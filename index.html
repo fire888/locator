@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <style>
+  
+    @font-face {
+	
+		font-family: tech; 
+		src: url(jsScene/ShareTechMono-Regular.ttf); 		
+		
+    }	  
+  
+	* { 
+		margin: 0px;
+		padding: 0px;
+	}
+
+	body{
+		font-size: 20px;
+		font-family: tech;
+		overflow: hidden;
+		color: #B3BDA5;
+	}	
+	button{
+		font-family: tech; 	
+		background-color: #5D6044;
+		color: #B3BDA5;
+	} 
+	
+  </style> 		
+</head>
+<body>
+<div id='cabin'>
+	<button 
+		id='exit' 
+		style ='
+			position: absolute;
+			right: 5%;
+			bottom: 7%;
+			height: 3%;
+			width: 25%;
+	'>exit cope</button>
+	
+	<span 
+		id='gunCamera'
+		style='
+			position: absolute;
+			left: 47%;
+			top: 5%;'		
+	>gun camera</span>
+	<span 
+		id='frontCamera'
+		style='
+			position: absolute;
+			left: 47%;
+			top: 40%;'		
+	>front camera</span>
+	<span 
+		id='backCamera'
+		style='
+			position: absolute;
+			left: 47%;
+			top: 69%;'		
+	>back camera</span>	
+	<span 
+		id='backCamera'
+		style='
+			position: absolute;
+			left: 13%;
+			top: 40%;'		
+	>left camera</span>	
+	<span 
+		id='backCamera'
+		style='
+			position: absolute;
+			left: 80%;
+			top: 40%;'		
+	>right camera</span>		
+</div>
+<canvas id="canvas-webgl" class="p-canvas-webgl"></canvas>
+
+
+<script src='jsScene/three.js'></script>
+<script src='jsScene/FirstPersonControls.js'></script>
+<script src='jsScene/EffectComposer.js'></script>
+<script src='jsScene/ShaderPass.js'></script>
+<script src='jsScene/RenderPass.js'></script>
+<script src='jsScene/CopyShader.js'></script>
+<script src='jsScene/LimonsityShader.js'></script>
+<script src='jsScene/SobelOperatorShader.js'></script>
+<script src='jsScene/OBJLoader.js'></script>
+<script src="jsScene/main.js"></script>
+
+
+</body>
+</html>
