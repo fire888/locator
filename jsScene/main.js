@@ -1,5 +1,251 @@
-
+/**
+ **************************************************; 
+ *  Project        	:		LOCATOR 
+ *  Program name   	: 		Threejs scene 
+ *  Author         	: 		www.otrisovano.ru
+ *  Date           	: 		16/03/2018
+ *  Purpose        	: 		check brain   
+ **************************************************/ 
+  
 "use strict";
+
+
+
+
+/**************************************************;
+ * Cabin
+ **************************************************/
+
+class Cabin{
+	
+	constructor(){
+		
+		/** init scene cabin **********************/		
+
+		/** init scene  */
+		this.sc = new THREE.Scene();
+		this.textureBack = new THREE.TextureLoader().load( "jsScene/back.jpg", 
+				()=>{ cabin.sc.background = cabin.textureBack; } 	
+			);
+	
+		/** init camera */
+		let aspect = window.innerWidth / window.innerHeight;
+		this.cam = new THREE.PerspectiveCamera(  70, 300 /200, 1, 10000 );
+		this.cam.position.set(0, 0, 600);
+		this.sc.add(this.cam);
+
+		
+		/** init screens **************************/
+		
+		/** gun screen */
+		this.scrGunTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrGun = new THREE.Mesh(
+			new THREE.PlaneGeometry(1000, 350,1),
+			new THREE.MeshBasicMaterial( { map: this.scrGunTexture } )
+		);
+		this.scrGun.position.set(0, 300, -30)
+		this.sc.add(this.scrGun);
+		
+		/** front screen */
+		this.scrFrontTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrFront = new THREE.Mesh(
+			new THREE.PlaneGeometry(400, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture } )
+		);
+		this.scrFront.position.set( 0, -30, -30)
+		this.sc.add(this.scrFront);	
+
+		/** back screen */
+		this.scrBackTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrBack = new THREE.Mesh(
+			new THREE.PlaneGeometry(300, 210, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrBackTexture } )
+		);
+		this.scrBack.position.set( 0, -270, -30);
+		this.scrBack.rotation.x = -0.3;		
+		this.sc.add(this.scrBack);
+
+		/** left screen */
+		this.scrLeftTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrLeft = new THREE.Mesh(
+			new THREE.PlaneGeometry(350, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture } )
+		);
+		this.scrLeft.rotation.y = 1.0;		
+		this.scrLeft.position.set( -400, -30, -30)
+		this.sc.add(this.scrLeft);	
+
+		/** right screen */
+		this.scrRightTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrRight = new THREE.Mesh(
+			new THREE.PlaneGeometry(350, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrRightTexture } )
+		);
+		this.scrRight.position.set( 400, -30, -30);
+		this.scrRight.rotation.y = -1.0;
+		this.sc.add(this.scrRight);		
+
+	}
+	
+	updateScreens( renderer, scene, cameras ){
+		//renderer.render( scene, cameras.gun, this.scrGunTexture );
+		//renderer.render( scene, cameras.front, this.scrFrontTexture );
+		//renderer.render( scene, cameras.back, this.scrBackTexture );
+		//renderer.render( scene, cameras.left, this.scrLeftTexture );
+		//renderer.render( scene, cameras.right, this.scrRightTexture );		
+	}
+
+	render(r){
+		//r.render( this.sc, this.cam );
+	}		
+}
+
+
+
+
+/**************************************************;
+ * CAR
+ **************************************************/	
+
+ class Car{
+	 
+	constructor(){
+		
+		/** Main params */
+		this.spdMax = 5;
+		this. spdBackMax = -3;
+		this.spd = 0;
+		this.spdRot = 0;
+		this.gunSpdRot = 0;
+				
+		/** model */
+		this.model = new THREE.Mesh(
+			new THREE.BoxGeometry(10,10,10),
+			new THREE.MeshPhongMaterial( { color: 0x00ff00 } )	
+		);
+		
+		/** cameras */
+		this.cameras = {};
+		this.cameras.gun = new THREE.PerspectiveCamera( 20, 300 /200, 1, 10000 );
+		this.cameras.gun.position.set(0, 30, 0); 
+		this.model.add( this.cameras.gun );		
+		
+		this.cameras.front = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
+		this.cameras.front.position.set(0, 0, -30); 
+		this.model.add( this.cameras.front );
+
+		this.cameras.back = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
+		this.cameras.back.position.set(0, 0, 30);
+		this.cameras.back.rotation.y = Math.PI;	
+		this.model.add( this.cameras.back );	
+
+		this.cameras.left = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
+		this.cameras.left.position.set(-20, 0, 30);
+		this.cameras.left.rotation.y = Math.PI/2;	
+		this.model.add( this.cameras.left );
+
+		this.cameras.right = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
+		this.cameras.right.position.set(20, 0, 30);
+		this.cameras.right.rotation.y = -Math.PI/2;	
+		this.model.add( this.cameras.right );		
+	}
+	
+	move(){
+		
+		/** update rotation gun */ 
+		if (keys.A){
+			car.cameras.gun.rotation.y += 0.01;
+			//console.log("A");
+		}						
+		if (keys.D){
+			this.cameras.gun.rotation.y -= 0.01;
+		}		
+		
+		
+		/** rotation car */	
+		if ( keys.left )
+			if ( this.spdRot < 0.01) this.spdRot += 0.0001;		
+		if ( keys.right )
+			if ( this.spdRot >  -0.01) this.spdRot -= 0.0001;
+		if (Math.abs( this.spdRot) < 0.0001)
+				this.spdRot = 0;
+	
+		/** move forward*/
+		if (keys.up){
+			this.spd < this.spdMax ? this.spd += 0.03 : this.spd = this.spdMax ; 
+			this.model.translateZ( -this.spd );			
+			if (this.spd > 0 ){
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) );
+			} else {
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs(this.spd) );		
+			}			
+		} else { 
+			if (this.spd > 0 && !keys.down ) {
+				this.spd -= 0.01;			
+				this.model.translateZ( -this.spd );
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) );			
+			}
+		}					
+
+		/** move backward */
+		if (keys.down){
+			if (this.spd > 0 ){	
+				this.spd -= 0.06; 
+				this.model.translateZ( -this.spd );
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs( this.spd ) );			
+			}else{
+				if ( this.spd > this.spdBackMax ){
+					this.spd -= 0.03;
+				}else{
+					this.spd = this.spdBackMax; 				
+				}
+				this.model.translateZ( -this.spd );				
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) );				
+			}			
+		} else {
+			if ( this.spd < 0 && !keys.up ){
+				this.model.translateZ( -this.spd );
+				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) );			
+				this.spd += 0.01 			
+			}		
+		}
+				
+	}
+	
+}	
+
+
+/**************************************************;
+ * HERO
+ **************************************************/
+
+class Hero{
+	constructor(){
+	
+	}
+}	
+ 
+
 
 
  
@@ -7,128 +253,17 @@
  * SCENE
  **************************************************/
  
-/** CAMERAS */ 
-  
-var views = [
-	{ 	//gun
-		left: 0.2,
-		top: 0.05,
-		width: 0.6,
-		height: 0.3,
-		background: new THREE.Color( 0.0, 0.1, 0.0 ),
-		eye: [ 0, 0, 0 ],
-		rotY: 0,
-		up: [ 0, 1, 0 ],
-		fov: 30,
-		updateCamera: function ( camera, scene) {
-			if (keys.A){
-				camera.rotation.y += 0.01;
-			}						
-			if (keys.D){
-				camera.rotation.y -= 0.01;
-			}	
-		}
-	},
-	{ 	//front
-		left: 0.5-0.15,
-		top: 0.4,
-		width: 0.3,
-		height: 0.25,
-		background: new THREE.Color( 0.0, 0.1, 0.0 ),
-		eye: [ 0, 0, -100 ],
-		rotY: 0,
-		up: [ 0, 1, 0 ],
-		fov: 45,
-		updateCamera: function ( camera, scene) {
-		}
-	},
-	{ 	//left
-		left: 0.02,
-		top: 0.4,
-		width: 0.3,
-		height: 0.3,
-		background: new THREE.Color( 0.0, 0.1, 0.0 ),
-		eye: [ -30, 0, 0 ],
-		rotY: Math.PI/2,
-		up: [ 0, 1, 0 ],
-		fov: 60,
-		updateCamera: function ( camera, scene) {
-
-		}
-	},
-	{ 	//right
-		left: 0.68,
-		top: 0.4,
-		width: 0.3,
-		height: 0.3,
-		background: new THREE.Color( 0.0, 0.1, 0.0 ),
-		eye: [ 30, 0, 0 ],
-		rotY: -Math.PI/2,
-		up: [ 0, 1, 0 ],
-		fov: 60,
-		updateCamera: function ( camera, scene) {
-		}
-	},
-	{ 	//back
-		left: 0.5-0.15,
-		top: 0.68,
-		width: 0.3,
-		height: 0.25,
-		background: new THREE.Color( 0.0, 0.1, 0.0 ),
-		rotY: Math.PI,
-		eye: [ 0, 0, 200 ],					
-		up: [ 0, 1, 0 ],
-		fov: 45,
-		updateCamera: function ( camera, scene) {
-		}
-	}				
-];
-			
-
-/** obj */			
+/** objSCENE */			
 const sc = {}; 
 var clock = new THREE.Clock();
 
-
 /** SCENE */
 const initScene = () => { 
-	
-	/** SCENE */	
-	const canvas = document.getElementById('canvas-webgl');
-	sc.renderer = new THREE.WebGLRenderer({ canvas: canvas} );
-	sc.renderer.setClearColor(0x00ffff);	
-	sc.renderer.setPixelRatio( window.devicePixelRatio );
-	sc.renderer.setSize(window.innerWidth, window.innerHeight);
-	//sc.renderer.gammaInput = true;
-	//sc.renderer.gammaOutput = true;
-
+					
     sc.scene = new THREE.Scene();
+	sc.scene.background = new THREE.Color( 0x000000 );
 	
-	/** MAIN TRACTOR */
-	sc.dummy = new THREE.Mesh(
-		new THREE.BoxGeometry(10,10,10),
-		new THREE.MeshPhongMaterial( { color: 0x00ff00 } )	
-	)
-	sc.scene.add(sc.dummy);
-	sc.car = {
-		spdMax: 5,
-		spdBackMax: -3, 
-		spd: 0,
-		moveDirection: "none", 
-		spdRot: 0,
-		gunSpdRot: 0,
-	}		
-	
-	for (let ii =  0; ii < views.length; ++ii ) {
-		var view = views[ii];
-		var camera = new THREE.PerspectiveCamera( view.fov, window.innerWidth / window.innerHeight, 1, 10000 );
-		camera.position.fromArray( view.eye );
-		camera.rotation.y = view.rotY;
-		camera.up.fromArray( view.up );
-		view.camera = camera;
-		sc.dummy.add(view.camera);
-	}
-	
+
 	sc.clock = new THREE.Clock();
 	
 	/** LIGHTS */
@@ -202,7 +337,12 @@ const initScene = () => {
 			sc.scene.add( sc.wireframe2 );				
 			
 		});	
-	}); 
+	});
+	
+	sc.renderer2 = new THREE.WebGLRenderer();
+	sc.renderer2.setPixelRatio( window.devicePixelRatio );
+	sc.renderer2.setSize( window.innerWidth, window.innerHeight);
+	document.body.appendChild( sc.renderer2.domElement );	
 	
 }
 
@@ -213,35 +353,8 @@ const initScene = () => {
  **************************************************/
   
 const animate = () => {
-	
-	moveCar();
-	
-	/** update cameras */
-	for ( var ii = 0; ii < views.length; ++ii ) {
-
-		var view = views[ii];
-		var camera = view.camera;
-
-		view.updateCamera( camera, sc.scene );
-
-		var left   = Math.floor( window.innerWidth  * view.left );
-		var top    = Math.floor( window.innerHeight * view.top );
-		var width  = Math.floor( window.innerWidth  * view.width );
-		var height = Math.floor( window.innerHeight * view.height );
-
-		sc.renderer.setViewport( left, top, width, height );
-		sc.renderer.setScissor( left, top, width, height );
-		sc.renderer.setScissorTest( true );
-		sc.renderer.setClearColor( view.background );
-
-		camera.aspect = width / height;
-		camera.updateProjectionMatrix();
-
-		sc.renderer.render( sc.scene, camera);
-
-	}
-	
-	/** update elements */
+		
+	/** update scene */
 	sc.wireframe.rotation.y += 0.01;
 	sc.wireframe.rotation.x += 0.01;
 	
@@ -249,68 +362,53 @@ const animate = () => {
 		sc.mesh.rotation.y += 0.01;
 	}
 
+	/** update car */
+	car.move();
+
+	/** render cope screens */
+	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrGunTexture );
+	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrFrontTexture );
+	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrBackTexture );
+	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrLeftTexture );
+	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrRightTexture );	
+	
+	/** update cope */ 
+	let time = sc.clock.getDelta();	
+	
+	if ( sc.videoPass ){
+		sc.videoPass.uniforms.iTime.value += time*2.0;	
+	}	
+	composer.render();
+	
 	/** animate */
 	requestAnimationFrame( animate );	
 }
 
 
-const moveCar = () => {
-		
-	/** turn left */
-	if ( keys.left ){
-		if ( sc.car.spdRot < 0.01) sc.car.spdRot += 0.0001;
-				
-	}
-	
-	/** turn right */
-	if ( keys.right ){
-		if ( sc.car.spdRot >  -0.01) sc.car.spdRot -= 0.0001;
-	}
-	
-	if (Math.abs(sc.car.spdRot) < 0.0001)
-			sc.car.spdRot = 0;
-	
-	/** move car forward */ 
-	if (keys.up){
-		sc.car.spd < sc.car.spdMax ? sc.car.spd += 0.03 : sc.car.spd = sc.car.spdMax ; 
-		sc.dummy.translateZ( -sc.car.spd );			
-		if (sc.car.spd > 0 ){
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), sc.car.spdRot * Math.abs(sc.car.spd) );
-		} else {
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), -sc.car.spdRot * Math.abs(sc.car.spd) );		
-		}			
-	} else { 
-		if (sc.car.spd > 0 && !keys.down ) {
-			sc.car.spd -= 0.01;			
-			sc.dummy.translateZ( -sc.car.spd );
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), sc.car.spdRot * Math.abs(sc.car.spd) );			
+/**************************************************;
+ * Init SCENE
+ **************************************************/
 
-		}
-	}					
+initScene();
+const cabin = new Cabin();
+const car = new Car();
+sc.scene.add( car.model );	
 
-	/** move car back */
-	if (keys.down){
-		if (sc.car.spd > 0 ){	
-			sc.car.spd -= 0.06; 
-			sc.dummy.translateZ( -sc.car.spd );
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), sc.car.spdRot * Math.abs(sc.car.spd) );			
-		}else{
-			if ( sc.car.spd > sc.car.spdBackMax ){
-				sc.car.spd -= 0.03;
-			}else{
-				sc.car.spd = sc.car.spdBackMax; 				
-			}
-			sc.dummy.translateZ( -sc.car.spd );				
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), -sc.car.spdRot * Math.abs(sc.car.spd) );				
-		}			
-	} else {
-		if ( sc.car.spd < 0 && !keys.up ){
-			sc.dummy.translateZ( -sc.car.spd );
-			sc.dummy.rotateOnAxis( new THREE.Vector3(0,1,0), -sc.car.spdRot * Math.abs(sc.car.spd) );			
-			sc.car.spd += 0.01 			
-		}		
-	}		
-}
+/** POSTPROCESSING ********************************/
+	
+const composer = new THREE.EffectComposer( sc.renderer2 );	
+const renderScene = new THREE.RenderPass( cabin.sc, cabin.cam );
+composer.addPass( renderScene );
+
+sc.videoPass = new THREE.ShaderPass(myEffect2);
+composer.addPass(sc.videoPass);
+sc.videoPass.renderToScreen = true;	
+	
+
+
+	
+animate();
+
 
 
 
@@ -319,7 +417,7 @@ const moveCar = () => {
  **************************************************/
 
 const handleWindowResize = () => {
-	sc.renderer.setSize(window.innerWidth, window.innerHeight);
+	//sc.renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
 window.addEventListener('resize', handleWindowResize, false);
@@ -379,14 +477,21 @@ document.addEventListener("keyup", function(event) {
 });
 
 
+/** INTERFACE BUTTONS */ 
+let buttGunLeft = document.getElementById('gunLeft');
+buttGunLeft.onmousedown = (e) => {
+	keys.A = true;
+}	
+buttGunLeft.onmouseup = (e) => {
+	keys.A = false;
+}
 
-/**************************************************;
- * Init SCENE
- **************************************************/
-
-initScene();
-animate();
-
-
+let buttGunRight = document.getElementById('gunRight')
+buttGunRight.onmousedown = (e) => {
+	keys.D = true;
+}	
+buttGunRight.onmouseup = (e) => {
+	keys.D = false;
+}
 
 

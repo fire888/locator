@@ -19,7 +19,6 @@
 	body{
 		font-size: 20px;
 		font-family: tech;
-		overflow: hidden;
 		color: #B3BDA5;
 	}	
 	button{
@@ -32,6 +31,27 @@
 </head>
 <body>
 <div id='cabin'>
+
+	<!--GUN BUTTONS -->
+	<button 
+		id='gunLeft' 
+		style ='
+			position: absolute;
+			left: 20%;
+			top: 33%;
+			height: 3%;
+			width: 15%;
+	'>gun left (A)</button>
+	<button 
+		id='gunRight' 
+		style ='
+			position: absolute;
+			left: 65%;
+			top: 33%;
+			height: 3%;
+			width: 15%;
+	'>gun right (D)</button>	
+
 	<button 
 		id='exit' 
 		style ='
@@ -47,7 +67,7 @@
 		style='
 			position: absolute;
 			left: 47%;
-			top: 5%;'		
+			top: 3%;'		
 	>gun camera</span>
 	<span 
 		id='frontCamera'
@@ -78,7 +98,6 @@
 			top: 40%;'		
 	>right camera</span>		
 </div>
-<canvas id="canvas-webgl" class="p-canvas-webgl"></canvas>
 
 
 <script src='jsScene/three.js'></script>
@@ -87,6 +106,8 @@
 <script src='jsScene/ShaderPass.js'></script>
 <script src='jsScene/RenderPass.js'></script>
 <script src='jsScene/CopyShader.js'></script>
+<script src="jsScene/ScreenShader.js"></script>
+<script src="jsScene/ScreenShader2.js"></script>
 <script src='jsScene/LimonsityShader.js'></script>
 <script src='jsScene/SobelOperatorShader.js'></script>
 <script src='jsScene/OBJLoader.js'></script>
