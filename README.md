@@ -27,10 +27,12 @@ Gameplay
 
 -------------  
 
-|Action           | Key                |
+|Action            | Key                |
 | ---------------- | ------------------:|
 | move forward     |  "key up"          |
 | move backward    |  "key down"        |
-|turn left       |    "key left"  |
-|turn right      |    "key right"  |
- 	
+| turn left        |  "key left"  |
+| turn right       |  "key right"  |
+| 	|  |
+|turn gun left   |    "A" |  
+|turn gun right   |    "D"  |
