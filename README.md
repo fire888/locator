@@ -2,10 +2,8 @@
 # VEHICLE LOCATOR 
 
 Online browser game on *nodejs* and *threejs*.  
+![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/back.jpg)  
 [Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
-
-
-![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/back.jpg)
 
 Gameplay
 ------------ 
