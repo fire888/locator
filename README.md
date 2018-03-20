@@ -1,7 +1,7 @@
 
 # VEHICLE LOCATOR 
 
-Online browser game on *NODEjs* and *THREEjs*  
+Online browser game on *nodejs* and *threejs*  
 [Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
 
 
