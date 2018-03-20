@@ -9,6 +9,7 @@ Gameplay
 ------------
 
 **_Vehicle:_**
+| Action  | Key |
 | -------------- |------------------:|
 |move forward    |    "key up"  |
 |move backward   |    "key down" | 	
