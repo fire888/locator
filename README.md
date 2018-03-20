@@ -27,7 +27,7 @@ Gameplay
 
 -------------  
 
-|Action            | Key                |
+| **_Vehicle:_**   | Key                |
 | ---------------- | ------------------:|
 | move forward     |  "key up"          |
 | move backward    |  "key down"        |
