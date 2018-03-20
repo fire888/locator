@@ -7,9 +7,9 @@ Online browser game on *NODEjs* and *THREEjs*
 
 Gameplay
 ------------ 
-
-| **_Vehicle:_**       |                    |
+||| 
 | -------------------- | ------------------:|
+| **_Vehicle:_**       |                    |
 | move forward         | "key up"           |
 | move backward        | "key down"         |
 | turn left            | "key left"         |
