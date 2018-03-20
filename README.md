@@ -30,6 +30,7 @@ Gameplay
 |Action           | Key                |
 | ---------------- | ------------------:|
 | move forward     |  "key up"          |
-| столбец 2     | выровнен по центру |
-| зебра-строки  | прикольные         |
+| move backward    |  "key down"        |
+|turn left       |    "key left"  |
+|turn right      |    "key right"  |
  	
