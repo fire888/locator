@@ -215,32 +215,28 @@ THREE.FirstPersonControls = function ( cam, domElement ) {
 
 		}
 		
-		
-
-		//var actualMoveSpeed = delta * this.movementSpeed;
 		var actualMoveSpeed = delta * this.movementSpeed;		
 
-	//	if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-	//	if ( this.moveBackward ) this.cam.translateZ( actualMoveSpeed );
+		//if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+		//if ( this.moveBackward ) this.cam.translateZ( actualMoveSpeed );
 		
-if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ){
-    this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-    this.cam.position.y = 10;
-}
-if ( this.moveBackward ) {
-    this.cam.translateZ( actualMoveSpeed );
-    this.cam.position.y = 10;
-}		
+		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ){
+			this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+			this.cam.position.y = -20;
+		}
+		if ( this.moveBackward ) {
+			this.cam.translateZ( actualMoveSpeed );
+			this.cam.position.y = -20;
+		}		
 
 		if ( this.moveLeft ) this.cam.translateX( - actualMoveSpeed );
 		if ( this.moveRight ) this.cam.translateX( actualMoveSpeed );
 
-	   // if ( this.moveUp ) this.cam.translateY( actualMoveSpeed );
+		//if ( this.moveUp ) this.cam.translateY( actualMoveSpeed );
 		//if ( this.moveDown ) this.cam.translateY( - actualMoveSpeed );
-		if ( this.moveUp ) this.cam.translateY( 0 );
-		if ( this.moveDown ) this.cam.translateY( 0 );
+		//if ( this.moveUp ) this.cam.translateY( 0 );
+		//if ( this.moveDown ) this.cam.translateY( 0 );
 		
-
 		var actualLookSpeed = delta * this.lookSpeed;
 
 		if ( !this.activeLook ) {

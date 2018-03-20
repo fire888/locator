@@ -12,20 +12,29 @@
 
 
 
+
+
+
+
 /**************************************************;
- * Cabin
+ * COPE
  **************************************************/
 
-class Cabin{
+class Cope {
 	
-	constructor(){
+	constructor () {
+		
+		/** params */
+		this.isCanExit = true;
+		
+		
 		
 		/** init scene cabin **********************/		
 
 		/** init scene  */
 		this.sc = new THREE.Scene();
 		this.textureBack = new THREE.TextureLoader().load( "jsScene/back.jpg", 
-				()=>{ cabin.sc.background = cabin.textureBack; } 	
+				()=>{ cope.sc.background = cope.textureBack; } 	
 			);
 	
 		/** init camera */
@@ -34,6 +43,8 @@ class Cabin{
 		this.cam.position.set(0, 0, 600);
 		this.sc.add(this.cam);
 
+		
+		
 		
 		/** init screens **************************/
 		
@@ -104,21 +115,67 @@ class Cabin{
 		this.scrRight.position.set( 400, -30, -30);
 		this.scrRight.rotation.y = -1.0;
 		this.sc.add(this.scrRight);		
+		
+		
 
+		/** init Buttons **************************/
+		this.htmlElems = document.getElementById('copeElems');
+		//https://experiments.withgoogle.com/webvr/inside-music/view/		
+		
+		
+		
+		/** init RENDERER *************************/
+		this.renderer = new THREE.WebGLRenderer();
+		this.renderer.setPixelRatio( window.devicePixelRatio );
+		this.renderer.setSize( window.innerWidth, window.innerHeight);
+		document.body.appendChild( this.renderer.domElement );
+		
 	}
 	
-	updateScreens( renderer, scene, cameras ){
-		//renderer.render( scene, cameras.gun, this.scrGunTexture );
-		//renderer.render( scene, cameras.front, this.scrFrontTexture );
-		//renderer.render( scene, cameras.back, this.scrBackTexture );
-		//renderer.render( scene, cameras.left, this.scrLeftTexture );
-		//renderer.render( scene, cameras.right, this.scrRightTexture );		
-	}
+	updateScreens( scene, cameras, vench ){
+		
+		if ( !vench.isMove ) return;
+		
+		/** update cope buttons */ 
+		if (vench.spd > 1) {
+			buttExitCope.style.opacity = 0.3;
+			this.isCanExit = false;
+		} else { 
+			buttExitCope.style.opacity = 1.0;
+			this.isCanExit = true;
+		}	
+		
+		/** render cope screens */
+		this.renderer.render( scene, cameras.gun, this.scrGunTexture );
+		this.renderer.render( scene, cameras.front, this.scrFrontTexture );
+		this.renderer.render( scene, cameras.back, this.scrBackTexture );
+		this.renderer.render( scene, cameras.left, this.scrLeftTexture );
+		this.renderer.render( scene, cameras.right, this.scrRightTexture );
 
-	render(r){
-		//r.render( this.sc, this.cam );
-	}		
+		/** render cope scene */
+		let time = s.clock.getDelta();	
+		if ( s.videoPass ){
+			s.videoPass.uniforms.iTime.value += time*2.0;	
+		}	
+		composer.render();
+		
+	}
+	
+	hideView () {
+		this.htmlElems.style.display = "none";
+		this.renderer.domElement.style.display = "none";		
+	}
+	
+	showView () {
+		this.htmlElems.style.display = "block";
+		this.renderer.domElement.style.display = "block";		
+	}	
+		
 }
+
+
+
+
 
 
 
@@ -127,16 +184,18 @@ class Cabin{
  * CAR
  **************************************************/	
 
- class Car{
+ class Car {
 	 
-	constructor(){
+	constructor () {
 		
-		/** Main params */
+		/** params */
 		this.spdMax = 5;
 		this. spdBackMax = -3;
 		this.spd = 0;
 		this.spdRot = 0;
 		this.gunSpdRot = 0;
+		this.isMove = true;
+		this.kvadrant = { x:0, z:0 };		
 				
 		/** model */
 		this.model = new THREE.Mesh(
@@ -170,7 +229,11 @@ class Cabin{
 		this.model.add( this.cameras.right );		
 	}
 	
-	move(){
+	move () {
+		
+		if ( !this.isMove ) return;
+		
+		this.kvadrant = checkKvadrant( this.model );
 		
 		/** update rotation gun */ 
 		if (keys.A){
@@ -235,83 +298,183 @@ class Cabin{
 }	
 
 
+
+
+
+
 /**************************************************;
  * HERO
  **************************************************/
 
-class Hero{
-	constructor(){
+class Hero {
 	
+	constructor ( sc ) {
+		
+		this.isMove = false;
+		this.kvadrant = { x:0, z:0 };
+		
+		/** camera */
+		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 );
+		this.cam.position.y = -20;
+		sc.add( this.cam );	
+		
+		/** mouse controls */
+		this.clock = new THREE.Clock();
+		this.INV_MAX_FPS = 0.01;
+		this.frameDelta = 0;
+		this.fps = this.INV_MAX_FPS; 	
+		this.controls = new THREE.FirstPersonControls( this.cam );
+		this.controls.movementSpeed = 30;
+		this.controls.lookSpeed = 0.1;
+		this.controls.isForwardCanMove = true;
+		
+		/** buttons */
+		this.htmlElems = document.getElementById('heroElems');
+		this.htmlElems.style.display = "none";
+		
+		/** renderer */
+		this.renderer = new THREE.WebGLRenderer();
+		this.renderer.setPixelRatio( window.devicePixelRatio );
+		this.renderer.setSize( window.innerWidth, window.innerHeight);
+		document.body.appendChild( this.renderer.domElement );
+		this.renderer.domElement.style.display = "none";
+		
+	}
+	
+	renderFrame ( sc ) {
+		
+		if ( !this.isMove ) return;
+		
+		/** check position near car */
+		this.kvadrant = checkKvadrant( this.cam );
+		if( this.kvadrant.x == car.kvadrant.x && this.kvadrant.z == car.kvadrant.z ){
+			this.htmlElems.style.display = "block";			
+		}else{
+			this.htmlElems.style.display = "none";	
+		}			
+			
+		/** update controls */	
+		this.frameDelta += this.clock.getDelta();
+		while (this.frameDelta >= this.INV_MAX_FPS){				
+			this.controls.update( this.INV_MAX_FPS);						
+			this.frameDelta -= this.INV_MAX_FPS;
+		}	
+		
+		/** render frame */
+		this.renderer.render( sc, this.cam );	
+	}
+	
+	hideView () {
+		this.htmlElems.style.display = "none";		
+		this.renderer.domElement.style.display = "none";		
+	}	
+	
+	showView () {
+		//this.htmlElems.style.display = "none";		
+		this.renderer.domElement.style.display = "block";		
 	}
 }	
  
+ 
+ 
+ 
+ 
+ 
+/**************************************************;
+ * FUNCTIONS FOR SCENE OBJECTS 
+ **************************************************/ 
+
+const checkKvadrant = ( obj ) => {
+	return ( { x: Math.floor(obj.position.x / 30 ),
+			   z: Math.floor(obj.position.z / 30 )	 
+		   } );
+}	
 
 
 
+
+ 
+ 
+/**************************************************;
+ * CHANCHE VIEWS COPE/HERO  
+ **************************************************/ 
+ 
+const exitCope = () => {
+	
+	cope.hideView();
+	car.isMove = false;
+	
+	hero.cam.position.set( car.model.position.x, 6, car.model.position.z );
+	hero.showView();
+	hero.isMove = true;
+}
+
+const enterCope = () => {
+		
+	hero.hideView();
+	hero.isMove = false;
+	
+	cope.showView();
+	car.isMove = true;	
+}
+ 
+ 
+ 
+ 
  
 /**************************************************;
  * SCENE
  **************************************************/
  
-/** objSCENE */			
-const sc = {}; 
-var clock = new THREE.Clock();
+/** OBJ SCENE */			
+const s = {}; 
 
 /** SCENE */
 const initScene = () => { 
-					
-    sc.scene = new THREE.Scene();
-	sc.scene.background = new THREE.Color( 0x000000 );
+				
+	s.scene = new THREE.Scene();
+	s.scene.background = new THREE.Color( 0x006600);
 	
 
-	sc.clock = new THREE.Clock();
+	s.clock = new THREE.Clock();
 	
 	/** LIGHTS */
-	sc.pointF = new THREE.PointLight();
-	sc.pointF.position.set(0, 0, 2000);
-	sc.scene.add(sc.pointF);
-	sc.pointL = new THREE.PointLight();
-	sc.pointL.position.set(-2000, 0, 0);
-	sc.scene.add(sc.pointL);
-	sc.pointR = new THREE.PointLight();
-	sc.pointR.position.set(2000, 0, 0);
-	sc.scene.add(sc.pointR);
+	s.pointF = new THREE.PointLight();
+	s.pointF.position.set(0, 0, 2000);
+	s.scene.add(s.pointF);
 	
 	/** FLOOR */
-	sc.floor = new THREE.Mesh(
+	s.floor = new THREE.Mesh(
 		new THREE.PlaneGeometry( 10000, 10000, 100, 100 ),
 		new THREE.MeshBasicMaterial( {
 			color: 0x888888,
-			//linewidth: 1,
 			wireframe: true,
 			wireframeLinewidth: 0.5
-			//linecap: 'round', //ignored by WebGLRenderer
-			//linejoin:  'round' //ignored by WebGLRenderer
 		})
 	);
-	sc.floor.rotation.x = -Math.PI/2;
-	sc.floor.position.y = -30;
-	sc.scene.add( sc.floor );
+	s.floor.rotation.x = -Math.PI/2;
+	s.floor.position.y = -30;
+	s.scene.add( s.floor );
 	
 	/** OB1 */
 	var geometry =  new THREE.BoxGeometry( 10, 10, 10, 10,10,10);	
-	sc.wireframe = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x777777 } ) );
-	sc.scene.add( sc.wireframe );	
+	s.wireframe = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x777777 } ) );
+	s.scene.add( s.wireframe );	
 	
 	/** ob2 */ 
 	let geomPlane = new THREE.PlaneGeometry(20, 20, 5, 5);
-    let material = new THREE.MeshBasicMaterial({
+	let material = new THREE.MeshBasicMaterial({
         color: 0xff0000,
         wireframe: true
-    });
+	});
 
-    let mesh = new THREE.Mesh(geomPlane, material);
+	let mesh = new THREE.Mesh(geomPlane, material);
 	mesh.position.set(-20, 0, 0);
-    sc.scene.add(mesh);
+	s.scene.add(mesh);
 	
 	/** ob3 */ 
-	sc.loader = new THREE.OBJLoader();
-	sc.loader.load( 'jsScene/head.obj', function ( object ) {	
+	s.loader = new THREE.OBJLoader();
+	s.loader.load( 'jsScene/head.obj', function ( object ) {	
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh != true){
 				return;
@@ -320,31 +483,30 @@ const initScene = () => {
 				return;
 			}
 			
-			
-			sc.mesh = new THREE.Mesh( 	
+			/** new 1 */
+			s.mesh = new THREE.Mesh( 	
 				child.geometry,
 				new THREE.MeshPhongMaterial( { color: 0x000000 } )			
 			);
-			sc.mesh.scale.set(0.3, 0.3, 0.3);
-			sc.scene.add(sc.mesh);
+			s.mesh.scale.set(0.3, 0.3, 0.3);
+			s.scene.add(s.mesh);
 			
-			/** new */
+			
+			/** new 2 */
  			let fgeo = new THREE.EdgesGeometry( child.geometry );
 			let matt = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );	
-			sc.wireframe2 = new THREE.LineSegments( fgeo, matt );
-						sc.wireframe2.scale.set(0.3, 0.3, 0.3);
-						sc.wireframe2.position.set(20, 0, 0);
-			sc.scene.add( sc.wireframe2 );				
+			s.wireframe2 = new THREE.LineSegments( fgeo, matt );
+			s.wireframe2.scale.set(0.3, 0.3, 0.3);
+			s.wireframe2.position.set(20, 0, 0);
+			s.scene.add( s.wireframe2 );				
 			
 		});	
-	});
-	
-	sc.renderer2 = new THREE.WebGLRenderer();
-	sc.renderer2.setPixelRatio( window.devicePixelRatio );
-	sc.renderer2.setSize( window.innerWidth, window.innerHeight);
-	document.body.appendChild( sc.renderer2.domElement );	
-	
+	});	
 }
+
+
+
+
 
 
 
@@ -355,81 +517,57 @@ const initScene = () => {
 const animate = () => {
 		
 	/** update scene */
-	sc.wireframe.rotation.y += 0.01;
-	sc.wireframe.rotation.x += 0.01;
+	s.wireframe.rotation.y += 0.01;
+	s.wireframe.rotation.x += 0.01;
 	
-	if (sc.mesh){
-		sc.mesh.rotation.y += 0.01;
+	if (s.mesh){
+		s.mesh.rotation.y += 0.01;
 	}
+	
+	/** update hero */
+	hero.renderFrame( s.scene );
 
 	/** update car */
 	car.move();
 
 	/** render cope screens */
-	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrGunTexture );
-	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrFrontTexture );
-	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrBackTexture );
-	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrLeftTexture );
-	sc.renderer2.render( sc.scene, car.cameras.front, cabin.scrRightTexture );	
-	
-	/** update cope */ 
-	let time = sc.clock.getDelta();	
-	
-	if ( sc.videoPass ){
-		sc.videoPass.uniforms.iTime.value += time*2.0;	
-	}	
-	composer.render();
-	
-	/** animate */
+	cope.updateScreens( s.scene, car.cameras, car );
+	 	
+	/** animate next frame */
 	requestAnimationFrame( animate );	
 }
 
 
-/**************************************************;
- * Init SCENE
- **************************************************/
 
-initScene();
-const cabin = new Cabin();
-const car = new Car();
-sc.scene.add( car.model );	
-
-/** POSTPROCESSING ********************************/
-	
-const composer = new THREE.EffectComposer( sc.renderer2 );	
-const renderScene = new THREE.RenderPass( cabin.sc, cabin.cam );
-composer.addPass( renderScene );
-
-sc.videoPass = new THREE.ShaderPass(myEffect2);
-composer.addPass(sc.videoPass);
-sc.videoPass.renderToScreen = true;	
-	
-
-
-	
-animate();
 
 
 
 
 /**************************************************;
- * resize scene
+ * RESIZE SCENE
  **************************************************/
 
 const handleWindowResize = () => {
-	//sc.renderer.setSize(window.innerWidth, window.innerHeight);
+	//s.renderer.setSize(window.innerWidth, window.innerHeight);
 }
-
 window.addEventListener('resize', handleWindowResize, false);
 
 
 
 
+
+
+
+
+
 /**************************************************;
- * listener window keydown
+ * INTERFACE
  **************************************************/
+
  
-var keys = {
+/** KEYBOARD **************************************/
+ 
+const keys = {
 	up: false,
 	down: false,
 	left: false,
@@ -477,7 +615,8 @@ document.addEventListener("keyup", function(event) {
 });
 
 
-/** INTERFACE BUTTONS */ 
+/** MOUSE CLICK *******************************/
+/* 
 let buttGunLeft = document.getElementById('gunLeft');
 buttGunLeft.onmousedown = (e) => {
 	keys.A = true;
@@ -485,13 +624,55 @@ buttGunLeft.onmousedown = (e) => {
 buttGunLeft.onmouseup = (e) => {
 	keys.A = false;
 }
-
-let buttGunRight = document.getElementById('gunRight')
+let buttGunRight = document.getElementById('gunRight');
 buttGunRight.onmousedown = (e) => {
 	keys.D = true;
 }	
 buttGunRight.onmouseup = (e) => {
 	keys.D = false;
+}*/
+let buttExitCope = document.getElementById('exitCope'); 
+buttExitCope.onclick = () => {
+	if (cope.isCanExit) exitCope();
 }
+let buttEnterCope = document.getElementById('enterCope'); 
+buttEnterCope.onclick = () => {
+	enterCope();
+}
+
+
+
+
+
+
+/**************************************************;
+ * INIT
+ **************************************************/
+
+ 
+/** SCENE *****************************************/
+  
+initScene();
+const cope = new Cope();
+const car = new Car();
+s.scene.add( car.model );	
+
+const hero = new Hero( s.scene );
+
+
+/** POSTPROCESSING ********************************/
+	
+const composer = new THREE.EffectComposer( cope.renderer );	
+const renderScene = new THREE.RenderPass( cope.sc, cope.cam );
+composer.addPass( renderScene );
+
+s.videoPass = new THREE.ShaderPass(myEffect2);
+composer.addPass(s.videoPass);
+s.videoPass.renderToScreen = true;	
+
+
+/** ANIMATION LOOP ********************************/
+	
+animate();
 
 
