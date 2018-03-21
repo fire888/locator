@@ -1,3 +1,4 @@
+
 /**
  **************************************************; 
  *  Project        	:		LOCATOR 
@@ -8,172 +9,6 @@
  **************************************************/ 
   
 "use strict";
-
-
-
-
-
-
-
-
-/**************************************************;
- * COPE
- **************************************************/
-
-class Cope {
-	
-	constructor () {
-		
-		/** params */
-		this.isCanExit = true;
-		
-		
-		
-		/** init scene cabin **********************/		
-
-		/** init scene  */
-		this.sc = new THREE.Scene();
-		this.textureBack = new THREE.TextureLoader().load( "jsScene/back.jpg", 
-				()=>{ cope.sc.background = cope.textureBack; } 	
-			);
-	
-		/** init camera */
-		let aspect = window.innerWidth / window.innerHeight;
-		this.cam = new THREE.PerspectiveCamera(  70, 300 /200, 1, 10000 );
-		this.cam.position.set(0, 0, 600);
-		this.sc.add(this.cam);
-
-		
-		
-		
-		/** init screens **************************/
-		
-		/** gun screen */
-		this.scrGunTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			});
-		this.scrGun = new THREE.Mesh(
-			new THREE.PlaneGeometry(1000, 350,1),
-			new THREE.MeshBasicMaterial( { map: this.scrGunTexture } )
-		);
-		this.scrGun.position.set(0, 300, -30)
-		this.sc.add(this.scrGun);
-		
-		/** front screen */
-		this.scrFrontTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			});
-		this.scrFront = new THREE.Mesh(
-			new THREE.PlaneGeometry(400, 250, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture } )
-		);
-		this.scrFront.position.set( 0, -30, -30)
-		this.sc.add(this.scrFront);	
-
-		/** back screen */
-		this.scrBackTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			});
-		this.scrBack = new THREE.Mesh(
-			new THREE.PlaneGeometry(300, 210, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrBackTexture } )
-		);
-		this.scrBack.position.set( 0, -270, -30);
-		this.scrBack.rotation.x = -0.3;		
-		this.sc.add(this.scrBack);
-
-		/** left screen */
-		this.scrLeftTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			});
-		this.scrLeft = new THREE.Mesh(
-			new THREE.PlaneGeometry(350, 250, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture } )
-		);
-		this.scrLeft.rotation.y = 1.0;		
-		this.scrLeft.position.set( -400, -30, -30)
-		this.sc.add(this.scrLeft);	
-
-		/** right screen */
-		this.scrRightTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			});
-		this.scrRight = new THREE.Mesh(
-			new THREE.PlaneGeometry(350, 250, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrRightTexture } )
-		);
-		this.scrRight.position.set( 400, -30, -30);
-		this.scrRight.rotation.y = -1.0;
-		this.sc.add(this.scrRight);		
-		
-		
-
-		/** init Buttons **************************/
-		this.htmlElems = document.getElementById('copeElems');
-		//https://experiments.withgoogle.com/webvr/inside-music/view/		
-		
-		
-		
-		/** init RENDERER *************************/
-		this.renderer = new THREE.WebGLRenderer();
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight);
-		document.body.appendChild( this.renderer.domElement );
-		
-	}
-	
-	updateScreens( scene, cameras, vench ){
-		
-		if ( !vench.isMove ) return;
-		
-		/** update cope buttons */ 
-		if (vench.spd > 1) {
-			buttExitCope.style.opacity = 0.3;
-			this.isCanExit = false;
-		} else { 
-			buttExitCope.style.opacity = 1.0;
-			this.isCanExit = true;
-		}	
-		
-		/** render cope screens */
-		this.renderer.render( scene, cameras.gun, this.scrGunTexture );
-		this.renderer.render( scene, cameras.front, this.scrFrontTexture );
-		this.renderer.render( scene, cameras.back, this.scrBackTexture );
-		this.renderer.render( scene, cameras.left, this.scrLeftTexture );
-		this.renderer.render( scene, cameras.right, this.scrRightTexture );
-
-		/** render cope scene */
-		let time = s.clock.getDelta();	
-		if ( s.videoPass ){
-			s.videoPass.uniforms.iTime.value += time*2.0;	
-		}	
-		composer.render();
-		
-	}
-	
-	hideView () {
-		this.htmlElems.style.display = "none";
-		this.renderer.domElement.style.display = "none";		
-	}
-	
-	showView () {
-		this.htmlElems.style.display = "block";
-		this.renderer.domElement.style.display = "block";		
-	}	
-		
-}
-
-
 
 
 
@@ -301,6 +136,154 @@ class Cope {
 
 
 
+/**************************************************;
+ * COPE
+ **************************************************/
+
+class Cope {
+	
+	constructor () {
+		
+		/** params */
+		this.isCanExit = true;
+		
+		
+		
+		/** init scene cabin **********************/		
+
+		/** init scene  */
+		this.sc = new THREE.Scene();
+		this.textureBack = new THREE.TextureLoader().load( "jsScene/back.jpg", 
+				()=>{ cope.sc.background = cope.textureBack; } 	
+			);
+	
+		/** init camera */
+		let aspect = window.innerWidth / window.innerHeight;
+		this.cam = new THREE.PerspectiveCamera(  70, 300 /200, 1, 10000 );
+		this.cam.position.set(0, 0, 600);
+		this.sc.add(this.cam);
+		
+		/** init RENDERER *************************/
+		this.renderPass = new THREE.RenderPass( this.sc, this.cam );
+		composer.addPass( this.renderPass );			
+
+		
+		
+		
+		/** init screens **************************/
+		
+		/** gun screen */
+		this.scrGunTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrGun = new THREE.Mesh(
+			new THREE.PlaneGeometry(1000, 350,1),
+			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
+		);
+		this.scrGun.position.set(0, 300, -30)
+		this.sc.add(this.scrGun);
+		
+		/** front screen */
+		this.scrFrontTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrFront = new THREE.Mesh(
+			new THREE.PlaneGeometry(400, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture.texture } )
+		);
+		this.scrFront.position.set( 0, -30, -30)
+		this.sc.add(this.scrFront);	
+
+		/** back screen */
+		this.scrBackTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrBack = new THREE.Mesh(
+			new THREE.PlaneGeometry(300, 210, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrBackTexture.texture } )
+		);
+		this.scrBack.position.set( 0, -270, -30);
+		this.scrBack.rotation.x = -0.3;		
+		this.sc.add(this.scrBack);
+
+		/** left screen */
+		this.scrLeftTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrLeft = new THREE.Mesh(
+			new THREE.PlaneGeometry(350, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture.texture } )
+		);
+		this.scrLeft.rotation.y = 1.0;		
+		this.scrLeft.position.set( -400, -30, -30)
+		this.sc.add(this.scrLeft);	
+
+		/** right screen */
+		this.scrRightTexture = new THREE.WebGLRenderTarget( 
+			600, 450, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			});
+		this.scrRight = new THREE.Mesh(
+			new THREE.PlaneGeometry(350, 250, 1 ),
+			new THREE.MeshBasicMaterial( { map: this.scrRightTexture.texture } )
+		);
+		this.scrRight.position.set( 400, -30, -30);
+		this.scrRight.rotation.y = -1.0;
+		this.sc.add(this.scrRight);		
+		
+		
+
+		/** init Buttons **************************/
+		this.htmlElems = document.getElementById('copeElems');
+		//https://experiments.withgoogle.com/webvr/inside-music/view/		
+				
+	}
+	
+	updateScreens( scene, cameras, vench, renderer ){
+		
+		if ( !vench.isMove ) return;
+		
+		/** update cope buttons */ 
+		if (vench.spd > 1) {
+			buttExitCope.style.opacity = 0.3;
+			this.isCanExit = false;
+		} else { 
+			buttExitCope.style.opacity = 1.0;
+			this.isCanExit = true;
+		}	
+		
+		/** render cope screens */		
+		renderer.render( scene, cameras.gun, this.scrGunTexture );
+		renderer.render( scene, cameras.front, this.scrFrontTexture );
+		renderer.render( scene, cameras.back, this.scrBackTexture );
+		renderer.render( scene, cameras.left, this.scrLeftTexture );
+		renderer.render( scene, cameras.right, this.scrRightTexture );
+
+	}
+	
+	hideView () {
+		this.htmlElems.style.display = "none";		
+	}
+	
+	showView () {
+		this.htmlElems.style.display = "block";	
+	}	
+		
+}
+
+
+
+
+
 
 /**************************************************;
  * HERO
@@ -317,6 +300,11 @@ class Hero {
 		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 );
 		sc.add( this.cam );	
 		
+		/** renderer */
+		this.renderPass = new THREE.RenderPass( sc, this.cam );
+		composer.addPass( this.renderPass );
+		this.renderPass.enabled = false;	
+		
 		/** mouse controls */
 		this.clock = new THREE.Clock();
 		this.INV_MAX_FPS = 0.01;
@@ -331,18 +319,10 @@ class Hero {
 		
 		/** buttons */
 		this.htmlElems = document.getElementById('heroElems');
-		this.htmlElems.style.display = "none";
-		
-		/** renderer */
-		this.renderer = new THREE.WebGLRenderer();
-		this.renderer.setPixelRatio( window.devicePixelRatio );
-		this.renderer.setSize( window.innerWidth, window.innerHeight);
-		document.body.appendChild( this.renderer.domElement );
-		this.renderer.domElement.style.display = "none";
-		
+		this.htmlElems.style.display = "none";		
 	}
 	
-	renderFrame ( sc ) {
+	renderFrame ( renderer, sc ) {
 		
 		if ( !this.isMove ) return;
 		
@@ -359,20 +339,15 @@ class Hero {
 		while (this.frameDelta >= this.INV_MAX_FPS){				
 			this.controls.update( this.INV_MAX_FPS);						
 			this.frameDelta -= this.INV_MAX_FPS;
-		}	
-		
-		/** render frame */
-		this.renderer.render( sc, this.cam );	
+		}						
 	}
 	
 	hideView () {
-		this.htmlElems.style.display = "none";		
-		this.renderer.domElement.style.display = "none";		
+		this.htmlElems.style.display = "none";				
 	}	
 	
 	showView () {
-		//this.htmlElems.style.display = "none";		
-		this.renderer.domElement.style.display = "block";		
+		this.htmlElems.style.display = "block";			
 	}
 }	
  
@@ -402,12 +377,15 @@ const checkKvadrant = ( obj ) => {
  
 const exitCope = () => {
 	
+
 	cope.hideView();
 	car.isMove = false;
 	
 	hero.cam.position.set( car.model.position.x, 6, car.model.position.z );
 	hero.showView();
 	hero.isMove = true;
+	cope.renderPass.enabled = false;
+	hero.renderPass.enabled = true;		
 }
 
 const enterCope = () => {
@@ -417,6 +395,8 @@ const enterCope = () => {
 	
 	cope.showView();
 	car.isMove = true;	
+	hero.renderPass.enabled = false;
+	cope.renderPass.enabled = true;	
 }
  
  
@@ -434,7 +414,7 @@ const s = {};
 const initScene = () => { 
 				
 	s.scene = new THREE.Scene();
-	s.scene.background = new THREE.Color( 0x006600);
+	s.scene.background = new THREE.Color( 0x003300);
 	
 
 	s.clock = new THREE.Clock();
@@ -525,15 +505,21 @@ const animate = () => {
 		s.mesh.rotation.y += 0.01;
 	}
 	
-	/** update hero */
-	hero.renderFrame( s.scene );
 
 	/** update car */
 	car.move();
 
-	/** render cope screens */
-	cope.updateScreens( s.scene, car.cameras, car );
-	 	
+
+	/** update hero */
+	hero.renderFrame( s.renderer, s.scene );	
+	 
+	/** update cope */
+	cope.updateScreens( s.scene, car.cameras, car, s.renderer );
+
+	
+	/** render */	
+	composer.render();	
+		
 	/** animate next frame */
 	requestAnimationFrame( animate );	
 }
@@ -549,7 +535,7 @@ const animate = () => {
  **************************************************/
 
 const handleWindowResize = () => {
-	//s.renderer.setSize(window.innerWidth, window.innerHeight);
+	s.renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener('resize', handleWindowResize, false);
 
@@ -650,26 +636,33 @@ buttEnterCope.onclick = () => {
  * INIT
  **************************************************/
 
+
  
-/** SCENE *****************************************/
-  
-initScene();
-const cope = new Cope();
-const car = new Car();
-s.scene.add( car.model );	
+ /** POSTPROCESSING ********************************/
 
-const hero = new Hero( s.scene );
+s.renderer = new THREE.WebGLRenderer();
+s.renderer.setPixelRatio( window.devicePixelRatio );
+s.renderer.setSize( window.innerWidth, window.innerHeight);
+s.renderer.setClearColor(0x00ffff);
+document.body.appendChild( s.renderer.domElement );
 
-
-/** POSTPROCESSING ********************************/
-	
-const composer = new THREE.EffectComposer( cope.renderer );	
-const renderScene = new THREE.RenderPass( cope.sc, cope.cam );
-composer.addPass( renderScene );
+const composer = new THREE.EffectComposer( s.renderer );	
 
 s.videoPass = new THREE.ShaderPass(myEffect2);
 composer.addPass(s.videoPass);
 s.videoPass.renderToScreen = true;	
+
+
+ 
+/** SCENE *****************************************/
+  
+initScene();
+
+const car = new Car();
+s.scene.add( car.model );
+const cope = new Cope();
+const hero = new Hero( s.scene );
+
 
 
 /** ANIMATION LOOP ********************************/

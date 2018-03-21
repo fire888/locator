@@ -248,9 +248,9 @@ myEffect2 = {
 "void main(  )",
 "{",
     //properties
-   " float noise_intensity = 0.9;",
-   " float flickering = 0.5;",
-   " float bar_freq = 500.0;",
+   " float noise_intensity = 0.2;",
+   " float flickering = 0.1;",
+   " float bar_freq = 100.0;",
    " float color_intensity = 0.1;",
     
     // Normalized pixel coordinates (from 0 to 1)
