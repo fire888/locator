@@ -1,11 +1,11 @@
 
 /**
  **************************************************; 
- *  Project        	:		LOCATOR 
- *  Program name   	: 		Threejs scene 
- *  Author         	: 		www.otrisovano.ru
- *  Date           	: 		16/03/2018
- *  Purpose        	: 		check brain   
+ *	Project        	:	LOCATOR 
+ *	Program name   	: 	Threejs scene 
+ *	Author         	: 	www.otrisovano.ru
+ *	Date           	: 	16/03/2018
+ *	Purpose        	: 	check brain   
  **************************************************/ 
   
 "use strict";
@@ -248,12 +248,12 @@ class Cope {
 				
 	}
 	
-	updateScreens( scene, cameras, vench, renderer ){
+	updateScreens( scene, cameras, vehicle, renderer ){
 		
-		if ( !vench.isMove ) return;
+		if ( ! vehicle.isMove ) return;
 		
 		/** update cope buttons */ 
-		if (vench.spd > 1) {
+		if ( vehicle.spd > 1) {
 			buttExitCope.style.opacity = 0.3;
 			this.isCanExit = false;
 		} else { 
@@ -361,9 +361,11 @@ class Hero {
  **************************************************/ 
 
 const checkKvadrant = ( obj ) => {
-	return ( { x: Math.floor(obj.position.x / 30 ),
-			   z: Math.floor(obj.position.z / 30 )	 
-		   } );
+	
+	return ({ 
+		x: Math.floor(obj.position.x / 30 ),
+		z: Math.floor(obj.position.z / 30 )	 
+	});
 }	
 
 
@@ -377,7 +379,6 @@ const checkKvadrant = ( obj ) => {
  
 const exitCope = () => {
 	
-
 	cope.hideView();
 	car.isMove = false;
 	
