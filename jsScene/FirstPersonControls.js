@@ -16,12 +16,12 @@ THREE.FirstPersonControls = function ( cam, domElement ) {
 
 	this.lookVertical = true;
 	this.autoForward = false;
-	// this.invertVertical = false;
+	this.invertVertical = false;
 
 	this.activeLook = true;
 
-	//this.heightSpeed = false;
-	this.heightSpeed = true;	
+	this.heightSpeed = false;
+	//this.heightSpeed = true;	
 	this.heightCoef = 1.0;
 	this.heightMin = 0.0;
 	this.heightMax = 1.0;
@@ -57,8 +57,6 @@ THREE.FirstPersonControls = function ( cam, domElement ) {
 		this.domElement.setAttribute( 'tabindex', -1 );
 
 	}
-
-	//
 
 	this.handleResize = function () {
 
@@ -214,21 +212,14 @@ THREE.FirstPersonControls = function ( cam, domElement ) {
 			this.autoSpeedFactor = 0.0;
 
 		}
-		
+				
 		var actualMoveSpeed = delta * this.movementSpeed;		
 
-		//if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-		//if ( this.moveBackward ) this.cam.translateZ( actualMoveSpeed );
-		
-		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ){
-			this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
-			this.cam.position.y = -20;
-		}
-		if ( this.moveBackward ) {
-			this.cam.translateZ( actualMoveSpeed );
-			this.cam.position.y = -20;
-		}		
+		if ( this.moveForward || ( this.autoForward && !this.moveBackward ) ) this.cam.translateZ( - ( actualMoveSpeed + this.autoSpeedFactor ) );
+		if ( this.moveBackward ) this.cam.translateZ( actualMoveSpeed );	
 
+		this.cam.position.y = -20;
+		
 		if ( this.moveLeft ) this.cam.translateX( - actualMoveSpeed );
 		if ( this.moveRight ) this.cam.translateX( actualMoveSpeed );
 
@@ -274,6 +265,8 @@ THREE.FirstPersonControls = function ( cam, domElement ) {
 		targetPosition.y = position.y + 3 * Math.cos( this.phi );	
 		targetPosition.z = position.z + 3 * Math.sin( this.phi ) * Math.sin( this.theta );
 
+		
+		
 		this.cam.lookAt( targetPosition );
 
 	};

@@ -315,7 +315,6 @@ class Hero {
 		
 		/** camera */
 		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 );
-		this.cam.position.y = -20;
 		sc.add( this.cam );	
 		
 		/** mouse controls */
@@ -327,6 +326,8 @@ class Hero {
 		this.controls.movementSpeed = 30;
 		this.controls.lookSpeed = 0.1;
 		this.controls.isForwardCanMove = true;
+		
+		this.cam.position.y = -20;		
 		
 		/** buttons */
 		this.htmlElems = document.getElementById('heroElems');
