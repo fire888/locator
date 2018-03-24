@@ -7,7 +7,7 @@ Online browser game on *nodejs* and *threejs*.
 ![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/back.jpg)  
   
   
-**State inProgress**  [Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
+State **inProgress.**  [Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
 
 Gameplay
 ------------ 
