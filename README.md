@@ -25,7 +25,8 @@ Gameplay
 |move forward          | "key up"           |
 |move backward         | "key down"         |  
 
-  
+Status
+------------   
 State: **inProgress.**  
 [Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
 
