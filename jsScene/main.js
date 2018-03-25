@@ -1,4 +1,6 @@
 
+"use strict";
+
 /**
  **************************************************; 
  *	Project        	:	LOCATOR 
@@ -8,13 +10,8 @@
  *	Purpose        	: 	check brain   
  **************************************************/ 
   
-"use strict";
 
-
-
-
-
-
+  
 /**************************************************;
  * CAR
  **************************************************/	
@@ -54,7 +51,7 @@
 				}	
 				car.modelCar = new THREE.Mesh(
 					child.geometry,
-					new THREE.MeshPhongMaterial( {color: 0x112222} )
+					new THREE.MeshPhongMaterial( {color: 0x05e099} )
 				)
 				car.modelCar.position.y = -20				
 				car.model.add(car.modelCar);
@@ -79,7 +76,7 @@
 				}	
 				car.modelGun = new THREE.Mesh(
 					child.geometry,
-					new THREE.MeshPhongMaterial( {color: 0x332222} )
+					new THREE.MeshPhongMaterial( {color: 0x05e099} )
 				)
 				car.modelGun.position.y = -20;
 				car.model.add(car.modelGun);
@@ -199,9 +196,6 @@ class Cope {
 		/** params */
 		this.isCanExit = true;
 		
-		
-		
-		
 		/** init scene cabin **********************/		
 
 		/** init scene  */
@@ -221,18 +215,16 @@ class Cope {
 		composer.addPass( this.renderPass );			
 
 		
-		
-		
 		/** init screens **************************/
 		
 		/** gun screen */
 		this.scrGunTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
+			600, 350, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
 			});
 		this.scrGun = new THREE.Mesh(
-			new THREE.PlaneGeometry(1000, 350,1),
+			new THREE.PlaneGeometry(700, 250 ,1),
 			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
 		);
 		this.scrGun.position.set(0, 300, -30)
@@ -296,9 +288,8 @@ class Cope {
 		
 
 		/** init Buttons **************************/
-		this.htmlElems = document.getElementById('copeElems');
-		//https://experiments.withgoogle.com/webvr/inside-music/view/		
-				
+		this.htmlElems = document.getElementById('copeElems');	
+		this.htmlElems.style.display = "block";
 	}
 	
 	updateScreens( scene, cameras, vehicle, renderer ){
@@ -312,8 +303,8 @@ class Cope {
 		} else { 
 			buttExitCope.style.opacity = 1.0;
 			this.isCanExit = true;
-		}	
-		
+		}
+					
 		/** render cope screens */		
 		renderer.render( scene, cameras.gun, this.scrGunTexture );
 		renderer.render( scene, cameras.front, this.scrFrontTexture );
@@ -321,6 +312,11 @@ class Cope {
 		renderer.render( scene, cameras.left, this.scrLeftTexture );
 		renderer.render( scene, cameras.right, this.scrRightTexture );
 
+		/** exit cope */
+		if ( keys.enter && this.isCanExit ){
+			exitCope();
+		}		
+		
 	}
 	
 	hideView () {
@@ -359,15 +355,11 @@ class Hero {
 		composer.addPass( this.renderPass );
 		this.renderPass.enabled = false;	
 		
-		/** mouse controls */
+		/** mouse controls params */
 		this.clock = new THREE.Clock();
 		this.INV_MAX_FPS = 0.01;
 		this.frameDelta = 0;
 		this.fps = this.INV_MAX_FPS; 	
-		this.controls = new THREE.FirstPersonControls( this.cam );
-		this.controls.movementSpeed = 30;
-		this.controls.lookSpeed = 0.1;
-		this.controls.isForwardCanMove = true;
 		
 		this.cam.position.y = -20;		
 		
@@ -378,30 +370,41 @@ class Hero {
 	
 	renderFrame ( renderer, sc ) {
 		
-		if ( !this.isMove ) return;
-		
-		/** check position near car */
-		this.kvadrant = checkKvadrant( this.cam );
-		if( this.kvadrant.x == car.kvadrant.x && this.kvadrant.z == car.kvadrant.z ){
-			this.htmlElems.style.display = "block";			
-		}else{
-			this.htmlElems.style.display = "none";	
-		}			
+		if ( !this.isMove ) return;		
 			
 		/** update controls */	
 		this.frameDelta += this.clock.getDelta();
 		while (this.frameDelta >= this.INV_MAX_FPS){				
 			this.controls.update( this.INV_MAX_FPS);						
 			this.frameDelta -= this.INV_MAX_FPS;
-		}						
+		}
+
+		/** check position near car and enter */
+		this.kvadrant = checkKvadrant( this.cam );
+		if( this.kvadrant.x == car.kvadrant.x && this.kvadrant.z == car.kvadrant.z ){
+			buttEnterCope.style.opacity = 1.0;	
+			if (keys.enter) enterCope();	
+		}else{
+			buttEnterCope.style.opacity = 0.0;	
+		}	
+		
 	}
 	
-	hideView () {
-		this.htmlElems.style.display = "none";				
+	hideView ( ) {
+		this.htmlElems.style.display = "none";	
+		hero.controls = null;			
 	}	
 	
-	showView () {
-		this.htmlElems.style.display = "block";			
+	showView ( p ) {
+			
+		hero.cam.position.set( p.x, 6, p.z );			
+			
+		this.controls = new THREE.FirstPersonControls( this.cam ); 
+		this.controls.movementSpeed = 30;
+		this.controls.lookSpeed = 0.1;
+		this.controls.isForwardCanMove = true;	
+		
+		this.htmlElems.style.display = "block";		
 	}
 }	
  
@@ -433,25 +436,34 @@ const checkKvadrant = ( obj ) => {
  
 const exitCope = () => {
 	
-	cope.hideView();
-	car.isMove = false;
+	keys.enter = false;	
+
+	car.isMove = false;	
+	hero.isMove = true;	
 	
-	hero.cam.position.set( car.model.position.x, 6, car.model.position.z );
-	hero.showView();
-	hero.isMove = true;
+	cope.hideView();
+	hero.showView( car.model.position );
+	
+
 	cope.renderPass.enabled = false;
-	hero.renderPass.enabled = true;		
+	hero.renderPass.enabled = true;
+	
+
 }
 
 const enterCope = () => {
+	
+	keys.enter = false;	
+	
+	car.isMove = true;
+	hero.isMove = false;	
 		
 	hero.hideView();
-	hero.isMove = false;
-	
 	cope.showView();
-	car.isMove = true;	
+
+	
 	hero.renderPass.enabled = false;
-	cope.renderPass.enabled = true;	
+	cope.renderPass.enabled = true;
 }
  
  
@@ -469,90 +481,32 @@ const s = {};
 const initScene = () => { 
 				
 	s.scene = new THREE.Scene();
-	s.scene.background = new THREE.Color( 0xffffff);
+	s.scene.background = new THREE.Color( 0x060c1a);
+	s.scene.fog = new THREE.FogExp2( 0x060c1a ,0.0012);		
 	
-
 	s.clock = new THREE.Clock();
 	
 	/** LIGHTS */
 	s.pointF = new THREE.PointLight();
-	s.pointF.position.set(0, 50, 2000);
+	s.pointF.position.set(0, 2000, 1000);
 	s.scene.add(s.pointF);
 	
-	s.pointF = new THREE.PointLight();
-	s.pointF.position.set(0, 50, -2000);
-	s.scene.add(s.pointF);	
-	
-	s.pointF = new THREE.PointLight();
-	s.pointF.position.set(2000, 50, 0);
-	s.scene.add(s.pointF);
-
-	s.pointF = new THREE.PointLight();
-	s.pointF.position.set(-2000, 50, 0);
-	s.scene.add(s.pointF);	
-	
-	s.ambient = new THREE.AmbientLight( 0xffffff, 1.0 );
+	s.ambient = new THREE.AmbientLight( 0x06253a, 1.0 );
 	s.scene.add(s.ambient);	
 	
 	/** FLOOR */
 	s.floor = new THREE.Mesh(
 		new THREE.PlaneGeometry( 10000, 10000, 100, 100 ),
 		new THREE.MeshBasicMaterial( {
-			color: 0x888888,
+			color: 0x0bd592,
 			wireframe: true,
 			wireframeLinewidth: 0.5
 		})
 	);
+	
 	s.floor.rotation.x = -Math.PI/2;
 	s.floor.position.y = -30;
-	s.scene.add( s.floor );
-	
-	/** OB1 */
-	/*var geometry =  new THREE.BoxGeometry( 10, 10, 10, 10,10,10);	
-	s.wireframe = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x777777 } ) );
-	s.scene.add( s.wireframe );	
-	
-	/** ob2 */ 
-	/*let geomPlane = new THREE.PlaneGeometry(20, 20, 5, 5);
-	let material = new THREE.MeshBasicMaterial({
-        color: 0xff0000,
-        wireframe: true
-	});
-
-	let mesh = new THREE.Mesh(geomPlane, material);
-	mesh.position.set(-20, 0, 0);
-	s.scene.add(mesh);
-	
-	/** ob3 */ 
-	/*s.loader = new THREE.OBJLoader();
-	s.loader.load( 'jsScene/head.obj', function ( object ) {	
-		object.traverse( function ( child ) {
-			if ( child instanceof THREE.Mesh != true){
-				return;
-			}	
-			if( typeof child.geometry.attributes.position.array != "object" ){ 
-				return;
-			}
-			
-			/** new 1 */
-		/*	s.mesh = new THREE.Mesh( 	
-				child.geometry,
-				new THREE.MeshPhongMaterial( { color: 0x0333333 } )			
-			);
-			s.mesh.scale.set(0.3, 0.3, 0.3);
-			s.scene.add(s.mesh);
-			
-			
-			/** new 2 */
- 		/*	let fgeo = new THREE.EdgesGeometry( child.geometry );
-			let matt = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );	
-			s.wireframe2 = new THREE.LineSegments( fgeo, matt );
-			s.wireframe2.scale.set(0.3, 0.3, 0.3);
-			s.wireframe2.position.set(20, 0, 0);
-			s.scene.add( s.wireframe2 );				
-			
-		});	
-	});*/	
+	s.scene.add( s.floor );	
 }
 
 
@@ -567,25 +521,15 @@ const initScene = () => {
   
 const animate = () => {
 		
-	/** update scene */
-	/*s.wireframe.rotation.y += 0.01;
-	s.wireframe.rotation.x += 0.01;
-	
-	if (s.mesh){
-		s.mesh.rotation.y += 0.01;
-	}*/
-	
 
 	/** update car */
 	car.move();
-
 
 	/** update hero */
 	hero.renderFrame( s.renderer, s.scene );	
 	 
 	/** update cope */
 	cope.updateScreens( s.scene, car.cameras, car, s.renderer );
-
 	
 	/** render */	
 	composer.render();	
@@ -630,7 +574,8 @@ const keys = {
 	left: false,
 	right: false,
 	A: false,
-	D: false
+	D: false,
+	enter: false
 }
 
 function keyUpdate(keyEvent, down) {
@@ -659,7 +604,9 @@ function keyUpdate(keyEvent, down) {
 			break;
 		case 83:
 			keys.S = down;
-			break;	  
+			break;
+		case 13:
+			keys.enter = down;	
 	}
 }
  
@@ -673,7 +620,7 @@ document.addEventListener("keyup", function(event) {
 
 
 /** MOUSE CLICK *******************************/
-/* 
+ 
 let buttGunLeft = document.getElementById('gunLeft');
 buttGunLeft.onmousedown = (e) => {
 	keys.A = true;
@@ -687,14 +634,16 @@ buttGunRight.onmousedown = (e) => {
 }	
 buttGunRight.onmouseup = (e) => {
 	keys.D = false;
-}*/
+}
+
 let buttExitCope = document.getElementById('exitCope'); 
 buttExitCope.onclick = () => {
-	if (cope.isCanExit) exitCope();
+	keys.enter = true; 
 }
+
 let buttEnterCope = document.getElementById('enterCope'); 
 buttEnterCope.onclick = () => {
-	enterCope();
+	keys.enter = true;
 }
 
 

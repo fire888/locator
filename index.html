@@ -15,12 +15,43 @@
 		font-size: 30px;
 		font-family: tech;
 		color: #B3BDA5;
+		overflow: hidden;
+		background-color: #05e099;
+	}
+
+	#copeElems{
+		display: none;
 	}	
-	button{
+	
+	button.innerCope{
 		font-family: tech; 	
-		background-color: #5D6044;
-		color: #ffffff;
+		background-color: #412a0d;
+		color: #b7a320;
+		border: 0px;
+		box-shadow: 0 0 20px rgba(220,173,9,0.2); 
+		border-radius: 4px;
+		transition: 0.4s;
+		overflow: hidden;	
 	} 
+	
+	button.innerCope:hover{
+		background-color: #77541c;	
+	}
+	
+	button.outerCope{
+		font-family: tech; 	
+		background-color: #1b8967;
+		color: #d3d271;
+		border: 0px;
+		box-shadow: 0 0 20px rgba(220,173,9,0.5); 
+		border-radius: 4px;
+		transition: 0.4s;
+		overflow: hidden;	
+	} 
+	
+	button.outerCope:hover{
+		background-color: #77541c;	
+	}	
 	
   </style> 		
 </head>
@@ -29,28 +60,55 @@
 
 <div id='copeElems'>
 	<button 
+		class = 'innerCope'	
 		id='exitCope' 
 		style ='
 			position: absolute;
 			right: 5%;
 			bottom: 7%;
-			/*height: 3%;*/
+			height: 3%;
 			width: 25%;
-			font-size: 35px;
-	'>Exit Cope</button>
+			font-size: 25px;
+	'>Exit Cope 'Enter'</button>
+	
+	<button 
+		class = 'innerCope'	
+		id='gunLeft' 
+		style ='
+			position: absolute;
+			left: 33%;
+			top: 32%;
+			height: 3%;
+			width: 10%;
+			font-size: 15px;
+	'>Gun left 'A'</button>	
+	
+	<button 
+		class = 'innerCope'	
+		id='gunRight' 
+		style ='
+			position: absolute;
+			right: 33%;
+			top: 32%;
+			height: 3%;
+			width: 10%;
+			font-size: 15px;
+	'>Gun right 'A'</button>		
+	
 </div>
 
 <div id='heroElems'>
 	<button 
+		class = 'outerCope'
 		id='enterCope' 
 		style ='
 			position: absolute;
 			left: 38%;
 			top: 50%;
-			/*height: 3%;*/
+			height: 3%;
 			width: 25%;
-			font-size: 35px;
-	'>Enter Cope</button>
+			font-size: 25px;
+	'>Enter Cope 'Enter'</button>
 			
 </div>
 
@@ -61,10 +119,6 @@
 <script src='jsScene/ShaderPass.js'></script>
 <script src='jsScene/RenderPass.js'></script>
 <script src='jsScene/CopyShader.js'></script>
-<script src="jsScene/ScreenShader.js"></script>
-<script src="jsScene/ScreenShader2.js"></script>
-<script src='jsScene/LimonsityShader.js'></script>
-<script src='jsScene/SobelOperatorShader.js'></script>
 <script src='jsScene/SimpleShader.js'></script>
 <script src='jsScene/OBJLoader.js'></script>
 <script src="jsScene/main.js"></script>
