@@ -28,6 +28,6 @@ Gameplay
 Status
 ------------   
 State: **inProgress.**  
-[Play](http://js.otrisovano.ru/tests/180316Locator/01) and check bugs :)
+[Play](http://js.otrisovano.ru/tests/180316Locator/scene) and check bugs :)
 
 
