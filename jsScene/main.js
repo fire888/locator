@@ -22,7 +22,8 @@
  class Car {
 	 
 	constructor () {
-		
+
+	
 		/** params */
 		this.spdMax = 5;
 		this. spdBackMax = -3;
@@ -31,35 +32,85 @@
 		this.gunSpdRot = 0;
 		this.isMove = true;
 		this.kvadrant = { x:0, z:0 };		
-				
+		
+
+
+		
 		/** model */
 		this.model = new THREE.Mesh(
-			new THREE.BoxGeometry(10,10,10),
-			new THREE.MeshPhongMaterial( { color: 0x00ff00 } )	
+			new THREE.BoxGeometry(0.01,0.01,0.01),
+			new THREE.MeshPhongMaterial( { color: 0x112222 } )	
 		);
+		
+		this.modelCar = false;
+		this.loader  = new THREE.OBJLoader();	
+		this.loader.load( 'jsScene/car.obj', function ( object ) {	
+			object.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh != true){
+					return;
+				}	
+				if( typeof child.geometry.attributes.position.array != "object" ){ 
+					return;
+				}	
+				car.modelCar = new THREE.Mesh(
+					child.geometry,
+					new THREE.MeshPhongMaterial( {color: 0x112222} )
+				)
+				car.modelCar.position.y = -20				
+				car.model.add(car.modelCar);
+				
+				for (let i = 0; i < 20; i ++ ){
+					let c = car.modelCar.clone();
+					c.position.set( Math.random()*2000-1000, -20, Math.random()*2000-1000 );
+					s.scene.add(c);	
+				}
+				
+			});	
+		});
+		
+		this.loader2  = new THREE.OBJLoader();	
+		this.loader2.load( 'jsScene/carGun.obj', function ( object ) {	
+			object.traverse( function ( child ) {
+				if ( child instanceof THREE.Mesh != true){
+					return;
+				}	
+				if( typeof child.geometry.attributes.position.array != "object" ){ 
+					return;
+				}	
+				car.modelGun = new THREE.Mesh(
+					child.geometry,
+					new THREE.MeshPhongMaterial( {color: 0x332222} )
+				)
+				car.modelGun.position.y = -20;
+				car.model.add(car.modelGun);
+			});	
+		});		
+		
+		
+
 		
 		/** cameras */
 		this.cameras = {};
 		this.cameras.gun = new THREE.PerspectiveCamera( 20, 300 /200, 1, 10000 );
-		this.cameras.gun.position.set(0, 30, 0); 
+		this.cameras.gun.position.set(0, -1, 0); 
 		this.model.add( this.cameras.gun );		
 		
 		this.cameras.front = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
-		this.cameras.front.position.set(0, 0, -30); 
+		this.cameras.front.position.set(0, -15, -30); 
 		this.model.add( this.cameras.front );
 
 		this.cameras.back = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
-		this.cameras.back.position.set(0, 0, 30);
+		this.cameras.back.position.set(0, -15, 30);
 		this.cameras.back.rotation.y = Math.PI;	
 		this.model.add( this.cameras.back );	
 
 		this.cameras.left = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
-		this.cameras.left.position.set(-20, 0, 30);
+		this.cameras.left.position.set(-20, -15, 30);
 		this.cameras.left.rotation.y = Math.PI/2;	
 		this.model.add( this.cameras.left );
 
 		this.cameras.right = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 );
-		this.cameras.right.position.set(20, 0, 30);
+		this.cameras.right.position.set(20, -15, 30);
 		this.cameras.right.rotation.y = -Math.PI/2;	
 		this.model.add( this.cameras.right );		
 	}
@@ -73,12 +124,13 @@
 		/** update rotation gun */ 
 		if (keys.A){
 			car.cameras.gun.rotation.y += 0.01;
-			//console.log("A");
 		}						
 		if (keys.D){
 			this.cameras.gun.rotation.y -= 0.01;
-		}		
-		
+		}	
+		if ( car.modelGun ){	
+			car.modelGun.rotation.y = car.cameras.gun.rotation.y;  		
+		}
 		
 		/** rotation car */	
 		if ( keys.left )
@@ -149,6 +201,7 @@ class Cope {
 		
 		
 		
+		
 		/** init scene cabin **********************/		
 
 		/** init scene  */
@@ -163,7 +216,7 @@ class Cope {
 		this.cam.position.set(0, 0, 600);
 		this.sc.add(this.cam);
 		
-		/** init RENDERER *************************/
+		/** init renderer */
 		this.renderPass = new THREE.RenderPass( this.sc, this.cam );
 		composer.addPass( this.renderPass );			
 
@@ -293,6 +346,7 @@ class Hero {
 	
 	constructor ( sc ) {
 		
+		
 		this.isMove = false;
 		this.kvadrant = { x:0, z:0 };
 		
@@ -415,15 +469,30 @@ const s = {};
 const initScene = () => { 
 				
 	s.scene = new THREE.Scene();
-	s.scene.background = new THREE.Color( 0x003300);
+	s.scene.background = new THREE.Color( 0xffffff);
 	
 
 	s.clock = new THREE.Clock();
 	
 	/** LIGHTS */
 	s.pointF = new THREE.PointLight();
-	s.pointF.position.set(0, 0, 2000);
+	s.pointF.position.set(0, 50, 2000);
 	s.scene.add(s.pointF);
+	
+	s.pointF = new THREE.PointLight();
+	s.pointF.position.set(0, 50, -2000);
+	s.scene.add(s.pointF);	
+	
+	s.pointF = new THREE.PointLight();
+	s.pointF.position.set(2000, 50, 0);
+	s.scene.add(s.pointF);
+
+	s.pointF = new THREE.PointLight();
+	s.pointF.position.set(-2000, 50, 0);
+	s.scene.add(s.pointF);	
+	
+	s.ambient = new THREE.AmbientLight( 0xffffff, 1.0 );
+	s.scene.add(s.ambient);	
 	
 	/** FLOOR */
 	s.floor = new THREE.Mesh(
@@ -439,12 +508,12 @@ const initScene = () => {
 	s.scene.add( s.floor );
 	
 	/** OB1 */
-	var geometry =  new THREE.BoxGeometry( 10, 10, 10, 10,10,10);	
+	/*var geometry =  new THREE.BoxGeometry( 10, 10, 10, 10,10,10);	
 	s.wireframe = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { color: 0x777777 } ) );
 	s.scene.add( s.wireframe );	
 	
 	/** ob2 */ 
-	let geomPlane = new THREE.PlaneGeometry(20, 20, 5, 5);
+	/*let geomPlane = new THREE.PlaneGeometry(20, 20, 5, 5);
 	let material = new THREE.MeshBasicMaterial({
         color: 0xff0000,
         wireframe: true
@@ -455,7 +524,7 @@ const initScene = () => {
 	s.scene.add(mesh);
 	
 	/** ob3 */ 
-	s.loader = new THREE.OBJLoader();
+	/*s.loader = new THREE.OBJLoader();
 	s.loader.load( 'jsScene/head.obj', function ( object ) {	
 		object.traverse( function ( child ) {
 			if ( child instanceof THREE.Mesh != true){
@@ -466,16 +535,16 @@ const initScene = () => {
 			}
 			
 			/** new 1 */
-			s.mesh = new THREE.Mesh( 	
+		/*	s.mesh = new THREE.Mesh( 	
 				child.geometry,
-				new THREE.MeshPhongMaterial( { color: 0x000000 } )			
+				new THREE.MeshPhongMaterial( { color: 0x0333333 } )			
 			);
 			s.mesh.scale.set(0.3, 0.3, 0.3);
 			s.scene.add(s.mesh);
 			
 			
 			/** new 2 */
- 			let fgeo = new THREE.EdgesGeometry( child.geometry );
+ 		/*	let fgeo = new THREE.EdgesGeometry( child.geometry );
 			let matt = new THREE.LineBasicMaterial( { color: 0xffffff, linewidth: 2 } );	
 			s.wireframe2 = new THREE.LineSegments( fgeo, matt );
 			s.wireframe2.scale.set(0.3, 0.3, 0.3);
@@ -483,7 +552,7 @@ const initScene = () => {
 			s.scene.add( s.wireframe2 );				
 			
 		});	
-	});	
+	});*/	
 }
 
 
@@ -499,12 +568,12 @@ const initScene = () => {
 const animate = () => {
 		
 	/** update scene */
-	s.wireframe.rotation.y += 0.01;
+	/*s.wireframe.rotation.y += 0.01;
 	s.wireframe.rotation.x += 0.01;
 	
 	if (s.mesh){
 		s.mesh.rotation.y += 0.01;
-	}
+	}*/
 	
 
 	/** update car */
@@ -644,14 +713,19 @@ buttEnterCope.onclick = () => {
 s.renderer = new THREE.WebGLRenderer();
 s.renderer.setPixelRatio( window.devicePixelRatio );
 s.renderer.setSize( window.innerWidth, window.innerHeight);
-s.renderer.setClearColor(0x00ffff);
+s.renderer.setClearColor(0xffffff);
 document.body.appendChild( s.renderer.domElement );
 
 const composer = new THREE.EffectComposer( s.renderer );	
 
-s.videoPass = new THREE.ShaderPass(myEffect2);
-composer.addPass(s.videoPass);
-s.videoPass.renderToScreen = true;	
+const simplePass = new THREE.ShaderPass(SimpleShader);	
+composer.addPass(simplePass);	
+simplePass.renderToScreen = true;	
+
+
+//s.videoPass = new THREE.ShaderPass(myEffect2);
+//composer.addPass(s.videoPass);
+//s.videoPass.renderToScreen = true;	
 
 
  
