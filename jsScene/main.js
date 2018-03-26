@@ -9,82 +9,123 @@
  *	Date           	: 	16/03/2018
  *	Purpose        	: 	check brain   
  **************************************************/ 
-  
+ 
+ 
+/** obj game */ 
+const g = {
+	arrBullets: [],
+	arrEnemies: []
+}
 
+/** obj scene */
+const s = {
+	loader: new THREE.OBJLoader(),
+	geomCar: null,
+	geomCarGun: null
+}; 
+
+let car, cope, hero;
+
+
+const loadAssets = () => {
+	return new Promise ( ( resolve ) => {
+		s.loader.load( 'jsScene/car.obj',
+			( obj ) => { 
+				obj.traverse( function ( child ) {
+					if ( child instanceof THREE.Mesh != true){
+						return;
+					}	
+					if( typeof child.geometry.attributes.position.array != "object" ){ 
+						return;
+					}	
+					s.geomCar = child.geometry;
+					resolve(); 
+				});
+			}	
+		);	
+	})
+	.then ( () => {
+		return new Promise ( (resolve) => { 
+			s.loader.load( 'jsScene/carGun.obj', function ( object ) {	
+				object.traverse( ( child ) => {
+					if ( child instanceof THREE.Mesh != true){
+						return;
+					}	
+					if( typeof child.geometry.attributes.position.array != "object" ){ 
+						return;
+					}
+				
+					s.geomCarGun = child.geometry;
+					resolve();
+				});
+			});
+		});		
+	})
+	.then ( () => {
+		
+			car = new Car();
+			cope = new Cope( car );
+			hero = new Hero( s.scene );	
+			
+			for ( let i = 0; i< 15; i++  ){
+				let bot = new Bot();
+				g.arrEnemies.push(bot);	
+			}
+			
+			animate();			
+	});
+};
+
+loadAssets(); 
+  
+  
   
 /**************************************************;
  * CAR
  **************************************************/	
 
- class Car {
+class Car {
 	 
 	constructor () {
 
 	
 		/** params */
 		this.spdMax = 5;
-		this. spdBackMax = -3;
+		this.spdBackMax = -3;
 		this.spd = 0;
 		this.spdRot = 0;
 		this.gunSpdRot = 0;
 		this.isMove = true;
-		this.kvadrant = { x:0, z:0 };		
+		this.kvadrant = { x:0, z:0 };
+
+		this.spdForBullet = {
+				pX: 0, pZ:0,
+				pXold: 0, pZold: 0,
+				x:0, z:0
+			};	
 		
 
-
-		
 		/** model */
 		this.model = new THREE.Mesh(
 			new THREE.BoxGeometry(0.01,0.01,0.01),
 			new THREE.MeshPhongMaterial( { color: 0x112222 } )	
 		);
-		
-		this.modelCar = false;
-		this.loader  = new THREE.OBJLoader();	
-		this.loader.load( 'jsScene/car.obj', function ( object ) {	
-			object.traverse( function ( child ) {
-				if ( child instanceof THREE.Mesh != true){
-					return;
-				}	
-				if( typeof child.geometry.attributes.position.array != "object" ){ 
-					return;
-				}	
-				car.modelCar = new THREE.Mesh(
-					child.geometry,
-					new THREE.MeshPhongMaterial( {color: 0x05e099} )
-				)
-				car.modelCar.position.y = -20				
-				car.model.add(car.modelCar);
+		s.scene.add( this.model );
 				
-				for (let i = 0; i < 20; i ++ ){
-					let c = car.modelCar.clone();
-					c.position.set( Math.random()*2000-1000, -20, Math.random()*2000-1000 );
-					s.scene.add(c);	
-				}
-				
-			});	
-		});
+		this.modelCar = new THREE.Mesh(
+			s.geomCar,
+			new THREE.MeshPhongMaterial( {color: 0xdddd55} )
+		);
+		this.modelCar.position.y = -22; 
+		this.model.add(this.modelCar);
 		
-		this.loader2  = new THREE.OBJLoader();	
-		this.loader2.load( 'jsScene/carGun.obj', function ( object ) {	
-			object.traverse( function ( child ) {
-				if ( child instanceof THREE.Mesh != true){
-					return;
-				}	
-				if( typeof child.geometry.attributes.position.array != "object" ){ 
-					return;
-				}	
-				car.modelGun = new THREE.Mesh(
-					child.geometry,
-					new THREE.MeshPhongMaterial( {color: 0x05e099} )
-				)
-				car.modelGun.position.y = -20;
-				car.model.add(car.modelGun);
-			});	
-		});		
+		this.modelGun = new THREE.Mesh(
+			s.geomCarGun,
+			new THREE.MeshPhongMaterial( {color: 0x05e099} )
+		)
+		this.modelGun.position.y = -20;
+		this.model.add(this.modelGun);	
 		
-		
-
 		
 		/** cameras */
 		this.cameras = {};
@@ -117,6 +158,16 @@
 		if ( !this.isMove ) return;
 		
 		this.kvadrant = checkKvadrant( this.model );
+		
+		/** local spd for bullet */
+		this.spdForBullet = {
+			pXold: this.spdForBullet.pX,
+			pZold: this.spdForBullet.pZ,
+			pX: this.model.position.x,			
+			pZ: this.model.position.z,
+			x:this.spdForBullet.pXold - this.spdForBullet.pX,
+			z:this.spdForBullet.pZold - this.spdForBullet.pZ, 	
+		}			
 		
 		/** update rotation gun */ 
 		if (keys.A){
@@ -184,6 +235,160 @@
 
 
 
+/**************************************************;
+ * Bot
+ **************************************************/
+
+class Bot {
+
+	constructor () {
+		
+		/** params */
+		this.lives = 3;
+				
+		/** geometry boom */
+		this.geomConstY = [];	
+		this.geomConstZ = [];	
+		this.geomConstX = [];
+		this.spdBoom = [];
+		this.countBoom = 300;
+		this.state = 'none';
+		
+		this.geom = s.geomCar.clone();
+
+		let geometry = new THREE.Geometry().fromBufferGeometry( this.geom );
+		for (let vi = 0; vi< geometry.vertices.length; vi++ ){
+			this.geomConstY.push( geometry.vertices[ vi ].y );   
+			this.geomConstZ.push( geometry.vertices[ vi ].z ); 		
+			this.geomConstX.push( geometry.vertices[ vi ].x );
+
+			
+			this.spdBoom.push( {
+				x: Math.random()-0.5, 
+				y: Math.random(),  
+				z: Math.random()-0.5  				
+			});	
+		}					
+		this.geom = geometry;
+
+		this.model = new THREE.Mesh(
+			this.geom,
+			new THREE.MeshPhongMaterial( { color: 0x05e099 } )
+		);		
+		
+		
+		/** position */	
+		this.model.position.set( Math.random()*2000-1000, -22, Math.random()*2000-1000 );
+		s.scene.add( this.model );
+
+		this.kvadrant = checkKvadrant( this.model ); 		
+	}
+	
+	render() {	
+		
+		if (this.lives < 0 && this.state == "none" ) this.state ='explosive';
+		if (this.state == 'explosive') this.animateExplosive(); 
+ 	
+	}
+	
+	animateExplosive() {
+		
+		if (this.countBoom < 0) this.state == 'afterExplosive'; 
+		
+		this.countBoom --;
+			
+		for ( var i = 0, l = this.geom.vertices.length; i < l; i += 3 ) {
+			
+			 if ( this.geom.vertices[ i ].y > -10){
+				this.spdBoom[i].y -= 0.008;			 
+			 }else{
+				this.spdBoom[i].y = 0;
+				
+				let z = Math.sign( this.spdBoom[i].x );
+				let v = Math.abs( this.spdBoom[i].x );
+				if ( v > 0 ){ this.spdBoom[i].x = (v -0.01)*z }
+				
+				z = Math.sign( this.spdBoom[i].z );
+				v = Math.abs( this.spdBoom[i].z );
+				if ( v > 0 ){ this.spdBoom[i].z = (v -0.01)*z }
+			 }
+
+			
+			this.geom.vertices[ i ].x = this.geomConstX[i] += this.spdBoom[i].x;
+			this.geom.vertices[ i ].y = this.geomConstY[i] += this.spdBoom[i].y;
+			this.geom.vertices[ i ].z = this.geomConstZ[i] += this.spdBoom[i].z;
+			this.geom.vertices[ i+1 ].x = this.geomConstX[i+1] += this.spdBoom[i].x;
+			this.geom.vertices[ i+1 ].y = this.geomConstY[i+1] += this.spdBoom[i].y;
+			this.geom.vertices[ i+1 ].z = this.geomConstZ[i+1] += this.spdBoom[i].z;	
+			this.geom.vertices[ i+2 ].x = this.geomConstX[i+2] += this.spdBoom[i].x;
+			this.geom.vertices[ i+2 ].y = this.geomConstY[i+2] += this.spdBoom[i].y;
+			this.geom.vertices[ i+2 ].z = this.geomConstZ[i+2] += this.spdBoom[i].z;				
+		}						
+		this.geom.verticesNeedUpdate = true;	
+	
+	}
+
+}	
+ 
+ 
+
+/**************************************************;
+ * Bullet
+ **************************************************/
+
+class Bullet{
+
+	constructor ( car ) {
+		
+		g.arrBullets.push(this);
+		
+		this.isRemovable = false;
+		this.id = Bullet.id ++;
+		this.lifeTimer = 100;
+		this.kvadrant = { x:0, z:0 };
+		
+		this.spd = 8.0;
+		this.spdXCar = car.spdForBullet.x;
+		this.spdZCar = car.spdForBullet.z;
+		
+		this.mesh = new THREE.Mesh (
+			new THREE.SphereGeometry(2, 7, 7),
+			new THREE.MeshBasicMaterial( {color: 0xffff88} )  	
+		);
+		
+		let gun = car.modelGun; 
+		this.mesh.setRotationFromQuaternion( gun.getWorldQuaternion() );
+		this.mesh.position.set( gun.getWorldPosition().x, -5 ,gun.getWorldPosition().z );		
+		this.mesh.translateZ(-10);		
+		s.scene.add( this.mesh);
+	}
+	
+	render () {
+		
+		this.mesh.translateZ(-this.spd);
+		this.mesh.position.x -= this.spdXCar;
+		this.mesh.position.z -= this.spdZCar;	
+		this.mesh.position.y -= 0.2;
+		
+		this.kvadrant = checkKvadrant( this.mesh );
+		
+		this.lifeTimer--;
+		if (this.lifeTimer<0){
+			this.deleteObj();
+		}			
+	}
+	
+	deleteObj () {
+		s.scene.remove( this.mesh );
+		this.mesh = null;
+		this.isRemovable = true;	
+	}
+
+}
+Bullet.id = 0;	
+
+
+
 
 /**************************************************;
  * COPE
@@ -191,9 +396,10 @@
 
 class Cope {
 	
-	constructor () {
+	constructor ( car ) {
 		
 		/** params */
+		this.car = car;
 		this.isCanExit = true;
 		
 		/** init scene cabin **********************/		
@@ -292,7 +498,7 @@ class Cope {
 		this.htmlElems.style.display = "block";
 	}
 	
-	updateScreens( scene, cameras, vehicle, renderer ){
+	render( scene, cameras, vehicle, renderer ){
 		
 		if ( ! vehicle.isMove ) return;
 		
@@ -315,7 +521,13 @@ class Cope {
 		/** exit cope */
 		if ( keys.enter && this.isCanExit ){
 			exitCope();
-		}		
+		}
+
+		/** shoot */
+		if ( keys.space ){
+			keys.space = false;
+			let bullet = new Bullet( this.car );
+		}			
 		
 	}
 	
@@ -341,43 +553,31 @@ class Cope {
 class Hero {
 	
 	constructor ( sc ) {
-		
-		
+			
 		this.isMove = false;
 		this.kvadrant = { x:0, z:0 };
 		
+		
 		/** camera */
-		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 );
-		sc.add( this.cam );	
+		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 );			
+		sc.add( this.cam );
+		
 		
 		/** renderer */
 		this.renderPass = new THREE.RenderPass( sc, this.cam );
 		composer.addPass( this.renderPass );
 		this.renderPass.enabled = false;	
 		
-		/** mouse controls params */
-		this.clock = new THREE.Clock();
-		this.INV_MAX_FPS = 0.01;
-		this.frameDelta = 0;
-		this.fps = this.INV_MAX_FPS; 	
-		
-		this.cam.position.y = -20;		
+	
 		
 		/** buttons */
 		this.htmlElems = document.getElementById('heroElems');
 		this.htmlElems.style.display = "none";		
 	}
 	
-	renderFrame ( renderer, sc ) {
+	render ( renderer, sc ) {
 		
 		if ( !this.isMove ) return;		
-			
-		/** update controls */	
-		this.frameDelta += this.clock.getDelta();
-		while (this.frameDelta >= this.INV_MAX_FPS){				
-			this.controls.update( this.INV_MAX_FPS);						
-			this.frameDelta -= this.INV_MAX_FPS;
-		}
 
 		/** check position near car and enter */
 		this.kvadrant = checkKvadrant( this.cam );
@@ -386,24 +586,25 @@ class Hero {
 			if (keys.enter) enterCope();	
 		}else{
 			buttEnterCope.style.opacity = 0.0;	
-		}	
-		
+		}
+
+		/** move hero */
+		if ( keys.left ) this.cam.rotation.y += 0.05;
+		if ( keys.right ) this.cam.rotation.y -= 0.05;
+		if ( keys.up ) this.cam.translateZ( -0.5);
+		if ( keys.down ) this.cam.translateZ( 0.5);	
+		if ( keys.A ) this.cam.translateX( -0.7);
+		if ( keys.D ) this.cam.translateX( 0.7);				
 	}
 	
 	hideView ( ) {
 		this.htmlElems.style.display = "none";	
-		hero.controls = null;			
+	
 	}	
 	
 	showView ( p ) {
 			
-		hero.cam.position.set( p.x, 6, p.z );			
-			
-		this.controls = new THREE.FirstPersonControls( this.cam ); 
-		this.controls.movementSpeed = 30;
-		this.controls.lookSpeed = 0.1;
-		this.controls.isForwardCanMove = true;	
-		
+		hero.cam.position.set( p.x, -22, p.z );				
 		this.htmlElems.style.display = "block";		
 	}
 }	
@@ -474,8 +675,6 @@ const enterCope = () => {
  * SCENE
  **************************************************/
  
-/** OBJ SCENE */			
-const s = {}; 
 
 /** SCENE */
 const initScene = () => { 
@@ -526,10 +725,30 @@ const animate = () => {
 	car.move();
 
 	/** update hero */
-	hero.renderFrame( s.renderer, s.scene );	
+	hero.render( s.renderer, s.scene );	
 	 
 	/** update cope */
-	cope.updateScreens( s.scene, car.cameras, car, s.renderer );
+	cope.render( s.scene, car.cameras, car, s.renderer );
+	
+	/** update bullets */
+	g.arrBullets.forEach( (bullet, i, arr ) => {
+		bullet.render();
+		g.arrEnemies.forEach( ( bot, ib, arrB ) => {
+			if ( bot.kvadrant.x == bullet.kvadrant.x && bot.kvadrant.z == bullet.kvadrant.z ){
+				bullet.deleteObj();
+				bot.lives --;
+			}
+		});		
+		if ( bullet.isRemovable ){
+			arr.splice( i, 1 );
+			i--;
+		}			
+	});
+	
+	/** render bots */
+	g.arrEnemies.forEach( (bot, i, arr) => {
+		bot.render();
+	});	
 	
 	/** render */	
 	composer.render();	
@@ -575,7 +794,8 @@ const keys = {
 	right: false,
 	A: false,
 	D: false,
-	enter: false
+	enter: false,
+	space: false
 }
 
 function keyUpdate(keyEvent, down) {
@@ -606,7 +826,11 @@ function keyUpdate(keyEvent, down) {
 			keys.S = down;
 			break;
 		case 13:
-			keys.enter = down;	
+			keys.enter = down;
+			break;	
+		case 32:
+			keys.space = down;				
+			break;
 	}
 }
  
@@ -646,6 +870,11 @@ buttEnterCope.onclick = () => {
 	keys.enter = true;
 }
 
+let buttFire = document.getElementById('gunFire'); 
+buttFire.onclick = () => {
+	keys.space = true;
+}
+
 
 
 
@@ -671,26 +900,18 @@ const simplePass = new THREE.ShaderPass(SimpleShader);
 composer.addPass(simplePass);	
 simplePass.renderToScreen = true;	
 
-
-//s.videoPass = new THREE.ShaderPass(myEffect2);
-//composer.addPass(s.videoPass);
-//s.videoPass.renderToScreen = true;	
-
-
+	
  
 /** SCENE *****************************************/
   
 initScene();
 
-const car = new Car();
-s.scene.add( car.model );
-const cope = new Cope();
-const hero = new Hero( s.scene );
+
 
 
 
 /** ANIMATION LOOP ********************************/
 	
-animate();
+
 
 
