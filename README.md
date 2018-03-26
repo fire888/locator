@@ -6,7 +6,7 @@ About
 Online browser game on *nodejs* and *threejs*.  
   
   
-![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/screenshot.jpg)  
+![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/back.jpg)  
 
 Gameplay
 ------------ 
@@ -28,6 +28,6 @@ Gameplay
 Status
 ------------   
 State: **inProgress.**  
-[Play](http://js.otrisovano.ru/tests/180316Locator/master) and check bugs :)
+[Play](http://js.otrisovano.ru/tests/180316Locator/scene) and check bugs :)
 
 
