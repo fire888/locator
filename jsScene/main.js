@@ -11,6 +11,10 @@
  **************************************************/ 
  
  
+/**************************************************;
+ * VARS SPACES
+ **************************************************/
+ 
 /** obj game */ 
 const g = {
 	arrBullets: [],
@@ -26,6 +30,12 @@ const s = {
 
 let car, cope, hero;
 
+
+
+
+/**************************************************;
+ * LOAD SCENE
+ **************************************************/
 
 const loadAssets = () => {
 	return new Promise ( ( resolve ) => {
@@ -62,6 +72,9 @@ const loadAssets = () => {
 		});		
 	})
 	.then ( () => {
+		
+			initRenderer();
+			initScene();
 		
 			car = new Car();
 			cope = new Cope( car );
@@ -245,14 +258,16 @@ class Bot {
 		
 		/** params */
 		this.lives = 3;
+		this.state = 'none';
+		this.isRemovable = false;
 				
-		/** geometry boom */
+		/** geometry */
 		this.geomConstY = [];	
 		this.geomConstZ = [];	
 		this.geomConstX = [];
 		this.spdBoom = [];
-		this.countBoom = 300;
-		this.state = 'none';
+		this.timerExplosion = 300;
+		this.timerRemove = 200;
 		
 		this.geom = s.geomCar.clone();
 
@@ -269,13 +284,13 @@ class Bot {
 				z: Math.random()-0.5  				
 			});	
 		}					
-		this.geom = geometry;
-
-		this.model = new THREE.Mesh(
-			this.geom,
-			new THREE.MeshPhongMaterial( { color: 0x05e099 } )
-		);		
 		
+		this.geom = geometry;
+		this.mat = new THREE.MeshPhongMaterial( { 
+			color: 0x05e099,
+			transparent: true 			
+		} ); 
+		this.model = new THREE.Mesh( this.geom, this.mat );		
 		
 		/** position */	
 		this.model.position.set( Math.random()*2000-1000, -22, Math.random()*2000-1000 );
@@ -284,24 +299,31 @@ class Bot {
 		this.kvadrant = checkKvadrant( this.model ); 		
 	}
 	
+	
 	render() {	
 		
-		if (this.lives < 0 && this.state == "none" ) this.state ='explosive';
-		if (this.state == 'explosive') this.animateExplosive(); 
- 	
+		if ( this.lives < 0 && this.state == "none" ) this.state ='explosive';
+		if ( this.state == "afterExplosive") {
+			this.timerRemove --;
+			this.mat.opacity -= 0.005;
+			//this.mat.needsUpdate = true;
+		}	
+		if ( this.timerRemove < 0 ) this.deleteObj();
+		if ( this.state == 'explosive') this.animateExplosive(); 
 	}
+	
 	
 	animateExplosive() {
 		
-		if (this.countBoom < 0) this.state == 'afterExplosive'; 
+		if (this.timerExplosion < 0) this.state = 'afterExplosive'; 
 		
-		this.countBoom --;
+		this.timerExplosion --;
 			
 		for ( var i = 0, l = this.geom.vertices.length; i < l; i += 3 ) {
 			
-			 if ( this.geom.vertices[ i ].y > -10){
+			if ( this.geom.vertices[ i ].y > -10){
 				this.spdBoom[i].y -= 0.008;			 
-			 }else{
+			}else{
 				this.spdBoom[i].y = 0;
 				
 				let z = Math.sign( this.spdBoom[i].x );
@@ -311,9 +333,8 @@ class Bot {
 				z = Math.sign( this.spdBoom[i].z );
 				v = Math.abs( this.spdBoom[i].z );
 				if ( v > 0 ){ this.spdBoom[i].z = (v -0.01)*z }
-			 }
+			}
 
-			
 			this.geom.vertices[ i ].x = this.geomConstX[i] += this.spdBoom[i].x;
 			this.geom.vertices[ i ].y = this.geomConstY[i] += this.spdBoom[i].y;
 			this.geom.vertices[ i ].z = this.geomConstZ[i] += this.spdBoom[i].z;
@@ -323,9 +344,21 @@ class Bot {
 			this.geom.vertices[ i+2 ].x = this.geomConstX[i+2] += this.spdBoom[i].x;
 			this.geom.vertices[ i+2 ].y = this.geomConstY[i+2] += this.spdBoom[i].y;
 			this.geom.vertices[ i+2 ].z = this.geomConstZ[i+2] += this.spdBoom[i].z;				
-		}						
+		}
+		
 		this.geom.verticesNeedUpdate = true;	
+	}
 	
+	deleteObj() {
+		s.scene.remove(this.model);
+		this.mesh = null;
+		this.geom = null;
+		this.geomConstY = null;	
+		this.geomConstZ = null;	
+		this.geomConstX = null;
+		this.spdBoom = null;
+
+		this.isRemovable = true;	
 	}
 
 }	
@@ -418,7 +451,7 @@ class Cope {
 		
 		/** init renderer */
 		this.renderPass = new THREE.RenderPass( this.sc, this.cam );
-		composer.addPass( this.renderPass );			
+		s.composer.addPass( this.renderPass );			
 
 		
 		/** init screens **************************/
@@ -565,7 +598,7 @@ class Hero {
 		
 		/** renderer */
 		this.renderPass = new THREE.RenderPass( sc, this.cam );
-		composer.addPass( this.renderPass );
+		s.composer.addPass( this.renderPass );
 		this.renderPass.enabled = false;	
 		
 	
@@ -632,7 +665,7 @@ const checkKvadrant = ( obj ) => {
  
  
 /**************************************************;
- * CHANCHE VIEWS COPE/HERO  
+ * CHANGE VIEWS COPE/HERO  
  **************************************************/ 
  
 const exitCope = () => {
@@ -670,15 +703,33 @@ const enterCope = () => {
  
  
  
- 
 /**************************************************;
- * SCENE
+ * CREATE THREE CANVAS
  **************************************************/
  
+const initRenderer = () => { 
+	
+	s.renderer = new THREE.WebGLRenderer();
+	s.renderer.setPixelRatio( window.devicePixelRatio );
+	s.renderer.setSize( window.innerWidth, window.innerHeight);
+	s.renderer.setClearColor(0xffffff);
+	document.body.appendChild( s.renderer.domElement );
 
-/** SCENE */
+	s.composer = new THREE.EffectComposer( s.renderer );	
+
+	s.simplePass = new THREE.ShaderPass(SimpleShader);	
+	s.composer.addPass( s.simplePass );	
+	s.simplePass.renderToScreen = true;	 
+}
+ 
+ 
+/**************************************************;
+ * CREATE SCENE
+ **************************************************/
+ 
 const initScene = () => { 
-				
+	
+	/** scene */	
 	s.scene = new THREE.Scene();
 	s.scene.background = new THREE.Color( 0x060c1a);
 	s.scene.fog = new THREE.FogExp2( 0x060c1a ,0.0012);		
@@ -709,11 +760,6 @@ const initScene = () => {
 }
 
 
-
-
-
-
-
 /**************************************************;
  * ANIMATION SCENE
  **************************************************/
@@ -742,22 +788,27 @@ const animate = () => {
 		if ( bullet.isRemovable ){
 			arr.splice( i, 1 );
 			i--;
+			bullet = null;
 		}			
 	});
 	
 	/** render bots */
 	g.arrEnemies.forEach( (bot, i, arr) => {
 		bot.render();
+		if ( bot.isRemovable == true ){
+			let md = bot;
+			arr.splice( i, 1 );
+			i--;
+			bot = null;	
+		}
 	});	
 	
 	/** render */	
-	composer.render();	
+	s.composer.render();	
 		
 	/** animate next frame */
 	requestAnimationFrame( animate );	
 }
-
-
 
 
 
@@ -771,10 +822,6 @@ const handleWindowResize = () => {
 	s.renderer.setSize(window.innerWidth, window.innerHeight);
 }
 window.addEventListener('resize', handleWindowResize, false);
-
-
-
-
 
 
 
@@ -874,44 +921,6 @@ let buttFire = document.getElementById('gunFire');
 buttFire.onclick = () => {
 	keys.space = true;
 }
-
-
-
-
-
-
-/**************************************************;
- * INIT
- **************************************************/
-
-
- 
- /** POSTPROCESSING ********************************/
-
-s.renderer = new THREE.WebGLRenderer();
-s.renderer.setPixelRatio( window.devicePixelRatio );
-s.renderer.setSize( window.innerWidth, window.innerHeight);
-s.renderer.setClearColor(0xffffff);
-document.body.appendChild( s.renderer.domElement );
-
-const composer = new THREE.EffectComposer( s.renderer );	
-
-const simplePass = new THREE.ShaderPass(SimpleShader);	
-composer.addPass(simplePass);	
-simplePass.renderToScreen = true;	
-
-	
- 
-/** SCENE *****************************************/
-  
-initScene();
-
-
-
-
-
-/** ANIMATION LOOP ********************************/
-	
 
 
 

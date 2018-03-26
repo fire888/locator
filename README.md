@@ -20,14 +20,17 @@ Gameplay
 | 	                   |                    |
 |turn gun left         | "A"                |  
 |turn gun right        | "D"                |  
-| **_Player:_**        |                    |
-|look around           | "mouse move"       |  
+| **_Player:_**        |                    |  
 |move forward          | "key up"           |
-|move backward         | "key down"         |  
+|move backward         | "key down"         |
+|move left             | "key A"            |
+|move right            | "key D"            |
+|turn left             | "A"                |  
+|turn right            | "D"                |    
 
 Status
 ------------   
 State: **inProgress.**  
-[Play](http://js.otrisovano.ru/tests/180316Locator/scene) and check bugs :)
+[Play](http://js.otrisovano.ru/tests/180316Locator/master) and check bugs :)
 
 
