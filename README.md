@@ -6,7 +6,7 @@ About
 Online browser game on *nodejs* and *threejs*.  
   
   
-![pic](https://raw.githubusercontent.com/fire888/locator/master/jsScene/screenshot.jpg)  
+![pic](https://raw.githubusercontent.com/fire888/locator/master/files/assets/screenshot.jpg)  
 
 Gameplay
 ------------ 
