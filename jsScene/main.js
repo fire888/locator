@@ -605,7 +605,7 @@ class Hero {
 	
 	showButtonsCar ( car ) {
 		buttEnterCope.style.opacity = 1.0;
-		buttAddBomb.style.opacity = 1.0;		
+		if (!g.heroBomb) buttAddBomb.style.opacity = 1.0;		
 		this.nearCar = car;	
 	}
 	
@@ -654,7 +654,8 @@ const enterCope = ( car ) => {
 
 
 const addBomb = ( car ) => {
-	if ( !g.heroBomb ) g.heroBomb = new Bomb(car);  
+	if ( !g.heroBomb ) g.heroBomb = new Bomb(car);
+	buttAddBomb.style.opacity = 0;	
 }	
  
  
