@@ -81,30 +81,31 @@ const loadAssets = () => {
 	})
 	.then( () => {
 		
-			initRenderer()
-			initScene()
-			initCarCameras()
+		initRenderer()
+		s.initScene()
+		sv.spaceVirt()		
+		initCarCameras()
+	
+		cope = new Cope()
+		cope.renderPass.enabled = false
 		
-			cope = new Cope()
-			cope.renderPass.enabled = false
+		hero = new Hero( s.scene )
+		hero.renderPass.enabled = true
+		
+		hero.showView( {x:0, z:0} )			
+		
+		for ( let i = 0; i< 7; i++  ){
 			
-			hero = new Hero( s.scene )
-			hero.renderPass.enabled = true
-			
-			hero.showView( {x:0, z:0} )			
-			
-			for ( let i = 0; i< 7; i++  ){
+			let car = new Car( {
+				pos: { 
+					x: Math.random()*100-50,
+					z: Math.random()*1000-500 	
+				}
+			} )
+			g.arrCars.push( car )	
+		}
 				
-				let car = new Car( {
-					pos: { 
-						x: Math.random()*100-50,
-						z: Math.random()*1000-500 	
-					}
-				} )
-				g.arrCars.push( car )	
-			}
-			
-			animate()			
+		animate()			
 	})
 }
 
@@ -124,6 +125,9 @@ class Car {
 		
 		this.id = Car.ID ++
 		this.lives = 3
+		this.allFuel = 400
+		this.currentFuel = 400
+		this.ammo = 30
 		this.spdMax = 5
 		this.spdBackMax = -3
 		this.spd = 0
@@ -141,6 +145,7 @@ class Car {
 				pXold: 0, pZold: 0,
 				x:0, z:0
 			}
+				
 		
 		/** model ******************************/
 		
@@ -153,6 +158,9 @@ class Car {
 		);
 		this.model.position.set ( carParams.pos.x, 0, carParams.pos.z )
 		s.scene.add( this.model )
+		
+		/** cleate label for locators */
+		sv.createNewLabel( this )
 
 		this.kvadrant = checkKvadrant( this.model )
 		
@@ -188,8 +196,10 @@ class Car {
 		
 		if ( !this.isHeroIn ) return
 		
-		this.kvadrant = checkKvadrant( this.model )
+		//if ( this.currentFuel < 0 ) return		
 		
+		this.kvadrant = checkKvadrant( this.model )
+				
 		/** local spd for bullet */
 		this.spdForBullet = {
 			pXold: this.spdForBullet.pX,
@@ -213,50 +223,57 @@ class Car {
 		if (Math.abs( this.spdRot) < 0.0001) this.spdRot = 0
 	
 		/** move forward*/
-		if (keys.up){
+		if (keys.up && this.currentFuel >0 ){
 			this.spd < this.spdMax ? this.spd += 0.03 : this.spd = this.spdMax ; 
 			this.model.translateZ( -this.spd );			
 			
 			this.spd > 0 ?
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )
+								this.model.rotation.y += this.spdRot * Math.abs( this.spd )
 				:
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs(this.spd) )	
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs(this.spd) )
+					this.model.rotation.y -= this.spdRot * Math.abs( this.spd )				
 			
 		} else { 
 		
 			if (this.spd > 0 && !keys.down ) {
 				this.spd -= 0.01				
 				this.model.translateZ( -this.spd )
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )			
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )	
+				this.model.rotation.y += this.spdRot * Math.abs( this.spd )					
 			}
 		}					
 
 		/** move backward */
-		if (keys.down){
+		if (keys.down && this.currentFuel > 0 ){
 			
 			if (this.spd > 0 ){
 				
 				this.spd -= 0.06 
 				this.model.translateZ( -this.spd )
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs( this.spd ) )
-				
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs( this.spd ) )
+				this.model.rotation.y += this.spdRot * Math.abs( this.spd )
 			}else{
 				
 				this.spd > this.spdBackMax ? 
 					this.spd -= 0.03 : this.spd = this.spdBackMax			
 				
 				this.model.translateZ( -this.spd )
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )				
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )
+				this.model.rotation.y -= this.spdRot * Math.abs( this.spd )					
 			}
 			
 		} else {
 			
 			if ( this.spd < 0 && !keys.up ){
 				this.model.translateZ( -this.spd )
-				this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )			
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )
+				this.model.rotation.y -= this.spdRot * Math.abs( this.spd )					
 				this.spd += 0.01 			
 			}		
 		}
+		
+		if ( Math.abs(this.spd) > 0.5 && this.currentFuel > 0 ) this.currentFuel -= 1
 				
 	}
 	
@@ -264,6 +281,17 @@ class Car {
 		
 		if ( this.lives < 0 && this.state == "none" ) this.state ='explosive'
 	}
+
+	shoot() {
+		
+		if (this.ammo>0 ){
+			this.ammo --			
+			return true 
+		} else { 
+			this.ammo = 0
+			return false 
+		} 
+	}		
 	
 	render() {
 		
@@ -402,6 +430,145 @@ Bullet.ID = 0
 
 
 /**************************************************;
+ * VIRTUAL SCENE FOR COPE CLOCKS
+ **************************************************/
+ 
+const sv = {} 
+
+sv.spaceVirt = () => {
+	
+	sv.scene = new THREE.Scene()
+	sv.scene.background = new THREE.Color( 0x060c1a )
+	sv.scene.fog = new THREE.FogExp2(0x060c1a ,0.0012 )		
+	
+	
+	sv.ambient = new THREE.AmbientLight( 0x06253a, 1.0 )
+	sv.scene.add( sv.ambient )	
+	
+	sv.camera =  new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
+	sv.camera.position.y = 100;
+	sv.camera.lookAt(sv.scene.position)
+	
+	sv.cameraParams = new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
+	sv.cameraParams.position.set(1000, 70, 130)
+
+	sv.helper = new THREE.PolarGridHelper( 60, 8, 3, 64);
+	sv.scene.add( sv.helper )
+	
+	/** locator label Enemy */
+	sv.targetMesh = new THREE.Mesh(
+			new THREE.CircleGeometry( 3, 12 ),
+			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+	)
+	sv.targetMesh.rotation.x = -Math.PI/2
+	sv.arrTargets = []	
+	
+	/** label Bullet */
+	sv.bulletMesh = new THREE.Mesh(
+			new THREE.BoxGeometry( 10, 3, 3 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )
+	)
+	sv.arrBullets = []
+	
+	/** fuel label */
+	sv.fuelMesh = new THREE.Mesh(
+			new THREE.BoxGeometry( 10, 100, 3 ),
+			new THREE.MeshBasicMaterial( { color: 0x00ffff } )
+	)
+	sv.fuelMesh.position.x = 1020
+	sv.fuelMesh.position.y = 50
+	sv.scene.add(sv.fuelMesh)	
+}
+
+sv.createNewLabel = car => {
+	
+	let l = sv.targetMesh.clone()
+	sv.scene.add(l)	
+	l.position.x = car.model.position.x/100
+	l.position.z = car.model.position.z/100		
+	
+	sv.arrTargets.push( {
+		id: car.id,
+		mesh: l	
+	})
+}	
+
+sv.update = car => {
+	
+	/** update labels */
+	g.arrCars.forEach( car=>{ 
+		sv.arrTargets.forEach ( (label, i, arr)=> {
+			if (car.state == "none" ) {
+			
+				if ( car.id == label.id ) {
+					label.mesh.position.x = car.model.position.x/100
+					label.mesh.position.z = car.model.position.z/100				
+				}
+				
+			}else{
+				
+				/** delete label if car explosive */
+				if ( car.id == label.id ) {
+					sv.scene.remove( label.mesh )
+					label.mesh = null
+					let md = arr[i]
+					arr.splice(i, 1)
+					i--	
+					md = null
+				}				
+			
+			}				
+		})
+	})
+	
+	/** update fuel */
+	sv.fuelMesh.scale.y = car.currentFuel/car.allFuel 
+	
+	/** update locator */
+	sv.camera.position.x = car.model.position.x/100
+	sv.camera.position.z = car.model.position.z/100
+	sv.camera.rotation.z = car.model.rotation.y 
+	sv.helper.rotation.y = car.model.rotation.y 
+	sv.helper.position.set(sv.camera.position.x, 0, sv.camera.position.z ) 	
+}	
+
+sv.createBullets = car => {
+	
+	for ( let i =0; i<car.ammo; i++ ){
+		let b = sv.bulletMesh.clone()
+		b.position.x = 1000
+		b.position.y = i * 4
+		sv.scene.add(b)
+		sv.arrBullets.push(b)
+	}
+}
+
+sv.dellBullets = () => {
+	
+	for ( let i = 0; i< sv.arrBullets.length; i++  ){
+		sv.scene.remove( sv.arrBullets[i] )
+		sv.arrBullets[sv.arrBullets[i] ] = null		
+		sv.arrBullets.splice(i, 1)
+		i--
+	}
+}
+
+sv.removeBulletShoot = () => {
+	
+	sv.scene.remove( sv.arrBullets[sv.arrBullets.length-1])
+	sv.arrBullets[sv.arrBullets.length-1] = null
+	sv.arrBullets.splice(sv.arrBullets.length-1)
+}
+
+
+sv.updateFuel = car => {
+	
+	sv.fuelMesh.scale.z = car.currentFuel/car.allFuel   
+}
+ 
+ 
+
+/**************************************************;
  * COPE
  **************************************************/
 
@@ -435,15 +602,35 @@ class Cope {
 		/** init screens **************************/
 		
 		/** locator screen */
-		this.srcLocatorTxt = new THREE.Texture( canvas )
+		this.scrLocatorTexture = new THREE.WebGLRenderTarget( 
+			256, 256, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			})
 		this.scrLocator = new THREE.Mesh(
-			new THREE.PlaneGeometry(240, 240 ,1),
-			new THREE.MeshBasicMaterial( { map: this.srcLocatorTxt } )
+			new THREE.CircleGeometry( 120, 32 ),
+			new THREE.MeshBasicMaterial( { map: this.scrLocatorTexture.texture } )
 		);
 		this.scrLocator.position.set(-510, 285, -70)
 		this.scrLocator.rotation.x	= 0.2	
-		//this.scrLocator.rotation.y	= 0.3		
-		this.sc.add( this.scrLocator )		
+		this.scrLocator.rotation.y	= 0.7		
+		this.sc.add( this.scrLocator )
+		
+		/** params screen */
+		this.scrParamsTexture = new THREE.WebGLRenderTarget( 
+			256, 256, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			})
+		this.scrParams = new THREE.Mesh(
+			new THREE.PlaneGeometry( 200, 200 ),
+			new THREE.MeshBasicMaterial( { map: this.scrParamsTexture.texture } )
+		);
+		this.scrParams.position.set(510, 285, -70)
+		this.scrParams.rotation.x	= 0.2	
+		this.scrParams.rotation.y	= -0.7		
+		this.sc.add( this.scrParams )		
+	
 	
 		/** gun screen */	
 		this.scrGunTexture = new THREE.WebGLRenderTarget( 
@@ -526,8 +713,7 @@ class Cope {
 		if ( ! this.car ) return
 		
 		/** draw Locator */
-		drawCanvas()
-		this.srcLocatorTxt.needsUpdate = true 
+		sv.update(this.car)
 		
 		/** update cope buttons */ 
 		if ( this.car.spd > 1) {
@@ -538,7 +724,9 @@ class Cope {
 			this.isCanExit = true
 		}
 					
-		/** render cope screens */		
+		/** render cope screens */	
+		renderer.render( sv.scene, sv.camera, this.scrLocatorTexture )	
+		renderer.render( sv.scene, sv.cameraParams, this.scrParamsTexture )		
 		renderer.render( scene, s.carCameras.gun, this.scrGunTexture )
 		renderer.render( scene, s.carCameras.front, this.scrFrontTexture )
 		renderer.render( scene, s.carCameras.back, this.scrBackTexture )
@@ -552,8 +740,12 @@ class Cope {
 
 		/** shoot */
 		if ( keys.space ){
-			keys.space = false
-			let bullet = new Bullet( this.car )
+			if ( this.car.shoot() ) { 
+				sv.removeBulletShoot()	
+				console.log( this.car.ammo)
+				keys.space = false
+				let bullet = new Bullet( this.car )
+			}	
 		}			
 		
 	}
@@ -562,203 +754,18 @@ class Cope {
 		
 		this.htmlElems.style.display = "none"
 		this.car = null
+		sv.dellBullets()
 	}
 	
 	showView( car ) {
 		
 		this.htmlElems.style.display = "block"
 		this.car = car
+		sv.createBullets(this.car)	
 	}	
 		
 }
 
-
-/**************************************************;
- * CANVAS FOR COPE LOCATOR
- **************************************************/
-
-
- 
-const canvas = document.getElementById("canvas")
-canvas.style.display = "none"
-const cntx = canvas.getContext('2d')
-
-const compose = (...fns) =>  
-	(arg) => {		
-		fns.reduce( 
-			(composed, f) => f(composed),
-			arg 
-		)					
-				
-	}
-
-		
-		
-		
-		
-/***************************** CUSTOM */
-/*
-const start = () => console.log('start')
-const getFirstVal = () => 5
-const addOne = val => val++
-
-const startAPP = value => compose(
-	start,
-	getFirstVal,
-	addOne
-)(value)
-
-startAPP()
-  */
-
-const getVal = () => 5
-const addOne = val => {
-	console.log(val)	
-	return val += 1
-} 
-const print = exitVal => console.log("exit: " + exitVal )
-
-const display = target => vall => target(vall) 
-//const getResult = (vall) => addOne( addOne( addOne( vall ) ) )
-//console.log( getResult(5) )
-
-
-
-
-const getRes2 = vall => compose(
-	addOne,
-	addOne,
-	addOne,
-	display(print)
-)( vall ) 
-
-
-getRes2( 5 )
-
-//console.log( getRes2( 5 ) ) 
-  
-
-/***************************** ENDCUSTOM */		
-
-const clearRect = () => { 
-	cntx.fillStyle = "#060c1a"
-	cntx.beginPath()
-	cntx.rect(0, 0, 256, 256)
-	cntx.fill()
-	cntx.stroke()
-}
-const drawLocatorLines = () => {
-	
-	cntx.strokeStyle = "#0f0"
-	cntx.beginPath()
-	cntx.arc(128,128,100,0,Math.PI*2, true)
-	cntx.stroke()
-	cntx.closePath()
-	
-	cntx.beginPath()
-	cntx.arc(128,128,50,0,Math.PI*2, true)	
-	cntx.closePath() 
-	cntx.stroke()
-	cntx.closePath()	
-	
-	cntx.beginPath()
-	cntx.moveTo(128, 120)
-	cntx.lineTo( 128, 10)
-	cntx.lineWidth = 0.5
-	cntx.stroke()
-	cntx.closePath()	
-	
-	cntx.beginPath()
-	cntx.moveTo(120, 128)
-	cntx.lineTo( 10, 128)
-	cntx.lineWidth =  0.5
-	cntx.stroke()
-	cntx.closePath()
-
-	cntx.beginPath()
-	cntx.moveTo(138, 128)
-	cntx.lineTo(246, 128)
-	cntx.lineWidth = 0.5
-	cntx.stroke()
-	cntx.closePath()
-
-	cntx.beginPath()
-	cntx.moveTo(128, 138)
-	cntx.lineTo(128, 246)
-	cntx.lineWidth = 0.5
-	cntx.stroke()
-	cntx.closePath()	
-}
-
-
-const getRotationGun = () => cope.car.modelGun.rotation.y
-const drawGun = rot => {
-	cntx.strokeStyle = "#f5"	
-	cntx.beginPath()
-	cntx.arc(128,128,10,0,Math.PI*2, true)
-	cntx.lineWidth = 0.5
-	cntx.stroke()
-	cntx.closePath()
-	let x = Math.sin(rot)*20 * (-1) + 128
-	let y = Math.cos(rot)*20 * (-1) + 128	
-	cntx.beginPath()
-	cntx.moveTo(x, y)
-	cntx.lineTo(128, 128)
-	cntx.lineWidth = 2		
-	cntx.stroke()
-	cntx.closePath()		
-}
-const displayGun = rot => compose(
-	getRotationGun,
-	drawGun
-)(rot)
-
-
-const getArrEnemies = () => g.arrCars
-
-const drawEnemies = obj => {
-
-	
-	//obj.forEach( (item) => { 
-
-		
-		//console.log( distX + " / " + distY)
-		//let x = (cope.car.model.position.x - item.model.position.x)*Math.cos(cope.car.model.rotation.y)/50*(-1) + 128
-		//let y = (cope.car.model.position.z - item.model.position.z)*Math.sin(cope.car.model.rotation.y)/50*(-1) + 128
-		//let dist = Math.sqrt( Math.pow((item.model.position.x-cope.car.model.position.x), 2)+ Math.pow((item.model.position.z - cope.car.model.position.z),2 ) )
-		let item = obj[0]
-		let distX = item.model.position.x-cope.car.model.position.x
-		let distY = item.model.position.z-cope.car.model.position.z
-		let d = Math.sqrt( distX * distX + distY * distY )
-		console.log( THREE.Math.radToDeg(cope.car.model.rotation.y) )
-		let x = Math.sin(cope.car.model.rotation.y*Math.PI)*d/20 +128 
-		let y = Math.cos(cope.car.model.rotation.y*Math.PI)*d/20 +128  
-		cntx.strokeStyle = "#ff0"	
-		cntx.beginPath()
-		cntx.moveTo(x, y-5)
-		cntx.lineTo(x+3, y+3)
-		cntx.lineTo(x-3, y+3)
-		cntx.lineTo(x, y-3)
-		cntx.lineWidth = 2	
-		cntx.stroke()
-		cntx.closePath()
-	//})	
-}
-const displayEnemies = arrEn => {
-	compose(
-		getArrEnemies,
-		drawEnemies
-	)(arrEn)
-} 
-
-
-
-const drawCanvas = compose(
-	clearRect,
-	drawLocatorLines,
-	displayGun,
-	displayEnemies
-)
 
 
 
@@ -822,7 +829,7 @@ class Hero {
 	showView( p ) {
 			
 		this.cam.position.set( p.x, -22, p.z )				
-		this.htmlElems.style.display = "block"		
+		this.htmlElems.style.display = "block"	
 	}
 	
 	showButtonsCar( car ) {
@@ -992,7 +999,7 @@ const initRenderer = () => {
  * CREATE SCENE
  **************************************************/
  
-const initScene = () => { 
+s.initScene = () => { 
 	
 	/** SCENE */	
 	s.scene = new THREE.Scene()
