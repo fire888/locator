@@ -730,7 +730,7 @@ const drawEnemies = obj => {
 		let distX = item.model.position.x-cope.car.model.position.x
 		let distY = item.model.position.z-cope.car.model.position.z
 		let d = Math.sqrt( distX * distX + distY * distY )
-		//console.log( 180 / Math.PI * cope.car.model.rotation.y )
+		console.log( THREE.Math.radToDeg(cope.car.model.rotation.y) )
 		let x = Math.sin(cope.car.model.rotation.y*Math.PI)*d/20 +128 
 		let y = Math.cos(cope.car.model.rotation.y*Math.PI)*d/20 +128  
 		cntx.strokeStyle = "#ff0"	
