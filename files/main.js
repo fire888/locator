@@ -1,4 +1,5 @@
 
+
 "use strict";
 
 /**
@@ -92,7 +93,7 @@ const loadAssets = () => {
 			
 			hero.showView( {x:0, z:0} )			
 			
-			for ( let i = 0; i< 15; i++  ){
+			for ( let i = 0; i< 7; i++  ){
 				
 				let car = new Car( {
 					pos: { 
@@ -433,7 +434,18 @@ class Cope {
 		
 		/** init screens **************************/
 		
-		/** gun screen */
+		/** locator screen */
+		this.srcLocatorTxt = new THREE.Texture( canvas )
+		this.scrLocator = new THREE.Mesh(
+			new THREE.PlaneGeometry(240, 240 ,1),
+			new THREE.MeshBasicMaterial( { map: this.srcLocatorTxt } )
+		);
+		this.scrLocator.position.set(-510, 285, -70)
+		this.scrLocator.rotation.x	= 0.2	
+		//this.scrLocator.rotation.y	= 0.3		
+		this.sc.add( this.scrLocator )		
+	
+		/** gun screen */	
 		this.scrGunTexture = new THREE.WebGLRenderTarget( 
 			600, 350, { 
 				minFilter: THREE.LinearFilter, 
@@ -444,6 +456,7 @@ class Cope {
 			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
 		);
 		this.scrGun.position.set(0, 300, -30)
+		this.scrGun.rotation.x	= 0.2		
 		this.sc.add( this.scrGun )
 		
 		/** front screen */
@@ -512,6 +525,10 @@ class Cope {
 		
 		if ( ! this.car ) return
 		
+		/** draw Locator */
+		drawCanvas()
+		this.srcLocatorTxt.needsUpdate = true 
+		
 		/** update cope buttons */ 
 		if ( this.car.spd > 1) {
 			buttExitCope.style.opacity = 0.3
@@ -556,6 +573,192 @@ class Cope {
 }
 
 
+/**************************************************;
+ * CANVAS FOR COPE LOCATOR
+ **************************************************/
+
+
+ 
+const canvas = document.getElementById("canvas")
+canvas.style.display = "none"
+const cntx = canvas.getContext('2d')
+
+const compose = (...fns) =>  
+	(arg) => {		
+		fns.reduce( 
+			(composed, f) => f(composed),
+			arg 
+		)					
+				
+	}
+
+		
+		
+		
+		
+/***************************** CUSTOM */
+/*
+const start = () => console.log('start')
+const getFirstVal = () => 5
+const addOne = val => val++
+
+const startAPP = value => compose(
+	start,
+	getFirstVal,
+	addOne
+)(value)
+
+startAPP()
+  */
+
+const getVal = () => 5
+const addOne = val => {
+	console.log(val)	
+	return val += 1
+} 
+const print = exitVal => console.log("exit: " + exitVal )
+
+const display = target => vall => target(vall) 
+//const getResult = (vall) => addOne( addOne( addOne( vall ) ) )
+//console.log( getResult(5) )
+
+
+
+
+const getRes2 = vall => compose(
+	addOne,
+	addOne,
+	addOne,
+	display(print)
+)( vall ) 
+
+
+getRes2( 5 )
+
+//console.log( getRes2( 5 ) ) 
+  
+
+/***************************** ENDCUSTOM */		
+
+const clearRect = () => { 
+	cntx.fillStyle = "#060c1a"
+	cntx.beginPath()
+	cntx.rect(0, 0, 256, 256)
+	cntx.fill()
+	cntx.stroke()
+}
+const drawLocatorLines = () => {
+	
+	cntx.strokeStyle = "#0f0"
+	cntx.beginPath()
+	cntx.arc(128,128,100,0,Math.PI*2, true)
+	cntx.stroke()
+	cntx.closePath()
+	
+	cntx.beginPath()
+	cntx.arc(128,128,50,0,Math.PI*2, true)	
+	cntx.closePath() 
+	cntx.stroke()
+	cntx.closePath()	
+	
+	cntx.beginPath()
+	cntx.moveTo(128, 120)
+	cntx.lineTo( 128, 10)
+	cntx.lineWidth = 0.5
+	cntx.stroke()
+	cntx.closePath()	
+	
+	cntx.beginPath()
+	cntx.moveTo(120, 128)
+	cntx.lineTo( 10, 128)
+	cntx.lineWidth =  0.5
+	cntx.stroke()
+	cntx.closePath()
+
+	cntx.beginPath()
+	cntx.moveTo(138, 128)
+	cntx.lineTo(246, 128)
+	cntx.lineWidth = 0.5
+	cntx.stroke()
+	cntx.closePath()
+
+	cntx.beginPath()
+	cntx.moveTo(128, 138)
+	cntx.lineTo(128, 246)
+	cntx.lineWidth = 0.5
+	cntx.stroke()
+	cntx.closePath()	
+}
+
+
+const getRotationGun = () => cope.car.modelGun.rotation.y
+const drawGun = rot => {
+	cntx.strokeStyle = "#f5"	
+	cntx.beginPath()
+	cntx.arc(128,128,10,0,Math.PI*2, true)
+	cntx.lineWidth = 0.5
+	cntx.stroke()
+	cntx.closePath()
+	let x = Math.sin(rot)*20 * (-1) + 128
+	let y = Math.cos(rot)*20 * (-1) + 128	
+	cntx.beginPath()
+	cntx.moveTo(x, y)
+	cntx.lineTo(128, 128)
+	cntx.lineWidth = 2		
+	cntx.stroke()
+	cntx.closePath()		
+}
+const displayGun = rot => compose(
+	getRotationGun,
+	drawGun
+)(rot)
+
+
+const getArrEnemies = () => g.arrCars
+
+const drawEnemies = obj => {
+
+	
+	//obj.forEach( (item) => { 
+
+		
+		//console.log( distX + " / " + distY)
+		//let x = (cope.car.model.position.x - item.model.position.x)*Math.cos(cope.car.model.rotation.y)/50*(-1) + 128
+		//let y = (cope.car.model.position.z - item.model.position.z)*Math.sin(cope.car.model.rotation.y)/50*(-1) + 128
+		//let dist = Math.sqrt( Math.pow((item.model.position.x-cope.car.model.position.x), 2)+ Math.pow((item.model.position.z - cope.car.model.position.z),2 ) )
+		let item = obj[0]
+		let distX = item.model.position.x-cope.car.model.position.x
+		let distY = item.model.position.z-cope.car.model.position.z
+		let d = Math.sqrt( distX * distX + distY * distY )
+		//console.log( 180 / Math.PI * cope.car.model.rotation.y )
+		let x = Math.sin(cope.car.model.rotation.y*Math.PI)*d/20 +128 
+		let y = Math.cos(cope.car.model.rotation.y*Math.PI)*d/20 +128  
+		cntx.strokeStyle = "#ff0"	
+		cntx.beginPath()
+		cntx.moveTo(x, y-5)
+		cntx.lineTo(x+3, y+3)
+		cntx.lineTo(x-3, y+3)
+		cntx.lineTo(x, y-3)
+		cntx.lineWidth = 2	
+		cntx.stroke()
+		cntx.closePath()
+	//})	
+}
+const displayEnemies = arrEn => {
+	compose(
+		getArrEnemies,
+		drawEnemies
+	)(arrEn)
+} 
+
+
+
+const drawCanvas = compose(
+	clearRect,
+	drawLocatorLines,
+	displayGun,
+	displayEnemies
+)
 
 
 
