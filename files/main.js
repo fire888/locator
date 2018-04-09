@@ -1,5 +1,7 @@
 
 
+"use strict";
+
 /**
  **************************************************; 
  *	Project        	:	LOCATOR 
@@ -8,14 +10,10 @@
  *	Date           	: 	16/03/2018
  *	Purpose        	: 	check brain   
  **************************************************/ 
-
-"use strict";
-
  
-
  
 /**************************************************;
- * SPACES VARS
+ * VARS SPACES
  **************************************************/
 
  
@@ -56,8 +54,8 @@ const loadAssets = () => {
 				
 			obj.traverse( function ( child ) {
 					
-				if ( child instanceof THREE.Mesh != true ) return
-				if ( typeof child.geometry.attributes.position.array != "object" ) return
+				if ( child instanceof THREE.Mesh != true) return
+				if( typeof child.geometry.attributes.position.array != "object" ) return
 					
 				s.geomCar = child.geometry
 				resolve() 
@@ -66,14 +64,14 @@ const loadAssets = () => {
 	})
 	.then( () => {
 		
-		return new Promise( ( resolve ) => { 
+		return new Promise( (resolve) => { 
 			
 			s.loader.load( 'files/assets/carGun.obj', ( obj ) => {	
 				
 				obj.traverse( ( child ) => {
 					
-					if ( child instanceof THREE.Mesh != true ) return
-					if ( typeof child.geometry.attributes.position.array != "object" ) return
+					if ( child instanceof THREE.Mesh != true) return
+					if( typeof child.geometry.attributes.position.array != "object" ) return
 					
 					s.geomCarGun = child.geometry
 					resolve()
@@ -89,21 +87,22 @@ const loadAssets = () => {
 		initCarCameras()
 	
 		cope = new Cope()
+		
 		cope.renderPass.enabled = false
 		
 		hero = new Hero( s.scene )
 		hero.renderPass.enabled = true
 		
-		hero.showView( { x:0, z:0 } )			
+		hero.showView( {x:0, z:0} )			
 		
-		for ( let i = 0; i < 7; i ++ ) {
+		for ( let i = 0; i< 7; i++  ){
 			
 			let car = new Car( {
 				pos: { 
 					x: Math.random()*100-50,
 					z: Math.random()*1000-500 	
 				}
-			})
+			} )
 			g.arrCars.push( car )	
 		}
 				
@@ -115,7 +114,6 @@ loadAssets()
   
   
   
-  
 /**************************************************;
  * CAR
  **************************************************/	
@@ -124,13 +122,18 @@ class Car {
 	 
 	constructor( carParams ) {
 
-	
 		/** params *******************************/
 		
 		this.id = Car.ID ++
 		this.lives = 3
-		this.allFuel = 400
-		this.currentFuel = 400
+		this.health = {
+			gun: 20,
+			cope: 20,
+			base: 20,
+			weels: 20
+		}
+		this.allFuel = 4000
+		this.currentFuel = 4000
 		this.ammo = 30
 		this.spdMax = 5
 		this.spdBackMax = -3
@@ -145,9 +148,9 @@ class Car {
 		this.state = 'none'		
 
 		this.spdForBullet = {
-				pX: 0, pZ: 0,
+				pX: 0, pZ:0,
 				pXold: 0, pZold: 0,
-				x: 0, z: 0
+				x:0, z:0
 			}
 				
 		
@@ -167,24 +170,27 @@ class Car {
 		sv.createNewLabel( this )
 
 		this.kvadrant = checkKvadrant( this.model )
-			
+		
+		
+		
 		/** prepear base */
 		this.geoms.base = prepearGeometryToExploisive( s.geomCar.clone() )	
 		this.modelBase = new THREE.Mesh(
 			this.geoms.base.geom,
-			new THREE.MeshPhongMaterial( { color: 0xdddd55 } )
+			new THREE.MeshPhongMaterial( {color: 0xdddd55} )
 		)
 		this.modelBase.position.y = -22 
-		this.model.add( this.modelBase )
+		this.model.add(this.modelBase)
 		
 		/** prepear gun */
 		this.geoms.gun =  prepearGeometryToExploisive( s.geomCarGun.clone() ) 
 		this.modelGun = new THREE.Mesh(
 			this.geoms.gun.geom,
-			new THREE.MeshPhongMaterial( { color: 0x05e099 } )
+			new THREE.MeshPhongMaterial( {color: 0x05e099} )
 		)
 		this.modelGun.position.y = -22
-		this.model.add( this.modelGun )	
+		this.model.add(this.modelGun)
+			
 	}
 	
 	enterHero() {
@@ -195,8 +201,9 @@ class Car {
 	
 	move() {
 		
-		if ( ! this.isHeroIn ) return
-				
+		if ( !this.isHeroIn ) return
+		
+		//if ( this.currentFuel < 0 ) return		
 		
 		this.kvadrant = checkKvadrant( this.model )
 				
@@ -206,13 +213,13 @@ class Car {
 			pZold: this.spdForBullet.pZ,
 			pX: this.model.position.x,			
 			pZ: this.model.position.z,
-			x: this.spdForBullet.pXold - this.spdForBullet.pX,
-			z: this.spdForBullet.pZold - this.spdForBullet.pZ 	
+			x:this.spdForBullet.pXold - this.spdForBullet.pX,
+			z:this.spdForBullet.pZold - this.spdForBullet.pZ 	
 		}			
 		
 		/** update rotation gun */ 
-		if ( keys.A ) this.modelGun.rotation.y += 0.01
-		if ( keys.D ) this.modelGun.rotation.y -= 0.01
+		if (keys.A) this.modelGun.rotation.y += 0.01
+		if (keys.D) this.modelGun.rotation.y -= 0.01
 		if ( this.modelGun )
 			s.carCameras.gun.rotation.y = this.modelGun.rotation.y  		
 		
@@ -220,43 +227,50 @@ class Car {
 		/** rotation car */	
 		if ( keys.left ) if ( this.spdRot < 0.01 ) this.spdRot += 0.0001		
 		if ( keys.right ) if ( this.spdRot >  -0.01 ) this.spdRot -= 0.0001
-		if ( Math.abs( this.spdRot) < 0.0001 ) this.spdRot = 0
+		if (Math.abs( this.spdRot) < 0.0001) this.spdRot = 0
 	
+	
+		/** MOVE ****************************/
+		
 		/** move forward */
-		if ( keys.up && this.currentFuel > 0 ){
-			
-			this.spd < this.spdMax ? this.spd += 0.03 : this.spd = this.spdMax  
-			this.model.translateZ( -this.spd )
+		/** move forward*/
+		if (keys.up && this.currentFuel >0 ){
+			this.spd < this.spdMax ? this.spd += 0.03 : this.spd = this.spdMax ; 
+			this.model.translateZ( -this.spd );			
 			
 			this.spd > 0 ?
-				this.model.rotation.y += this.spdRot * Math.abs( this.spd )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )
+								this.model.rotation.y += this.spdRot * Math.abs( this.spd )
 				:
-				this.model.rotation.y -= this.spdRot * Math.abs( this.spd )				
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs(this.spd) )
+					this.model.rotation.y -= this.spdRot * Math.abs( this.spd )				
 			
 		} else { 
 		
-			if ( this.spd > 0 && !keys.down ) {
+			if (this.spd > 0 && !keys.down ) {
 				this.spd -= 0.01				
 				this.model.translateZ( -this.spd )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs(this.spd) )	
 				this.model.rotation.y += this.spdRot * Math.abs( this.spd )					
 			}
 		}					
 
 		/** move backward */
-		if ( keys.down && this.currentFuel > 0 ){
+		if (keys.down && this.currentFuel > 0 ){
 			
-			if ( this.spd > 0 ){
+			if (this.spd > 0 ){
 				
 				this.spd -= 0.06 
 				this.model.translateZ( -this.spd )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), this.spdRot * Math.abs( this.spd ) )
 				this.model.rotation.y += this.spdRot * Math.abs( this.spd )
-				
-			} else {
+			}else{
 				
 				this.spd > this.spdBackMax ? 
 					this.spd -= 0.03 : this.spd = this.spdBackMax			
 				
 				this.model.translateZ( -this.spd )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )
 				this.model.rotation.y -= this.spdRot * Math.abs( this.spd )					
 			}
 			
@@ -264,14 +278,17 @@ class Car {
 			
 			if ( this.spd < 0 && !keys.up ){
 				this.model.translateZ( -this.spd )
+				//this.model.rotateOnAxis( new THREE.Vector3(0,1,0), -this.spdRot * Math.abs( this.spd ) )
 				this.model.rotation.y -= this.spdRot * Math.abs( this.spd )					
 				this.spd += 0.01 			
 			}		
 		}
 		
-		/** update fuel */
-		if ( Math.abs( this.spd ) > 0.5 && this.currentFuel > 0 ) this.currentFuel -= 1
-				
+		
+		if ( Math.abs(this.spd) > 0.1 && this.currentFuel > 0 ) { 
+			this.currentFuel -= 1
+		}
+						
 	}
 	
 	checkLife() {
@@ -281,7 +298,7 @@ class Car {
 
 	shoot() {
 		
-		if ( this.ammo > 0 ) {
+		if (this.ammo>0 ){
 			this.ammo --			
 			return true 
 		} else { 
@@ -292,14 +309,14 @@ class Car {
 	
 	render() {
 		
-		if ( this.state == 'explosive' ) this.animateExplosive()
-		if ( this.state == "afterExplosive" ) this.timerRemove --
+		if ( this.state == 'explosive') this.animateExplosive()
+		if ( this.state == "afterExplosive") this.timerRemove --
 		if ( this.timerRemove < 0 ) this.deleteObj()
 	}
 
 	animateExplosive() {
 		
-		if ( this.timerExplosion < 0 ) this.state = 'afterExplosive'
+		if (this.timerExplosion < 0) this.state = 'afterExplosive'
 		
 		geomAnimateExplosive( this.geoms.base )
 		geomAnimateExplosive( this.geoms.gun )	
@@ -310,13 +327,23 @@ class Car {
 	deleteObj() {
 		
 		this.spdForBullet = null
-		s.scene.remove( this.model )
+		s.scene.remove(this.model)
 		this.model = null
 		this.geoms.base = null
 		this.geoms.gun = null
 		this.geoms = null
 		this.isRemovable = true
+	}
+
+	hit() {
+		
+		let r = Math.floor(Math.random()*4)
+		if ( r == 0 ) this.health.gun -= Math.floor( Math.random()* 3 )  
+		if ( r == 1 ) this.health.cope -= Math.floor( Math.random()* 3 )  
+		if ( r == 2 ) this.health.base -= Math.floor( Math.random()* 3 )  	
+		if ( r == 3 ) this.health.weels -= Math.floor( Math.random()* 3 ) 					
 	}		
+	
 }
 
 Car.ID = 0;	
@@ -324,8 +351,9 @@ Car.ID = 0;
 
 
 
+
 /**************************************************;
- * HERO BOMB
+ * HeroBomb
  **************************************************/
  
 class Bomb {
@@ -337,8 +365,8 @@ class Bomb {
 		this.car = car		
 		
 		this.mesh = new THREE.Mesh(
-			new THREE.BoxGeometry( 5, 5, 5 ),
-			new THREE.MeshBasicMaterial( { color: 0xff0000 } )
+			new THREE.BoxGeometry( 5, 5, 5),
+			new THREE.MeshBasicMaterial( {color: 0xff0000} )
 		)
 		
 		this.mesh.position.set( 0, -21, 0 )
@@ -363,16 +391,17 @@ class Bomb {
  
 
  
-  
+ 
+ 
 /**************************************************;
- * BULLET
+ * Bullet
  **************************************************/
 
 class Bullet {
 
 	constructor( car ) {
 		
-		g.arrBullets.push( this )
+		g.arrBullets.push(this)
 		
 		this.id = Bullet.ID ++		
 		this.isRemovable = false
@@ -385,33 +414,32 @@ class Bullet {
 		this.spdXCar = car.spdForBullet.x
 		this.spdZCar = car.spdForBullet.z
 		
-		this.mesh = new THREE.Mesh(
-			new THREE.SphereGeometry( 2, 7, 7 ),
-			new THREE.MeshBasicMaterial( { color: 0xffff88 } )  	
+		this.mesh = new THREE.Mesh (
+			new THREE.SphereGeometry(2, 7, 7),
+			new THREE.MeshBasicMaterial( {color: 0xffff88} )  	
 		)
 		
 		let gun = car.modelGun 
 		this.mesh.setRotationFromQuaternion( gun.getWorldQuaternion() )
 		this.mesh.position.set( gun.getWorldPosition().x, -5 ,gun.getWorldPosition().z )		
-		this.mesh.translateZ( -10 )
-		s.scene.add( this.mesh )
+		this.mesh.translateZ(-10)
+		s.scene.add( this.mesh)
 	}
 	
 	render() {
 		
-		this.mesh.translateZ( -this.spd )
+		this.mesh.translateZ(-this.spd)
 		this.mesh.position.x -= this.spdXCar
 		this.mesh.position.z -= this.spdZCar	
 		this.mesh.position.y -= 0.2
 		
 		this.kvadrant = checkKvadrant( this.mesh )
 		
-		this.lifeTimer --
-		if ( this.lifeTimer < 0 ) this.deleteObj()
+		this.lifeTimer--
+		if (this.lifeTimer<0) this.deleteObj()
 	}
 	
 	deleteObj() {
-		
 		s.scene.remove( this.mesh )
 		this.mesh = null
 		this.isRemovable = true
@@ -434,20 +462,20 @@ sv.spaceVirt = () => {
 	
 	sv.scene = new THREE.Scene()
 	sv.scene.background = new THREE.Color( 0x060c1a )
-	sv.scene.fog = new THREE.FogExp2( 0x060c1a ,0.0012 )		
+	sv.scene.fog = new THREE.FogExp2(0x060c1a ,0.0012 )		
 	
 	
 	sv.ambient = new THREE.AmbientLight( 0x06253a, 1.0 )
 	sv.scene.add( sv.ambient )	
 	
-	sv.camera = new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
+	sv.camera =  new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
 	sv.camera.position.y = 100;
-	sv.camera.lookAt( sv.scene.position )
+	sv.camera.lookAt(sv.scene.position)
 	
 	sv.cameraParams = new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
-	sv.cameraParams.position.set( 1000, 70, 130 )
+	sv.cameraParams.position.set(1000, 70, 130)
 
-	sv.helper = new THREE.PolarGridHelper( 60, 8, 3, 64 );
+	sv.helper = new THREE.PolarGridHelper( 60, 8, 3, 64);
 	sv.scene.add( sv.helper )
 	
 	/** locator label Enemy */
@@ -456,31 +484,92 @@ sv.spaceVirt = () => {
 			new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.targetMesh.rotation.x = -Math.PI/2
-	sv.arrTargets = []	
-	
-	/** label Bullet */
-	sv.bulletMesh = new THREE.Mesh(
-			new THREE.BoxGeometry( 10, 3, 3 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )
+	sv.arrTargets = []
+
+	/** health */
+	sv.lableGun = new THREE.Mesh(
+			new THREE.BoxBufferGeometry( 30, 10, 12 ),
+			new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
-	sv.arrBullets = []
-	
-	/** fuel label */
-	sv.fuelMesh = new THREE.Mesh(
-			new THREE.BoxGeometry( 10, 100, 3 ),
-			new THREE.MeshBasicMaterial( { color: 0x00ffff } )
+	sv.lableGun.position.set(950, 120, 0)
+	sv.scene.add( sv.lableGun ) 
+
+	sv.lableCope = new THREE.Mesh(
+			new THREE.BoxBufferGeometry( 30, 10, 12 ),
+			new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
-	sv.fuelMesh.position.x = 1020
-	sv.fuelMesh.position.y = 50
-	sv.scene.add( sv.fuelMesh )	
+	sv.lableCope.position.set(950, 90, 0)
+	sv.scene.add( sv.lableCope ) 	
+	
+	sv.lableBase = new THREE.Mesh(
+			new THREE.BoxBufferGeometry( 30, 10, 12 ),
+			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+	)
+	sv.lableBase.position.set(950, 60, 0)
+	sv.scene.add( sv.lableBase ) 
+
+	sv.lableWeels = new THREE.Mesh(
+			new THREE.BoxBufferGeometry( 30, 10, 12 ),
+			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+	)
+	sv.lableWeels.position.set(950, 30, 0)
+	sv.scene.add( sv.lableWeels )
+
+
+	sv.lableHealth = new THREE.Mesh(
+		new THREE.PlaneBufferGeometry( 3, 10, 1 ),
+		new THREE.MeshBasicMaterial( { color: 0x888800 } )
+	) 
+
+	/** COMPAS */	
+	//sv.cameraCompas =  new THREE.PerspectiveCamera( 70, 300 /300, 1, 10000 )
+	//sv.cameraCompas.position.set( 1500, 0, 0 )
+ 	
 }
 
+/** labels health */
+sv.updateLabelBar = ( d = { 
+			width: 100, 
+			x: 0, y: 0,
+			arr: [],
+			parentObj: cope.sc,
+			count: 20 
+		} ) => {
+	
+	if ( d.arr.length != 0 ) {
+		sv.removeAllBar( d ) 
+	} else {
+		d.arr = []
+	}
+		
+	for ( let i = 0; i < d.count; i++ ){
+		let ln = sv.lableHealth.clone()
+		ln.position.set( d.width / 20 * i + d.x, d.y, 5 )  
+		d.parentObj.add( ln )
+		d.arr.push( ln )
+	}	
+	return d
+}
+
+sv.removeAllBar = d => {
+
+	for ( let i = 0; i < d.arr.length; i++ ) {
+		
+		d.parentObj.remove( d.arr[ d.arr.length-1 ] )
+		d.arr[ d.arr.length-1 ] = null
+		d.arr.splice( d.arr.length-1, 1 )
+	}
+	
+}
+
+
+/** labels locator */
 sv.createNewLabel = car => {
 	
 	let l = sv.targetMesh.clone()
-	sv.scene.add( l )	
-	l.position.x = car.model.position.x / 100
-	l.position.z = car.model.position.z / 100		
+	sv.scene.add(l)	
+	l.position.x = car.model.position.x/100
+	l.position.z = car.model.position.z/100		
 	
 	sv.arrTargets.push( {
 		id: car.id,
@@ -491,14 +580,13 @@ sv.createNewLabel = car => {
 sv.update = car => {
 	
 	/** update labels */
-	g.arrCars.forEach( car => { 
-		sv.arrTargets.forEach( ( label, i, arr ) => {
-			
-			if ( car.state == "none" ) {
+	g.arrCars.forEach( car=>{ 
+		sv.arrTargets.forEach ( (label, i, arr)=> {
+			if (car.state == "none" ) {
 			
 				if ( car.id == label.id ) {
-					label.mesh.position.x = car.model.position.x / 100
-					label.mesh.position.z = car.model.position.z / 100				
+					label.mesh.position.x = car.model.position.x/100
+					label.mesh.position.z = car.model.position.z/100				
 				}
 				
 			}else{
@@ -507,8 +595,8 @@ sv.update = car => {
 				if ( car.id == label.id ) {
 					sv.scene.remove( label.mesh )
 					label.mesh = null
-					let md = arr[ i ]
-					arr.splice( i, 1 )
+					let md = arr[i]
+					arr.splice(i, 1)
 					i--	
 					md = null
 				}				
@@ -517,53 +605,17 @@ sv.update = car => {
 		})
 	})
 	
-	/** update fuel */
-	sv.fuelMesh.scale.y = car.currentFuel / car.allFuel 
-	
 	/** update locator */
-	sv.camera.position.x = car.model.position.x / 100
-	sv.camera.position.z = car.model.position.z / 100
+	sv.camera.position.x = car.model.position.x/100
+	sv.camera.position.z = car.model.position.z/100
 	sv.camera.rotation.z = car.model.rotation.y 
 	sv.helper.rotation.y = car.model.rotation.y 
-	sv.helper.position.set( sv.camera.position.x, 0, sv.camera.position.z ) 	
+	sv.helper.position.set(sv.camera.position.x, 0, sv.camera.position.z ) 	
 }	
 
-sv.createBullets = car => {
-	
-	for ( let i = 0; i < car.ammo; i++ ) {
-		let b = sv.bulletMesh.clone()
-		b.position.x = 1000
-		b.position.y = i * 4
-		sv.scene.add( b )
-		sv.arrBullets.push( b )
-	}
-}
-
-sv.dellBullets = () => {
-	
-	for ( let i = 0; i < sv.arrBullets.length; i++  ) {
-		sv.scene.remove( sv.arrBullets[ i ] )
-		sv.arrBullets[ sv.arrBullets[ i ] ] = null		
-		sv.arrBullets.splice( i, 1 )
-		i--
-	}
-}
-
-sv.removeBulletShoot = () => {
-	
-	sv.scene.remove( sv.arrBullets[sv.arrBullets.length-1] )
-	sv.arrBullets[sv.arrBullets.length-1] = null
-	sv.arrBullets.splice( sv.arrBullets.length-1 )
-}
-
-sv.updateFuel = car => {
-	
-	sv.fuelMesh.scale.z = car.currentFuel / car.allFuel   
-}
  
  
 
- 
 /**************************************************;
  * COPE
  **************************************************/
@@ -572,12 +624,12 @@ class Cope {
 	
 	constructor() {
 		
-		
-		/** params ********************************/
-		
+		/** params */
 		this.car = null
 		this.isCanExit = true
-
+		
+		this.backColor = 0x080603
+		this.scrColor = 0x001122
 		
 		/** init scene cabin **********************/		
 
@@ -589,16 +641,61 @@ class Cope {
 	
 		/** init camera */
 		let aspect = window.innerWidth / window.innerHeight
-		this.cam = new THREE.PerspectiveCamera(  70, 300 / 200, 1, 10000 )
-		this.cam.position.set( 0, 0, 600 )
-		this.sc.add( this.cam )
+		this.cam = new THREE.PerspectiveCamera(  70, 300/200, 1, 10000 )
+		this.cam.position.set(0, 0, 600)
+		this.sc.add(this.cam)
 		
 		/** init renderer */
 		this.renderPass = new THREE.RenderPass( this.sc, this.cam )
 		s.composer.addPass( this.renderPass )
 
 		
-		/** init screens **************************/
+		/** SCREENS INIT **************************/
+		
+		/** exit back */
+		let back1 = new THREE.Mesh(
+			new THREE.PlaneGeometry( 230, 120 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )
+		)
+		back1.position.set(  300, -235, 30  )
+		//back1.rotation.x = -0.4			
+		this.sc.add( back1 )			
+	
+
+		/** compass */
+		this.compass = new THREE.Mesh(
+			new THREE.CircleGeometry( 45, 32 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )
+		)
+		this.compass.position.set( -250, 140, 50 )
+		this.compass.rotation.x = 0.2	
+		this.compass.rotation.y = 0.7		
+		this.sc.add( this.compass )	
+	
+		let scr = new THREE.Mesh(
+			new THREE.CircleGeometry( 35, 32 ),
+			new THREE.MeshBasicMaterial( { color: this.scrColor } )
+		) 
+		scr.position.set( 0, 0, 3 )		
+		this.compass.add( scr )			
+		
+		this.compasArrow = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
+			new THREE.MeshBasicMaterial( { color: 0x888800 } )
+		)
+		this.compasArrow.rotation.x = 0// = Math.PI/2
+		this.compasArrow.position.set(0, 15, 7)
+		this.compass.add( this.compasArrow )	
+		
+		this.compasArrow2 = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
+			new THREE.MeshBasicMaterial( { color: 0x008800 } )
+		)
+		this.compasArrow2.rotation.x = 0// = Math.PI/2
+		this.compasArrow2.position.set(0, -15, 7)		
+		this.compass.add( this.compasArrow2 )
+
+	
 		
 		/** locator screen */
 		this.scrLocatorTexture = new THREE.WebGLRenderTarget( 
@@ -606,29 +703,23 @@ class Cope {
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
 			})
-		this.scrLocator = new THREE.Mesh(
+		let l = new THREE.Mesh(
 			new THREE.CircleGeometry( 120, 32 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )
+		);
+		l.position.set(-370, 215, 50)
+		l.rotation.x = 0.2	
+		l.rotation.y = 0.7		
+		this.sc.add( l )				
+			
+		this.scrLocator = new THREE.Mesh(
+			new THREE.CircleGeometry( 110, 32 ),
 			new THREE.MeshBasicMaterial( { map: this.scrLocatorTexture.texture } )
 		);
-		this.scrLocator.position.set( -510, 285, -70 )
+		this.scrLocator.position.set(-365, 210, 60)
 		this.scrLocator.rotation.x	= 0.2	
 		this.scrLocator.rotation.y	= 0.7		
-		this.sc.add( this.scrLocator )
-		
-		/** params screen */
-		this.scrParamsTexture = new THREE.WebGLRenderTarget( 
-			256, 256, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			})
-		this.scrParams = new THREE.Mesh(
-			new THREE.PlaneGeometry( 200, 200 ),
-			new THREE.MeshBasicMaterial( { map: this.scrParamsTexture.texture } )
-		);
-		this.scrParams.position.set( 510, 285, -70 )
-		this.scrParams.rotation.x = 0.2	
-		this.scrParams.rotation.y = -0.7		
-		this.sc.add( this.scrParams )		
+		this.sc.add( this.scrLocator )	
 	
 		/** gun screen */	
 		this.scrGunTexture = new THREE.WebGLRenderTarget( 
@@ -637,11 +728,11 @@ class Cope {
 				magFilter: THREE.NearestFilter
 			})
 		this.scrGun = new THREE.Mesh(
-			new THREE.PlaneGeometry( 700, 250 ,1 ),
+			new THREE.PlaneGeometry(700, 250 ,1),
 			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
 		);
-		this.scrGun.position.set( 0, 300, -30 )
-		this.scrGun.rotation.x = 0.2		
+		this.scrGun.position.set(0, 300, -30)
+		this.scrGun.rotation.x	= 0.2		
 		this.sc.add( this.scrGun )
 		
 		/** front screen */
@@ -651,10 +742,10 @@ class Cope {
 				magFilter: THREE.NearestFilter
 			})
 		this.scrFront = new THREE.Mesh(
-			new THREE.PlaneGeometry( 400, 250, 1 ),
+			new THREE.PlaneGeometry(420, 260, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture.texture } )
 		)
-		this.scrFront.position.set( 0, -30, -30 )
+		this.scrFront.position.set( 0, -20, -30)
 		this.sc.add( this.scrFront )	
 
 		/** back screen */
@@ -664,10 +755,10 @@ class Cope {
 				magFilter: THREE.NearestFilter
 			})
 		this.scrBack = new THREE.Mesh(
-			new THREE.PlaneGeometry( 300, 210, 1 ),
+			new THREE.PlaneGeometry(440, 210, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrBackTexture.texture } )
 		)
-		this.scrBack.position.set( 0, -270, -30 )
+		this.scrBack.position.set( 0, -280, -30)
 		this.scrBack.rotation.x = -0.3
 		this.sc.add( this.scrBack )
 
@@ -678,12 +769,12 @@ class Cope {
 				magFilter: THREE.NearestFilter
 			})
 		this.scrLeft = new THREE.Mesh(
-			new THREE.PlaneGeometry( 350, 250, 1 ),
+			new THREE.PlaneGeometry(350, 320, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture.texture } )
-		)
+		);
 		this.scrLeft.rotation.y = 1.0		
-		this.scrLeft.position.set( -400, -30, -30 )
-		this.sc.add( this.scrLeft )
+		this.scrLeft.position.set( -380, -28, -30)
+		this.sc.add(this.scrLeft)
 
 		/** right screen */
 		this.scrRightTexture = new THREE.WebGLRenderTarget( 
@@ -692,29 +783,213 @@ class Cope {
 				magFilter: THREE.NearestFilter
 			})
 		this.scrRight = new THREE.Mesh(
-			new THREE.PlaneGeometry( 350, 250, 1 ),
+			new THREE.PlaneGeometry(350, 320, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrRightTexture.texture } )
 		)
-		this.scrRight.position.set( 400, -30, -30 )
+		this.scrRight.position.set( 380, -28, -30)
 		this.scrRight.rotation.y = -1.0
-		this.sc.add( this.scrRight )
+		this.sc.add(this.scrRight)
+		
+		
+		
+		/** BARS **********************************/
+		
+		let p = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 100, 230 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )			
+		) 
+		p.position.set(330, 200, 50)
+		p.rotation.x	= 0.2	
+		p.rotation.y	= -0.7		
+		this.sc.add( p )	
+		
+		/** ammo */
+		this.ammoBarBack = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 35, 200 ),
+			new THREE.MeshBasicMaterial( { color: 0x001122 } )			
+		) 
+		this.ammoBarBack.position.set( -20, 0, 5)	
+		p.add( this.ammoBarBack )	
+		
+		this.ammoLabel = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 10, 3, 3 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )
+		)
+		this.arrBulletsLabel = []
+		
+		/** fuel */
+		this.fuelBarBack = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 35, 200 ),
+			new THREE.MeshBasicMaterial( { color: 0x001122 } )			
+		) 
+		this.fuelBarBack.position.set( 25, 0, 5)	
+		p.add( this.fuelBarBack )	
+
+		this.fuelLabel = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 10, 170 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
+		)
+		this.fuelLabel.position.z = 10
+		this.fuelBarBack.add( this.fuelLabel )	
+		
+		/** wheels */
+		let plane = new THREE.Mesh(
+			new THREE.CircleGeometry( 55, 32 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )		
+		)
+		plane.position.set( 0, -140, -10 )
+		plane.rotation.x = -0.2		
+		this.sc.add( plane )		
+		
+		this.weelsBarBack = new THREE.Mesh(
+			new THREE.CircleGeometry( 45, 32 ),
+			new THREE.MeshBasicMaterial( { color: this.scrColor } )		
+		) 
+		this.weelsBarBack.position.set( 0, -138, 0)
+		this.weelsBarBack.rotation.x	= -0.2		
+		this.sc.add( this.weelsBarBack )	
+
+		this.weelsBarL = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 9, 25 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
+		) 
+		this.weelsBarL.position.set( -18, 20, 3)
+		this.weelsBarBack.add( this.weelsBarL )	
+
+		this.weelsBarR = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 9, 25 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
+		) 
+		this.weelsBarR.position.set( 18, 20, 3)
+		this.weelsBarBack.add( this.weelsBarR )		
+		
+		this.weelsBarBL = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 9, 25 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
+		) 
+		this.weelsBarBL.position.set( -18, -20, 3)
+		this.weelsBarBack.add( this.weelsBarBL )	
+
+		this.weelsBarBR = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 9, 25 ),
+			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
+		) 
+		this.weelsBarBR.position.set( 18, -20, 3)
+		this.weelsBarBack.add( this.weelsBarBR )
+
+		/** gun Rotation */
+		this.gunRotation = new THREE.Mesh(
+			new THREE.CircleGeometry( 10, 32 ),
+			new THREE.MeshBasicMaterial( { color: 0x777700 } )
+		) 
+		this.gunRotation.position.set( 0, 0, 8 )		
+		this.weelsBarBack.add( this.gunRotation )
+		
+		let arrowRot = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 7, 35 ),
+			new THREE.MeshBasicMaterial( { color: 0x777700 } )			
+		)  	
+		arrowRot.position.set( 0, 10, 9)
+		this.gunRotation.add( arrowRot )
 		
 	
-		/** init Buttons **************************/
+		/** health screen *****************************************/
 		
-		this.htmlElems = document.getElementById( 'copeElems' )	
+		let back = new THREE.Mesh(
+			new THREE.PlaneGeometry( 230, 150 ),
+			new THREE.MeshBasicMaterial( { color: this.backColor } )
+		)
+		back.position.set(  -280, -240, 50  )
+		back.rotation.x = -0.4			
+		this.sc.add( back )	
+		
+		this.scrHealthTexture = new THREE.WebGLRenderTarget( 
+			256, 256, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			})
+			
+		this.scrHealth = new THREE.Mesh(
+			new THREE.PlaneGeometry( 210, 130 ),
+			new THREE.MeshBasicMaterial( { map: this.scrHealthTexture.texture } )
+		);
+		this.scrHealth.position.set( 0, 0, 5 )
+		back.add( this.scrHealth ) 
+	
+		/** healthGunBur */
+		this.health = {}
+		
+		this.health.gunbar = sv.updateLabelBar( { 
+			width: 100,
+			x: -15,
+			y: 40, 
+			arr: [],
+			parentObj: this.scrHealth,
+			count: 20	
+		} )	
+		
+		this.health.copebar = sv.updateLabelBar( { 
+			width: 100,
+			x: -15,
+			y: 15, 
+			arr: [],
+			parentObj: this.scrHealth,
+			count: 20
+			
+		} )	
+
+		this.health.basebar = sv.updateLabelBar( { 
+			width: 100,
+			x: -15,
+			y: -10,
+			arr: [],	
+			parentObj: this.scrHealth,
+			count: 20	
+		} )	
+
+		this.health.weelsbar = sv.updateLabelBar( { 
+			width: 100,
+			x: -15,
+			y: -35, 
+			arr: [],
+			parentObj: this.scrHealth,
+			count: 20	
+		} )	
+
+
+			
+		
+		
+		/** BUTTONS INIT **************************/
+		
+		this.htmlElems = document.getElementById('copeElems')	
 		this.htmlElems.style.display = "none"
 	}
+	
 	
 	render( scene, renderer ) {
 		
 		if ( ! this.car ) return
 		
+		/** drawCompas */
+		this.compass.rotation.z = -this.car.model.rotation.y
+		
+		/** gunRotation */
+		this.gunRotation.rotation.z = this.car.modelGun.rotation.y
+		
 		/** draw Locator */
-		sv.update( this.car )
+		sv.update(this.car)
+		
+		/** draw Fuel */
+		if ( Math.abs(this.car.spd) > 0.1 && this.car.currentFuel > 0 ) { 
+			this.updateFuelBar()
+		}
+		
+		/** draw Weels */ 
+		this.updateWeelsBar()
 		
 		/** update cope buttons */ 
-		if ( this.car.spd > 1 ) {
+		if ( this.car.spd > 1) {
 			buttExitCope.style.opacity = 0.3
 			this.isCanExit = false
 		} else { 
@@ -724,7 +999,7 @@ class Cope {
 					
 		/** render cope screens */	
 		renderer.render( sv.scene, sv.camera, this.scrLocatorTexture )	
-		renderer.render( sv.scene, sv.cameraParams, this.scrParamsTexture )		
+		renderer.render( sv.scene, sv.cameraParams, this.scrHealthTexture )		
 		renderer.render( scene, s.carCameras.gun, this.scrGunTexture )
 		renderer.render( scene, s.carCameras.front, this.scrFrontTexture )
 		renderer.render( scene, s.carCameras.back, this.scrBackTexture )
@@ -732,15 +1007,15 @@ class Cope {
 		renderer.render( scene, s.carCameras.right, this.scrRightTexture )
 
 		/** exit cope */
-		if ( keys.enter && this.isCanExit ) {
+		if ( keys.enter && this.isCanExit ){
 			exitCope()
 		}
 
 		/** shoot */
-		if ( keys.space ) {
+		if ( keys.space ){
 			if ( this.car.shoot() ) { 
-				sv.removeBulletShoot()	
-				console.log( this.car.ammo )
+				this.removeBulletShoot()	
+				console.log( this.car.ammo)
 				keys.space = false
 				let bullet = new Bullet( this.car )
 			}	
@@ -752,17 +1027,78 @@ class Cope {
 		
 		this.htmlElems.style.display = "none"
 		this.car = null
-		sv.dellBullets()
+		this.dellBullets()
 	}
 	
 	showView( car ) {
 		
 		this.htmlElems.style.display = "block"
 		this.car = car
-		sv.createBullets( this.car )	
-	}	
+		this.createBulletsBar(this.car)	
+		this.updateFuelBar()
+	}
+	
+	
+	/** BARS **********************************/
+	
+	createBulletsBar( car ) {
+	
+		for ( let i =0; i<car.ammo; i++ ){
+			let b = this.ammoLabel.clone()
+			b.position.x = 3
+			b.position.y = i * 6 - 85
+			b.position.z = 2
+			this.ammoBarBack.add(b)
+			this.arrBulletsLabel.push(b)
+		}
+	}
+
+	removeBulletShoot() {
+	
+		this.ammoBarBack.remove( this.arrBulletsLabel[ this.arrBulletsLabel.length-1 ] )
+		this.arrBulletsLabel[ this.arrBulletsLabel - 1 ] = null
+		this.arrBulletsLabel.splice( this.arrBulletsLabel.length-1, 1 )
+	}
+
+	dellBullets() {
+	
+		for ( let i = 0; i< this.arrBulletsLabel.length; i++  ){
+			this.ammoBarBack.remove( this.arrBulletsLabel[ i ] )
+			this.arrBulletsLabel[ this.arrBulletsLabel[ i ] ] = null		
+			this.arrBulletsLabel.splice(i, 1)
+			i--
+		}
+	}
+
+	updateFuelBar() {
 		
+		if ( this.car.currentFuel > 1 ) {
+			this.fuelLabel.scale.y = this.car.currentFuel / this.car.allFuel
+			this.fuelLabel.position.y =  this.fuelLabel.scale.y * 90 - 90
+		} else {
+			this.fuelLabel.scale.y = 0.000001
+		}			
+	}
+
+	updateWeelsBar() {
+		
+		this.weelsBarL.rotation.z = this.car.spdRot * 70.0
+		this.weelsBarR.rotation.z = this.car.spdRot * 70.0		
+	}
+
+	updateHealthBars() { 
+		this.health.gunbar.count = this.car.health.gun
+		this.health.copebar.count = this.car.health.cope	
+		this.health.basebar.count = this.car.health.base
+		this.health.weelsbar.count = this.car.health.weels		
+			
+		sv.updateLabelBar( this.health.copebar )
+		sv.updateLabelBar( this.health.basebar )
+		sv.updateLabelBar( this.health.gunbar )
+		sv.updateLabelBar( this.health.weelsbar )		
+	}	
 }
+
 
 
 
@@ -780,23 +1116,26 @@ class Hero {
 		this.nearCar = null
 		
 		/** camera */
-		this.cam = new THREE.PerspectiveCamera( 70, 300 / 200, 1, 10000 )			
+		this.cam = new THREE.PerspectiveCamera( 70, 300 /200, 1, 10000 )			
 		sc.add( this.cam )
 
+		
 		/** renderer */
 		this.renderPass = new THREE.RenderPass( sc, this.cam )
 		s.composer.addPass( this.renderPass )
 		this.renderPass.enabled = false
-				
+		
+	
+		
 		/** buttons */
-		this.htmlElems = document.getElementById( 'heroElems' )
+		this.htmlElems = document.getElementById('heroElems')
 		this.htmlElems.style.display = "none"
 		this.hideButtonsCar()
 	}
 	
 	render( renderer, sc ) {
 		
-		if ( ! this.isMove ) return;		
+		if ( !this.isMove ) return;		
 
 		/** check position near car and enter */
 		this.kvadrant = checkKvadrant( this.cam )
@@ -805,11 +1144,11 @@ class Hero {
 		if ( keys.left ) this.cam.rotation.y += 0.05
 		if ( keys.right ) this.cam.rotation.y -= 0.05
 		if ( keys.up ) this.cam.translateZ( -0.5 )
-		if ( keys.down ) this.cam.translateZ( 0.5 )	
-		if ( keys.A ) this.cam.translateX( -0.7 )
-		if ( keys.D ) this.cam.translateX( 0.7 )
+		if ( keys.down ) this.cam.translateZ( 0.5)	
+		if ( keys.A ) this.cam.translateX( -0.7)
+		if ( keys.D ) this.cam.translateX( 0.7)
 		
-		if ( ! this.nearCar ) return
+		if ( !this.nearCar ) return
 		
 		if ( keys.enter ) enterCope( this.nearCar )
 		if ( keys.B ) addBomb( this.nearCar )		
@@ -829,12 +1168,11 @@ class Hero {
 	showButtonsCar( car ) {
 		
 		buttEnterCope.style.opacity = 1.0
-		if ( ! g.heroBomb ) buttAddBomb.style.opacity = 1.0		
+		if (!g.heroBomb) buttAddBomb.style.opacity = 1.0		
 		this.nearCar = car
 	}
 	
 	hideButtonsCar() {
-		
 		buttEnterCope.style.opacity = 0
 		buttAddBomb.style.opacity = 0
 		this.nearCar = null	
@@ -877,11 +1215,14 @@ const enterCope = car => {
 }
 
 
+
 const addBomb = car => {
 	
-	if ( ! g.heroBomb ) g.heroBomb = new Bomb( car )
+	if ( !g.heroBomb ) g.heroBomb = new Bomb(car)
 	buttAddBomb.style.opacity = 0	
 }	
+ 
+ 
  
  
  
@@ -892,30 +1233,31 @@ const addBomb = car => {
 
 const checkKvadrant = obj => {
 	
-	return ( { 
-	
+	return ({ 
 		x: Math.floor(obj.position.x / 30 ),
 		z: Math.floor(obj.position.z / 30 )	 
 	})
 }
 
+	
+
 const prepearGeometryToExploisive = ob => {
 		
 	let gObject = {
-		constY: [],	
-		constZ: [],	
-		constX: [],
-		spdBoom: [],
+		constY:[],	
+		constZ:[],	
+		constX:[],
+		spdBoom:[],
 		geom: ob 			
 	}
 
 	let geometry = new THREE.Geometry().fromBufferGeometry( gObject.geom )
 		
-	for ( let vi = 0; vi < geometry.vertices.length; vi++ ) {
+	for (let vi = 0; vi< geometry.vertices.length; vi++ ){
 			
-		gObject.constY.push( geometry.vertices[vi].y )   
-	gObject.constZ.push( geometry.vertices[vi}.z ) 		
-		gObject.constX.push( geometry.vertices[vi].x )
+		gObject.constY.push( geometry.vertices[ vi ].y )   
+		gObject.constZ.push( geometry.vertices[ vi ].z ) 		
+		gObject.constX.push( geometry.vertices[ vi ].x )
 
 		gObject.spdBoom.push( {
 			x: Math.random()-0.5, 
@@ -928,42 +1270,43 @@ const prepearGeometryToExploisive = ob => {
 	return gObject	
 }
 
+
+
 const geomAnimateExplosive = b => {
 	
 	let { spdBoom, geom, constX, constY, constZ } = b
 	
 	for ( var i = 0, l = geom.vertices.length; i < l; i += 3 ) {
 			
-		if ( geom.vertices[ i ].y > -10 ) {
-		 spdBoom[ i ].y -= 0.008			 
-		} else {
+		if ( geom.vertices[ i ].y > -10){
+		 spdBoom[i].y -= 0.008			 
+		}else{
 			b.spdBoom[i].y = 0
 				
-			let z = Math.sign( spdBoom[ i ].x )
-			let v = Math.abs( spdBoom[ i ].x )
-			if ( v > 0 ){ spdBoom[ i ].x = ( v - 0.01 ) * z }
+			let z = Math.sign( spdBoom[i].x )
+			let v = Math.abs( spdBoom[i].x )
+			if ( v > 0 ){ spdBoom[i].x = (v -0.01)*z }
 				
-			z = Math.sign( spdBoom[ i ].z )
-			v = Math.abs( spdBoom[ i ].z )
-			if ( v > 0 ){ spdBoom[ i ].z = ( v -0.01 ) * z }
+			z = Math.sign( spdBoom[i].z )
+			v = Math.abs( spdBoom[i].z )
+			if ( v > 0 ){ spdBoom[i].z = (v -0.01)*z }
 		}
 
-		geom.vertices[ i ].x = constX[ i ] += spdBoom[ i ].x
-		geom.vertices[ i ].y = constY[ i ] += spdBoom[ i ].y
-		geom.vertices[ i ].z = constZ[ i ] += spdBoom[ i ].z
-		geom.vertices[ i+1 ].x = constX[ i+1 ] += spdBoom[ i ].x
-		geom.vertices[ i+1 ].y = constY[ i+1 ] += spdBoom[ i ].y
-		geom.vertices[ i+1 ].z = constZ[ i+1 ] += spdBoom[ i ].z	
-		geom.vertices[ i+2 ].x = constX[ i+2 ] += spdBoom[ i ].x
-		geom.vertices[ i+2 ].y = constY[ i+2 ] += spdBoom[ i ].y
-		geom.vertices[ i+2 ].z = constZ[ i+2 ] += spdBoom[ i ].z				
+		geom.vertices[ i ].x = constX[i] += spdBoom[i].x
+		geom.vertices[ i ].y = constY[i] += spdBoom[i].y
+		geom.vertices[ i ].z = constZ[i] += spdBoom[i].z
+		geom.vertices[ i+1 ].x = constX[i+1] += spdBoom[i].x
+		geom.vertices[ i+1 ].y = constY[i+1] += spdBoom[i].y
+		geom.vertices[ i+1 ].z = constZ[i+1] += spdBoom[i].z	
+		geom.vertices[ i+2 ].x = constX[i+2] += spdBoom[i].x
+		geom.vertices[ i+2 ].y = constY[i+2] += spdBoom[i].y
+		geom.vertices[ i+2 ].z = constZ[i+2] += spdBoom[i].z				
 	}
 		
 	geom.verticesNeedUpdate = true
 }
 
  
-
  
 /**************************************************;
  * CREATE THREE CANVAS
@@ -973,19 +1316,17 @@ const initRenderer = () => {
 	
 	s.renderer = new THREE.WebGLRenderer()
 	s.renderer.setPixelRatio( window.devicePixelRatio )
-	s.renderer.setSize( window.innerWidth, window.innerHeight )
-	s.renderer.setClearColor( 0xffffff )
+	s.renderer.setSize( window.innerWidth, window.innerHeight)
+	s.renderer.setClearColor(0xffffff)
 	document.body.appendChild( s.renderer.domElement )
 
 	s.composer = new THREE.EffectComposer( s.renderer )	
 
-	s.simplePass = new THREE.ShaderPass( SimpleShader )
+	s.simplePass = new THREE.ShaderPass(SimpleShader)
 	s.composer.addPass( s.simplePass )
 	s.simplePass.renderToScreen = true 
 }
  
-
-
  
 /**************************************************;
  * CREATE SCENE
@@ -996,7 +1337,7 @@ s.initScene = () => {
 	/** SCENE */	
 	s.scene = new THREE.Scene()
 	s.scene.background = new THREE.Color( 0x060c1a )
-	s.scene.fog = new THREE.FogExp2( 0x060c1a, 0.0012 )		
+	s.scene.fog = new THREE.FogExp2( 0x060c1a ,0.0012 )		
 	
 	s.clock = new THREE.Clock()
 	
@@ -1032,39 +1373,39 @@ s.initScene = () => {
 const initCarCameras = () => {
 
 		s.carCameras.pivot = new THREE.Mesh(
-			new THREE.BoxGeometry( 0.01, 0.01, 0.01 ),
-			new THREE.MeshBasicMaterial( { color: 0x000000 } )
+			new THREE.BoxGeometry(0.01,0.01,0.01),
+			new THREE.MeshBasicMaterial( {color: 0x000000} )
 		)
 		
 		/** gun */
 		let cam = new THREE.PerspectiveCamera( 20, 300 /200, 1, 10000 )
-		cam.position.set( 0, -2.5, 0 )
+		cam.position.set(0, -2.5, 0)
 		s.carCameras.pivot.add( cam )
 		s.carCameras.gun = cam
 				
 		/** front */ 
 		cam = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 )
-		cam.position.set( 0, -15, -30 )
+		cam.position.set(0, -15, -30)
 		s.carCameras.pivot.add( cam )
 		s.carCameras.front = cam	
 
 		/** back */
 		cam = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 )
-		cam.position.set( 0, -15, 30 )
+		cam.position.set(0, -15, 30)
 		cam.rotation.y = Math.PI
 		s.carCameras.pivot.add( cam )
 		s.carCameras.back = cam	
 
 		/** left */
 		cam = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 )
-		cam.position.set( -20, -15, 30 )
+		cam.position.set(-20, -15, 30)
 		cam.rotation.y = Math.PI/2;	
 		s.carCameras.pivot.add( cam )
 		s.carCameras.left = cam	
 
 		/** right */
 		cam = new THREE.PerspectiveCamera( 45, 300/200, 1, 10000 )
-		cam.position.set( 20, -15, 30 )
+		cam.position.set(20, -15, 30)
 		cam.rotation.y = -Math.PI/2	
 		s.carCameras.pivot.add( cam )
 		s.carCameras.right = cam	
@@ -1083,20 +1424,26 @@ const animate = () => {
 	hero.render( s.renderer, s.scene )
 	let isCar = false; 	
 	g.arrCars.forEach( ( car, i, arr ) => {
-		if ( hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z ) {
+		if ( hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z ){
 			if ( car.state == 'none' ) {
 				hero.showButtonsCar( car )
 				isCar = true
 			}			
 		}
 	})
-	if ( ! isCar ) hero.hideButtonsCar()  
+	if ( !isCar ) hero.hideButtonsCar()  
 	 
 	/** update cope */
 	if ( cope ) {
 		cope.render( s.scene, s.renderer )
 		if ( cope.car ) {
 			cope.car.state != 'explosive' ? cope.car.move() : exitCope()	
+			
+			/** hitcar TEST FUNCTION */
+			if ( Math.random()*10<1 ) {
+				cope.car.hit()
+				cope.updateHealthBars()
+			}				
 		}
 	}
 		
@@ -1104,7 +1451,7 @@ const animate = () => {
 	g.arrBullets.forEach( ( bullet, i, arr ) => {
 		bullet.render()
 		g.arrCars.forEach( ( car ) => {
-			if ( car.kvadrant.x == bullet.kvadrant.x && car.kvadrant.z == bullet.kvadrant.z ) {
+			if ( car.kvadrant.x == bullet.kvadrant.x && car.kvadrant.z == bullet.kvadrant.z ){
 				if ( car.id != bullet.carId && car.state == 'none' ) {
 					bullet.deleteObj()
 					car.lives --
@@ -1120,7 +1467,7 @@ const animate = () => {
 	})
 	
 	/** update cars */
-	g.arrCars.forEach( ( car, i, arr ) => {
+	g.arrCars.forEach( (car, i, arr ) => {
 		if ( car.state != "none" ) car.render()
 		if ( car.isRemovable ) {
 			arr.splice( i, 1 )
@@ -1131,6 +1478,7 @@ const animate = () => {
 	
 	/** update bomb */
 	if ( g.heroBomb ) g.heroBomb.update()
+			
 		
 	/** render */	
 	s.composer.render()
@@ -1142,12 +1490,13 @@ const animate = () => {
 
 
 
+
 /**************************************************;
  * RESIZE SCENE
  **************************************************/
 
-const handleWindowResize = () =>  s.renderer.setSize( window.innerWidth, window.innerHeight )
-window.addEventListener( 'resize', handleWindowResize, false )
+const handleWindowResize = () =>  s.renderer.setSize(window.innerWidth, window.innerHeight)
+window.addEventListener('resize', handleWindowResize, false)
 
 
 
@@ -1173,7 +1522,7 @@ const keys = {
 
 const keyUpdate = ( keyEvent, down ) => {
 	
-	switch ( keyEvent.keyCode ) {
+	switch (keyEvent.keyCode) {
 		
 		case 38:
 			keys.up = down
@@ -1217,25 +1566,26 @@ document.addEventListener( "keyup", event => keyUpdate( event, false ) )
 
 /** BUTTONS MOUSE CLICK ****************************/
  
-let buttGunLeft = document.getElementById( 'gunLeft' )
+let buttGunLeft = document.getElementById('gunLeft')
 buttGunLeft.onmousedown = () => keys.A = true
 buttGunLeft.onmouseup = () => keys.A = false
 
-let buttGunRight = document.getElementById( 'gunRight' )
-buttGunRight.onmousedown = () => keys.D = true
+let buttGunRight = document.getElementById('gunRight')
+buttGunRight.onmousedown = () => keys.D = true	
 buttGunRight.onmouseup = () => keys.D = false
 
-let buttExitCope = document.getElementById( 'exitCope' )
+let buttExitCope = document.getElementById('exitCope') 
 buttExitCope.onclick = () => keys.enter = true
 
-let buttEnterCope = document.getElementById( 'enterCope' )
+let buttEnterCope = document.getElementById('enterCope') 
 buttEnterCope.onclick = () => keys.enter = true
 
-let buttAddBomb = document.getElementById( 'addBomb' )
+let buttAddBomb = document.getElementById('addBomb') 
 buttEnterCope.onclick = () =>  keys.B = true
 
-let buttFire = document.getElementById( 'gunFire' )
+let buttFire = document.getElementById('gunFire') 
 buttFire.onclick = () => keys.space = true
+
 
 
 
