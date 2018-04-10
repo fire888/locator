@@ -54,9 +54,9 @@ const loadAssets = () => {
 					
 				s.geomCar = child.geometry
 				resolve() 
-			})
-		})	
-	})
+			} )
+		} )	
+	} )
 	.then( () => {
 		
 		return new Promise( ( resolve ) => { 
@@ -70,10 +70,10 @@ const loadAssets = () => {
 					
 					s.geomCarGun = child.geometry
 					resolve()
-				})
-			})
-		})
-	})
+				} )
+			} )
+		} )
+	} )
 	.then( () => {
 		
 		initRenderer()
@@ -102,7 +102,7 @@ const loadAssets = () => {
 		}
 				
 		animate()			
-	})
+	} )
 }
 
 loadAssets()
@@ -143,10 +143,10 @@ class Car {
 		this.state = 'none'		
 
 		this.spdForBullet = {
-				pX: 0, pZ:0,
-				pXold: 0, pZold: 0,
-				x: 0, z: 0
-			}
+			pX: 0, pZ:0,
+			pXold: 0, pZold: 0,
+			x: 0, z: 0
+		}
 				
 		
 		/** MODEL ******************************/
@@ -157,7 +157,7 @@ class Car {
 		this.model = new THREE.Mesh(
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
-		);
+		)
 		this.model.position.set ( carParams.pos.x, 0, carParams.pos.z )
 		s.scene.add( this.model )
 		
@@ -182,8 +182,7 @@ class Car {
 			new THREE.MeshPhongMaterial( { color: 0x05e099 } )
 		)
 		this.modelGun.position.y = -22
-		this.model.add( this.modelGun )
-			
+		this.model.add( this.modelGun )	
 	}
 	
 	enterHero() {
@@ -270,7 +269,6 @@ class Car {
 			}		
 		}
 		
-		
 		if ( Math.abs( this.spd ) > 0.1 && this.currentFuel > 0 ) this.currentFuel -= 1
 	}
 	
@@ -326,10 +324,9 @@ class Car {
 		if ( r == 2 ) this.health.base -= Math.floor( Math.random() * 3 )  	
 		if ( r == 3 ) this.health.weels -= Math.floor( Math.random() * 3 ) 					
 	}		
-	
 }
 
-Car.ID = 0;	
+Car.ID = 0	
 
 
 
@@ -423,7 +420,6 @@ class Bullet {
 		this.mesh = null
 		this.isRemovable = true
 	}
-
 }
 
 Bullet.ID = 0
@@ -450,7 +446,7 @@ sv.spaceVirt = () => {
 	sv.scene.add( sv.ambient )	
 	
 	sv.camera =  new THREE.PerspectiveCamera( 70, 300 / 300, 1, 10000 )
-	sv.camera.position.y = 100;
+	sv.camera.position.y = 100
 	sv.camera.lookAt( sv.scene.position )
 	
 	sv.cameraParams = new THREE.PerspectiveCamera( 70, 300 / 300, 1, 10000 )
@@ -463,8 +459,8 @@ sv.spaceVirt = () => {
 	/** LOCATOR LABELS ****************************/
 	
 	sv.targetMesh = new THREE.Mesh(
-			new THREE.CircleGeometry( 3, 12 ),
-			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		new THREE.CircleGeometry( 3, 12 ),
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.targetMesh.rotation.x = -Math.PI / 2
 	sv.arrTargets = []
@@ -473,33 +469,32 @@ sv.spaceVirt = () => {
 	/** HEALTH LABELS ****************************/
 	
 	sv.lableGun = new THREE.Mesh(
-			new THREE.BoxBufferGeometry( 30, 10, 12 ),
-			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		new THREE.BoxBufferGeometry( 30, 10, 12 ),
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.lableGun.position.set( 950, 120, 0 )
 	sv.scene.add( sv.lableGun ) 
 
 	sv.lableCope = new THREE.Mesh(
-			new THREE.BoxBufferGeometry( 30, 10, 12 ),
-			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		new THREE.BoxBufferGeometry( 30, 10, 12 ),
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.lableCope.position.set( 950, 90, 0 )
 	sv.scene.add( sv.lableCope ) 	
 	
 	sv.lableBase = new THREE.Mesh(
-			new THREE.BoxBufferGeometry( 30, 10, 12 ),
-			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		new THREE.BoxBufferGeometry( 30, 10, 12 ),
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.lableBase.position.set( 950, 60, 0 )
 	sv.scene.add( sv.lableBase ) 
 
 	sv.lableWeels = new THREE.Mesh(
-			new THREE.BoxBufferGeometry( 30, 10, 12 ),
-			new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		new THREE.BoxBufferGeometry( 30, 10, 12 ),
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)
 	sv.lableWeels.position.set( 950, 30, 0 )
 	sv.scene.add( sv.lableWeels )
-
 
 	sv.lableHealth = new THREE.Mesh(
 		new THREE.PlaneBufferGeometry( 3, 10, 1 ),
@@ -520,7 +515,7 @@ sv.createNewLabel = car => {
 	sv.arrTargets.push( {
 		id: car.id,
 		mesh: l	
-	})
+	} )
 }	
 
 sv.update = car => {
@@ -548,8 +543,8 @@ sv.update = car => {
 				}				
 			
 			}				
-		})
-	})
+		} )
+	} )
 	
 	/** update locator */
 	sv.camera.position.x = car.model.position.x / 100
@@ -642,7 +637,7 @@ class Cope {
 			600, 350, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		this.scrGun = new THREE.Mesh(
 			new THREE.PlaneGeometry( 700, 250 ,1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
@@ -656,7 +651,7 @@ class Cope {
 			600, 450, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		this.scrFront = new THREE.Mesh(
 			new THREE.PlaneGeometry( 420, 260, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture.texture } )
@@ -669,7 +664,7 @@ class Cope {
 			600, 450, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		this.scrBack = new THREE.Mesh(
 			new THREE.PlaneGeometry( 440, 210, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrBackTexture.texture } )
@@ -683,11 +678,11 @@ class Cope {
 			600, 450, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		this.scrLeft = new THREE.Mesh(
 			new THREE.PlaneGeometry( 350, 320, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture.texture } )
-		);
+		)
 		this.scrLeft.rotation.y = 1.0		
 		this.scrLeft.position.set( -380, -28, -30 )
 		this.sc.add( this.scrLeft )
@@ -697,7 +692,7 @@ class Cope {
 			600, 450, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		this.scrRight = new THREE.Mesh(
 			new THREE.PlaneGeometry( 350, 320, 1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrRightTexture.texture } )
@@ -717,7 +712,7 @@ class Cope {
 		let l = new THREE.Mesh(
 			new THREE.CircleGeometry( 120, 32 ),
 			new THREE.MeshBasicMaterial( { color: this.backColor } )
-		);
+		)
 		l.position.set( -370, 215, 50 )
 		l.rotation.x = 0.2	
 		l.rotation.y = 0.7		
@@ -726,7 +721,7 @@ class Cope {
 		this.scrLocator = new THREE.Mesh(
 			new THREE.CircleGeometry( 110, 32 ),
 			new THREE.MeshBasicMaterial( { map: this.scrLocatorTexture.texture } )
-		);
+		)
 		this.scrLocator.position.set( -365, 210, 60 )
 		this.scrLocator.rotation.x	= 0.2	
 		this.scrLocator.rotation.y	= 0.7		
@@ -747,12 +742,12 @@ class Cope {
 			256, 256, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 			
 		this.scrHealth = new THREE.Mesh(
 			new THREE.PlaneGeometry( 210, 130 ),
 			new THREE.MeshBasicMaterial( { map: this.scrHealthTexture.texture } )
-		);
+		)
 		this.scrHealth.position.set( 0, 0, 5 )
 		back.add( this.scrHealth ) 
 	
@@ -994,7 +989,6 @@ class Cope {
 				let bullet = new Bullet( this.car )
 			}	
 		}			
-		
 	}
 	
 	hideView() {
@@ -1106,7 +1100,7 @@ class Hero {
 	
 	render( renderer, sc ) {
 		
-		if ( ! this.isMove ) return;		
+		if ( ! this.isMove ) return		
 
 		/** check position near car and enter */
 		this.kvadrant = checkKvadrant( this.cam )
@@ -1227,7 +1221,8 @@ const prepearGeometryToExploisive = ob => {
 			y: Math.random(),  
 			z: Math.random() - 0.5  				
 		} )	
-	}			
+	}	
+	
 	gObject.geom = geometry 
 		
 	return gObject	
@@ -1254,7 +1249,6 @@ const geomAnimateExplosive = b => {
 			z = Math.sign( spdBoom[ i ].z )
 			v = Math.abs( spdBoom[ i ].z )
 			if ( v > 0 ) spdBoom[ i ].z = ( v - 0.01 ) * z
-
 		}
 
 		geom.vertices[ i ].x = constX[ i ] += spdBoom[ i ].x
@@ -1337,43 +1331,43 @@ s.initScene = () => {
  
 const initCarCameras = () => {
 
-		s.carCameras.pivot = new THREE.Mesh(
-			new THREE.BoxGeometry( 0.01, 0.01, 0.01 ),
-			new THREE.MeshBasicMaterial( { color: 0x000000 } )
-		)
-		
-		/** gun */
-		let cam = new THREE.PerspectiveCamera( 20, 300 / 200, 1, 10000 )
-		cam.position.set( 0, -2.5, 0 )
-		s.carCameras.pivot.add( cam )
-		s.carCameras.gun = cam
-				
-		/** front */ 
-		cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-		cam.position.set( 0, -15, -30 )
-		s.carCameras.pivot.add( cam )
-		s.carCameras.front = cam	
+	s.carCameras.pivot = new THREE.Mesh(
+		new THREE.BoxGeometry( 0.01, 0.01, 0.01 ),
+		new THREE.MeshBasicMaterial( { color: 0x000000 } )
+	)
+	
+	/** gun */
+	let cam = new THREE.PerspectiveCamera( 20, 300 / 200, 1, 10000 )
+	cam.position.set( 0, -2.5, 0 )
+	s.carCameras.pivot.add( cam )
+	s.carCameras.gun = cam
+			
+	/** front */ 
+	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
+	cam.position.set( 0, -15, -30 )
+	s.carCameras.pivot.add( cam )
+	s.carCameras.front = cam	
 
-		/** back */
-		cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-		cam.position.set( 0, -15, 30 )
-		cam.rotation.y = Math.PI
-		s.carCameras.pivot.add( cam )
-		s.carCameras.back = cam	
+	/** back */
+	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
+	cam.position.set( 0, -15, 30 )
+	cam.rotation.y = Math.PI
+	s.carCameras.pivot.add( cam )
+	s.carCameras.back = cam	
 
-		/** left */
-		cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-		cam.position.set( -20, -15, 30 )
-		cam.rotation.y = Math.PI / 2;	
-		s.carCameras.pivot.add( cam )
-		s.carCameras.left = cam	
+	/** left */
+	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
+	cam.position.set( -20, -15, 30 )
+	cam.rotation.y = Math.PI / 2	
+	s.carCameras.pivot.add( cam )
+	s.carCameras.left = cam	
 
-		/** right */
-		cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-		cam.position.set( 20, -15, 30 )
-		cam.rotation.y = -Math.PI / 2	
-		s.carCameras.pivot.add( cam )
-		s.carCameras.right = cam	
+	/** right */
+	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
+	cam.position.set( 20, -15, 30 )
+	cam.rotation.y = -Math.PI / 2	
+	s.carCameras.pivot.add( cam )
+	s.carCameras.right = cam	
 }		
 
 
@@ -1386,7 +1380,7 @@ const animate = () => {
 		
 	/** update hero */
 	hero.render( s.renderer, s.scene )
-	let isCar = false; 	
+	let isCar = false	
 	g.arrCars.forEach( ( car, i, arr ) => {
 		if ( hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z ) {
 			if ( car.state == 'none' ) {
@@ -1394,7 +1388,7 @@ const animate = () => {
 				isCar = true
 			}			
 		}
-	})
+	} )
 	if ( ! isCar ) hero.hideButtonsCar()  
 	 
 	/** update cope */
@@ -1422,13 +1416,13 @@ const animate = () => {
 					car.checkLife()
 				}	
 			}
-		})	
+		} )	
 		if ( bullet.isRemovable ){
 			arr.splice( i, 1 )
 			i --
 			bullet = null
 		}			
-	})
+	} )
 	
 	/** update cars */
 	g.arrCars.forEach( ( car, i, arr ) => {
@@ -1438,7 +1432,7 @@ const animate = () => {
 			car = null
 			i --
 		}
-	})
+	} )
 	
 	/** update bomb */
 	if ( g.heroBomb ) g.heroBomb.update()
