@@ -251,7 +251,7 @@ class Car {
 				this.model.translateZ( -this.spd )
 				this.model.rotation.y += this.spdRot * Math.abs( this.spd )
 				
-			}else{
+			} else {
 				
 				this.spd > this.spdBackMax ? 
 					this.spd -= 0.03 : this.spd = this.spdBackMax			
@@ -530,7 +530,7 @@ sv.update = car => {
 					label.mesh.position.z = car.model.position.z / 100				
 				}
 				
-			}else{
+			} else {
 				
 				/** delete label if car explosive */
 				if ( car.id == label.id ) {
@@ -641,7 +641,7 @@ class Cope {
 		this.scrGun = new THREE.Mesh(
 			new THREE.PlaneGeometry( 700, 250 ,1 ),
 			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
-		);
+		)
 		this.scrGun.position.set( 0, 300, -30 )
 		this.scrGun.rotation.x	= 0.2		
 		this.sc.add( this.scrGun )
@@ -708,7 +708,7 @@ class Cope {
 			256, 256, { 
 				minFilter: THREE.LinearFilter, 
 				magFilter: THREE.NearestFilter
-			})
+			} )
 		let l = new THREE.Mesh(
 			new THREE.CircleGeometry( 120, 32 ),
 			new THREE.MeshBasicMaterial( { color: this.backColor } )
@@ -1193,8 +1193,8 @@ const addBomb = car => {
 const checkKvadrant = obj => {
 	
 	return ( { 
-		x: Math.floor(obj.position.x / 30 ),
-		z: Math.floor(obj.position.z / 30 )	 
+		x: Math.floor( obj.position.x / 30 ),
+		z: Math.floor( obj.position.z / 30 )	 
 	} )
 }
 
