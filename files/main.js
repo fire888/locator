@@ -88,7 +88,7 @@ const loadAssets = () => {
 		hero = new Hero( s.scene )
 		hero.renderPass.enabled = true
 		
-		hero.showView( { x: 0, z: 0 } )			
+		hero.showView({ x: 0, z: 0 })			
 		
 		for ( let i = 0; i < 7; i ++  ) {
 			
@@ -594,6 +594,57 @@ sv.removeAllBar = d => {
 
 
 /**************************************************;
+ * COPE SCREENS SHADER
+ **************************************************/
+
+const NoiseShader = {
+	
+	uniforms: {
+		
+		iTime: {value: 0.1 }
+	},
+	
+	vertexShader: [
+	
+		"varying vec2 vUv;",
+		"void main() {",
+			"vUv = uv;",
+			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
+		"}"
+	].join("\n"), 
+	
+	fragmentShader: [  
+	
+		// Gold Noise ©2017-2018 dcerisano@standard3d.com
+		// - based on the Golden Ratio, PI and the Square Root of Two
+		// - fastest noise generator function
+		// - works with all chipsets (including low precision)
+
+		'precision lowp  float;',
+		
+		'varying vec2 vUv;',
+		'uniform float iTime;',	
+
+		'float PHI = 1.61803398874989484820459 * 00000.1;', // Golden Ratio   
+		'float PI  = 3.14159265358979323846264 * 00000.1;', // PI
+		'float SQ2 = 1.41421356237309504880169 * 10000.0;', // Square Root of Two
+
+		'float gold_noise(in vec2 coordinate, in float seed){',
+			'return fract(sin(dot(coordinate*(seed+PHI), vec2(PHI, PI)))*SQ2);',
+		'}',
+		
+		'void main(){',   
+			'vec2 uv = vUv;',
+			'float n = gold_noise(uv, iTime);',
+			'gl_FragColor  = vec4( n*0.1, n*0.1, n*0.25,  1.0);',
+		'}'
+	].join("\n")
+}	
+
+
+
+
+/**************************************************;
  * COPE
  **************************************************/
 
@@ -609,7 +660,8 @@ class Cope {
 		
 		this.backColor = 0x080603
 		this.scrColor = 0x001122
-		
+		this.noiseShaderMat = new THREE.ShaderMaterial( NoiseShader )
+		this.noiseShaderUniforms = this.noiseShaderMat.uniforms
 		
 		/** INIT SCENE CABINE ********************/		
 
@@ -640,7 +692,8 @@ class Cope {
 			} )
 		this.scrGun = new THREE.Mesh(
 			new THREE.PlaneGeometry( 700, 250 ,1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
+			//new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
+			this.noiseShaderMat
 		)
 		this.scrGun.position.set( 0, 300, -30 )
 		this.scrGun.rotation.x	= 0.2		
@@ -939,9 +992,12 @@ class Cope {
 		this.htmlElems.style.display = "none"
 	}
 		
-	render( scene, renderer ) {
+	render( scene, renderer, time ) {
 		
 		if ( ! this.car ) return
+		
+		/** update noiseShader */ 
+		this.noiseShaderUniforms.iTime.value += time * 40
 		
 		/** draw Compass */
 		this.compass.rotation.z = -this.car.model.rotation.y
@@ -1321,6 +1377,8 @@ s.initScene = () => {
 	s.floor.rotation.x = -Math.PI / 2
 	s.floor.position.y = -30
 	s.scene.add( s.floor )
+	
+	s.clock = new THREE.Clock()
 }
 
 
@@ -1378,6 +1436,8 @@ const initCarCameras = () => {
   
 const animate = () => {
 		
+	let time = s.clock.getDelta()	
+		
 	/** update hero */
 	hero.render( s.renderer, s.scene )
 	let isCar = false	
@@ -1393,7 +1453,7 @@ const animate = () => {
 	 
 	/** update cope */
 	if ( cope ) {
-		cope.render( s.scene, s.renderer )
+		cope.render( s.scene, s.renderer, time )
 		if ( cope.car ) {
 			cope.car.state != 'explosive' ? cope.car.move() : exitCope()	
 			
