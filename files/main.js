@@ -127,6 +127,20 @@ class Car {
 			base: 20,
 			weels: 20
 		}
+		this.cope = {
+			noiseGun: 0,
+			noiseFront: 0,
+			noiseBack: 0,
+			noiseLeft: 0,
+			noiseRight: 0,
+			noiseHealth: 0,
+			noiseLocator: 0,
+			
+			noNoiseAmmo: true,
+			noNoiseFuel: true,
+			noNoiseCompas: true,
+			noNoiseRorations: true,			
+		}
 		this.allFuel = 4000
 		this.currentFuel = 4000
 		this.ammo = 30
@@ -274,7 +288,10 @@ class Car {
 	
 	checkLife() {
 		
-		if ( this.lives < 0 && this.state == "none" ) this.state ='explosive'
+		if ( this.lives < 0 && this.state == "none" ) { 
+			this.state ='explosive'
+			cope.boomForScreens()
+		}	
 	}
 
 	shoot() {
@@ -318,11 +335,81 @@ class Car {
 
 	hit() {
 		
-		let r = Math.floor( Math.random() * 4 )
-		if ( r == 0 ) this.health.gun -= Math.floor( Math.random() * 3 )  
-		if ( r == 1 ) this.health.cope -= Math.floor( Math.random() * 3 )  
-		if ( r == 2 ) this.health.base -= Math.floor( Math.random() * 3 )  	
-		if ( r == 3 ) this.health.weels -= Math.floor( Math.random() * 3 ) 					
+		let dam = Math.floor( Math.random() * 3 )
+		
+		switch (  Math.floor( Math.random() * 4 ) ) { 
+			case 0:	
+				this.health.gun = this.minusHealth( this.health.gun, dam )
+				cope.damageGun( dam )
+				break
+			case 1: 
+				this.health.base = this.minusHealth( this.health.base, dam )
+				cope.damageBase( dam )
+				break
+			case 2:	 
+				this.health.cope = this.minusHealth( this.health.cope, dam )
+				cope.damageCope( dam )
+				break
+			case 3:	
+				this.health.weels = this.minusHealth( this.health.weels, dam )
+				cope.damageWeels( dam )			
+				break
+		}	 					
+	}
+
+	minusHealth( val, dam ) {
+		
+		let l = val - dam 
+		if ( l > 0 ) { return l } 
+		else { return 0 }	
+	}
+	
+	saveCopeParams( scr, bars ) {
+
+		this.cope.noNoiseAmmo = bars.ammo.obj.visible
+		this.cope.noNoiseFuel = bars.fuel.obj.visible
+		this.cope.noNoiseCompas = bars.compas.obj.visible
+		this.cope.noNoiseRorations = bars.rotations.obj.visible
+		
+		this.cope.noiseGun = scr.gun.standartNoise
+		this.cope.noiseFront = scr.front.standartNoise
+		this.cope.noiseBack = scr.back.standartNoise
+		this.cope.noiseLeft = scr.left.standartNoise
+		this.cope.noiseRight = scr.right.standartNoise
+		this.cope.noiseHealth = scr.health.standartNoise
+		this.cope.noiseLocator = scr.locator.standartNoise		
+	}
+	
+	repair() {
+		
+		this.cope.noNoiseAmmo = true
+		this.cope.noNoiseFuel = true
+		this.cope.noNoiseCompas = true
+		this.cope.noNoiseRorations = true
+		
+		this.cope.noiseGun = 0
+		this.cope.noiseFront = 0
+		this.cope.noiseBack = 0
+		this.cope.noiseLeft = 0
+		this.cope.noiseRight = 0
+		this.cope.noiseHealth = 0
+		this.cope.noiseLocator = 0	
+		
+		this.health.gun = 20
+		this.health.cope = 20
+		this.health.base = 20
+		this.health.weels = 20			
+	}
+	
+	checkHealth() {
+		
+		let h = false 
+		if ( this.health.gun < 20 ) h = true
+		if ( this.health.cope < 20 ) h = true
+		if ( this.health.base < 20 ) h = true
+		if ( this.health.weels < 20 ) h = true
+
+		return h	
 	}		
 }
 
@@ -441,7 +528,6 @@ sv.spaceVirt = () => {
 	sv.scene.background = new THREE.Color( 0x060c1a )
 	sv.scene.fog = new THREE.FogExp2( 0x060c1a, 0.0012 )		
 	
-	
 	sv.ambient = new THREE.AmbientLight( 0x06253a, 1.0 )
 	sv.scene.add( sv.ambient )	
 	
@@ -498,7 +584,7 @@ sv.spaceVirt = () => {
 
 	sv.lableHealth = new THREE.Mesh(
 		new THREE.PlaneBufferGeometry( 3, 10, 1 ),
-		new THREE.MeshBasicMaterial( { color: 0x888800 } )
+		new THREE.MeshBasicMaterial( { color: 0x007733 } )
 	)  	
 }
 
@@ -541,7 +627,6 @@ sv.update = car => {
 					i--	
 					md = null
 				}				
-			
 			}				
 		} )
 	} )
@@ -574,8 +659,8 @@ sv.updateLabelBar = (
 		
 	for ( let i = 0; i < d.count; i ++ ){
 		let ln = sv.lableHealth.clone()
-		ln.position.set( d.width / 20 * i + d.x, d.y, 5 )  
-		d.parentObj.add( ln )
+		ln.position.set( d.width / 20 * i + 980, d.y + 70 , 5 )  
+		sv.scene.add( ln )
 		d.arr.push( ln )
 	}	
 	return d
@@ -585,7 +670,7 @@ sv.removeAllBar = d => {
 
 	for ( let i = 0; i < d.arr.length; i ++ ) {
 		
-		d.parentObj.remove( d.arr[ d.arr.length-1 ] )
+		sv.scene.remove( d.arr[ d.arr.length-1 ] )
 		d.arr[ d.arr.length-1 ] = null
 		d.arr.splice( d.arr.length-1, 1 )
 	}
@@ -601,7 +686,9 @@ const NoiseShader = {
 	
 	uniforms: {
 		
-		iTime: {value: 0.1 }
+		iTime: { value: 0.1 },
+		amountNoise: { value: 0.5 },
+		render: { value: null } 
 	},
 	
 	vertexShader: [
@@ -623,7 +710,9 @@ const NoiseShader = {
 		'precision lowp  float;',
 		
 		'varying vec2 vUv;',
-		'uniform float iTime;',	
+		'uniform float iTime;',
+		'uniform sampler2D render;',
+		'uniform float amountNoise;',	
 
 		'float PHI = 1.61803398874989484820459 * 00000.1;', // Golden Ratio   
 		'float PI  = 3.14159265358979323846264 * 00000.1;', // PI
@@ -635,8 +724,9 @@ const NoiseShader = {
 		
 		'void main(){',   
 			'vec2 uv = vUv;',
+			'vec4 r = texture2D( render, uv );',
 			'float n = gold_noise(uv, iTime);',
-			'gl_FragColor  = vec4( n*0.1, n*0.1, n*0.25,  1.0);',
+			'gl_FragColor  = vec4( n * 0.6, n * 0.6, n * 0.6,  1.0) * amountNoise * 2.0 + r * ( 1.0 - amountNoise );',
 		'}'
 	].join("\n")
 }	
@@ -657,355 +747,252 @@ class Cope {
 		
 		this.car = null
 		this.isCanExit = true
-		
-		this.backColor = 0x080603
-		this.scrColor = 0x001122
-		this.noiseShaderMat = new THREE.ShaderMaterial( NoiseShader )
-		this.noiseShaderUniforms = this.noiseShaderMat.uniforms
-		
+			
+	
 		/** INIT SCENE CABINE ********************/		
 
-		/** init scene  */
 		this.sc = new THREE.Scene()
 		this.textureBack = new THREE.TextureLoader().load( "files/assets/back.jpg", 
 				() => cope.sc.background = cope.textureBack 	
 			)
 	
-		/** init camera */
-		let aspect = window.innerWidth / window.innerHeight
 		this.cam = new THREE.PerspectiveCamera( 70, 300 / 200, 1, 10000 )
 		this.cam.position.set( 0, 0, 600 )
 		this.sc.add( this.cam )
 		
-		/** init renderer */
+		this.light = new THREE.AmbientLight( 0xffffff, 1.0 )
+		this.sc.add( this.light )
+		
+		this.backColor = 0x080603
+		this.scrColor = 0x060c1a
+		this.noiseShaderMat = new THREE.ShaderMaterial( NoiseShader )
+		this.matClocksLight = new THREE.MeshBasicMaterial( { color: 0x007733 } )
+		this.matScreens = new THREE.MeshBasicMaterial( { color: 0x060c1a } )		
+		this.matBlackFrames = new THREE.MeshBasicMaterial( { color: this.backColor } )			
+		
 		this.renderPass = new THREE.RenderPass( this.sc, this.cam )
 		s.composer.addPass( this.renderPass )
 
 		
-		/** SCREENS INIT **************************/
-					
-		/** gun screen */	
-		this.scrGunTexture = new THREE.WebGLRenderTarget( 
-			600, 350, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		this.scrGun = new THREE.Mesh(
-			new THREE.PlaneGeometry( 700, 250 ,1 ),
-			//new THREE.MeshBasicMaterial( { map: this.scrGunTexture.texture } )
-			this.noiseShaderMat
-		)
-		this.scrGun.position.set( 0, 300, -30 )
-		this.scrGun.rotation.x	= 0.2		
-		this.sc.add( this.scrGun )
+		/** SCREENS INIT *************************/
 		
-		/** front screen */
-		this.scrFrontTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		this.scrFront = new THREE.Mesh(
-			new THREE.PlaneGeometry( 420, 260, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrFrontTexture.texture } )
-		)
-		this.scrFront.position.set( 0, -20, -30 )
-		this.sc.add( this.scrFront )	
-
-		/** back screen */
-		this.scrBackTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		this.scrBack = new THREE.Mesh(
-			new THREE.PlaneGeometry( 440, 210, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrBackTexture.texture } )
-		)
-		this.scrBack.position.set( 0, -280, -30 )
-		this.scrBack.rotation.x = -0.3
-		this.sc.add( this.scrBack )
-
-		/** left screen */
-		this.scrLeftTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		this.scrLeft = new THREE.Mesh(
-			new THREE.PlaneGeometry( 350, 320, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrLeftTexture.texture } )
-		)
-		this.scrLeft.rotation.y = 1.0		
-		this.scrLeft.position.set( -380, -28, -30 )
-		this.sc.add( this.scrLeft )
-
-		/** right screen */
-		this.scrRightTexture = new THREE.WebGLRenderTarget( 
-			600, 450, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		this.scrRight = new THREE.Mesh(
-			new THREE.PlaneGeometry( 350, 320, 1 ),
-			new THREE.MeshBasicMaterial( { map: this.scrRightTexture.texture } )
-		)
-		this.scrRight.position.set( 380, -28, -30 )
-		this.scrRight.rotation.y = -1.0
-		this.sc.add( this.scrRight )
-		
-		
-		/** LOCATOR SCREEN *******************/
-		
-		this.scrLocatorTexture = new THREE.WebGLRenderTarget( 
-			256, 256, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		let l = new THREE.Mesh(
-			new THREE.CircleGeometry( 120, 32 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )
-		)
-		l.position.set( -370, 215, 50 )
-		l.rotation.x = 0.2	
-		l.rotation.y = 0.7		
-		this.sc.add( l )				
+		this.screens = {
 			
-		this.scrLocator = new THREE.Mesh(
-			new THREE.CircleGeometry( 110, 32 ),
-			new THREE.MeshBasicMaterial( { map: this.scrLocatorTexture.texture } )
-		)
-		this.scrLocator.position.set( -365, 210, 60 )
-		this.scrLocator.rotation.x	= 0.2	
-		this.scrLocator.rotation.y	= 0.7		
-		this.sc.add( this.scrLocator )	
+			gun: {
+				pos: { width: 700, height: 250, x: 0, y: 300, z: -30, rX: 0.2, rY: 0 },
+				mesh: null, map: null, mat: null, uniforms: null,
+				standartNoise: 0.08,
+				type: 'plane',
+				scene: s.scene,					
+				camera: s.carCameras.gun,   
+			},
+			front: {
+				pos: { width: 420, height: 260, x: 0, y: -20, z: -30, rX: 0, rY: 0 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.08,				
+				type: 'plane',	
+				scene: s.scene,					
+				camera: s.carCameras.front,   				
+			},
+			back: {
+				pos: { width: 440, height: 210, x: 0, y: -280, z:-30, rX: -0.3, rY: 0 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				type: 'plane',	
+				standartNoise: 0.08,				
+				scene: s.scene,					
+				camera: s.carCameras.back,   				
+			},
+			left: {
+				pos: { width: 350, height: 320, x: -380, y: -28, z: -30, rX: 0, rY: 1.0 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				type: 'plane',	
+				standartNoise: 0.08,				
+				scene: s.scene,					
+				camera: s.carCameras.left,   	
+			},
+			right: {
+				pos: { width: 350, height: 320, x: 380, y: -28, z: 0, rX: 0, rY: -1.0 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				type: 'plane',
+				standartNoise: 0.08,				
+				scene: s.scene,				
+				camera: s.carCameras.right,				
+			},
+			locator: {
+				pos: { width: 220, height: 220, x: -370, y: 215, z: 60, rX: 0.2, rY: 0.7 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				type: 'circle',
+				standartNoise: 0.02,				
+				scene: sv.scene,	
+				camera: sv.camera,						
+			},
+			health: {
+				pos: { width: 210, height: 130, x: -280, y: -240, z: 53, rX: -0.4, rY: 0 },
+				mesh: null, map: null, mat: null, uniforms: null, 
+				type: 'plane',
+				standartNoise: 0.02,				
+				scene: sv.scene,	
+				camera: sv.cameraParams,				
+			}
+		}
 		
+		this.createScreen( this.screens.gun )
+		this.createScreen( this.screens.front )		
+		this.createScreen( this.screens.back )	
+		this.createScreen( this.screens.left )	
+		this.createScreen( this.screens.right )	
+		this.createScreen( this.screens.locator )
+		this.createScreen( this.screens.health )
+
 		
-		/** HEALTH SCREEN *************************/
-		
-		let back = new THREE.Mesh(
-			new THREE.PlaneGeometry( 230, 150 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )
-		)
-		back.position.set( -280, -240, 50  )
-		back.rotation.x = -0.4			
-		this.sc.add( back )	
-		
-		this.scrHealthTexture = new THREE.WebGLRenderTarget( 
-			256, 256, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
+		/** HEALTH VIRTUAL SCENE BARS *************/
 			
-		this.scrHealth = new THREE.Mesh(
-			new THREE.PlaneGeometry( 210, 130 ),
-			new THREE.MeshBasicMaterial( { map: this.scrHealthTexture.texture } )
-		)
-		this.scrHealth.position.set( 0, 0, 5 )
-		back.add( this.scrHealth ) 
-	
 		this.health = {}
 		
 		this.health.gunbar = sv.updateLabelBar( { 
-			width: 100,
-			x: -15,
-			y: 40, 
+			width: 100, x: -15, y: 40, 
 			arr: [],
-			parentObj: this.scrHealth,
 			count: 20	
 		} )	
 		
 		this.health.copebar = sv.updateLabelBar( { 
-			width: 100,
-			x: -15,
-			y: 15, 
+			width: 100, x: -15, y: 15, 
 			arr: [],
-			parentObj: this.scrHealth,
 			count: 20		
 		} )	
 
 		this.health.basebar = sv.updateLabelBar( { 
-			width: 100,
-			x: -15,
-			y: -10,
+			width: 100, x: -15, y: -10,
 			arr: [],	
-			parentObj: this.scrHealth,
 			count: 20	
 		} )	
 
 		this.health.weelsbar = sv.updateLabelBar( { 
-			width: 100,
-			x: -15,
-			y: -35, 
-			arr: [],
-			parentObj: this.scrHealth,
+			width: 100, x: -15, y: -35, arr: [],
 			count: 20	
 		} )			
 		
 	
 		/** BARS INIT *****************************/
 		
-		/** compass */
-		this.compass = new THREE.Mesh(
-			new THREE.CircleGeometry( 45, 32 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )
-		)
-		this.compass.position.set( -250, 140, 50 )
-		this.compass.rotation.x = 0.2	
-		this.compass.rotation.y = 0.7		
-		this.sc.add( this.compass )	
+		this.bars = {
+			ammo: {
+				labelProto: null,
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 35, 200 ),
+				obj: null,
+				arrChildrens: null,
+				update: null,
+			},
+			fuel: {
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 35, 200 ),				
+				obj: null,
+				arrChildrens: null,
+				update: null,
+			},
+			rotations: {
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 100, 100 ),				
+				obj: null,
+				arrChildrens: null,
+				update: null,
+			},
+			compas: {
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 100, 100 ),					
+				obj: null,
+				arrChildrens: null,
+				update: null,			
+			},				
+		} 		
+		
+		this.initAmmoBar( this.bars.ammo )	
+		this.initFuelBar( this.bars.fuel ) 
+		this.initCompasBar( this.bars.compas ) 		
+		this.initRotationsBar( this.bars.rotations ) 		
 	
-		let scr = new THREE.Mesh(
-			new THREE.CircleGeometry( 35, 32 ),
-			new THREE.MeshBasicMaterial( { color: this.scrColor } )
-		) 
-		scr.position.set( 0, 0, 3 )		
-		this.compass.add( scr )			
-		
-		this.compasArrow = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
-			new THREE.MeshBasicMaterial( { color: 0x888800 } )
-		)
-		this.compasArrow.rotation.x = 0
-		this.compasArrow.position.set( 0, 15, 7 )
-		this.compass.add( this.compasArrow )	
-		
-		this.compasArrow2 = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
-			new THREE.MeshBasicMaterial( { color: 0x008800 } )
-		)
-		this.compasArrow2.rotation.x = 0
-		this.compasArrow2.position.set( 0, -15, 7 )		
-		this.compass.add( this.compasArrow2 )	
-	
-		/** ammo/fuel back plane */
-		let p = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 100, 230 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )			
-		) 
-		p.position.set( 330, 200, 50 )
-		p.rotation.x = 0.2	
-		p.rotation.y = -0.7		
-		this.sc.add( p )	
-		
-		/** ammo */
-		this.ammoBarBack = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 35, 200 ),
-			new THREE.MeshBasicMaterial( { color: 0x001122 } )			
-		) 
-		this.ammoBarBack.position.set( -20, 0, 5 )	
-		p.add( this.ammoBarBack )	
-		
-		this.ammoLabel = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 10, 3, 3 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )
-		)
-		this.arrBulletsLabel = []
-		
-		/** fuel */
-		this.fuelBarBack = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 35, 200 ),
-			new THREE.MeshBasicMaterial( { color: 0x001122 } )			
-		) 
-		this.fuelBarBack.position.set( 25, 0, 5 )	
-		p.add( this.fuelBarBack )	
-
-		this.fuelLabel = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 10, 170 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
-		)
-		this.fuelLabel.position.z = 10
-		this.fuelBarBack.add( this.fuelLabel )	
-		
-		/** wheels */
-		let plane = new THREE.Mesh(
-			new THREE.CircleGeometry( 55, 32 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )		
-		)
-		plane.position.set( 0, -140, -10 )
-		plane.rotation.x = -0.2		
-		this.sc.add( plane )		
-		
-		this.weelsBarBack = new THREE.Mesh(
-			new THREE.CircleGeometry( 45, 32 ),
-			new THREE.MeshBasicMaterial( { color: this.scrColor } )		
-		) 
-		this.weelsBarBack.position.set( 0, -138, 0 )
-		this.weelsBarBack.rotation.x = -0.2		
-		this.sc.add( this.weelsBarBack )	
-
-		this.weelsBarL = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 9, 25 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
-		) 
-		this.weelsBarL.position.set( -18, 20, 3 )
-		this.weelsBarBack.add( this.weelsBarL )	
-
-		this.weelsBarR = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 9, 25 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
-		) 
-		this.weelsBarR.position.set( 18, 20, 3 )
-		this.weelsBarBack.add( this.weelsBarR )		
-		
-		this.weelsBarBL = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 9, 25 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
-		) 
-		this.weelsBarBL.position.set( -18, -20, 3 )
-		this.weelsBarBack.add( this.weelsBarBL )	
-
-		this.weelsBarBR = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 9, 25 ),
-			new THREE.MeshBasicMaterial( { color: 0x999900 } )			
-		) 
-		this.weelsBarBR.position.set( 18, -20, 3 )
-		this.weelsBarBack.add( this.weelsBarBR )
-
-		/** gun Rotation */
-		this.gunRotation = new THREE.Mesh(
-			new THREE.CircleGeometry( 10, 32 ),
-			new THREE.MeshBasicMaterial( { color: 0x777700 } )
-		) 
-		this.gunRotation.position.set( 0, 0, 8 )		
-		this.weelsBarBack.add( this.gunRotation )
-		
-		let arrowRot = new THREE.Mesh(
-			new THREE.PlaneBufferGeometry( 7, 35 ),
-			new THREE.MeshBasicMaterial( { color: 0x777700 } )			
-		)  	
-		arrowRot.position.set( 0, 10, 9 )
-		this.gunRotation.add( arrowRot )
-		
-		
+				
 		/** BUTTONS INIT **************************/
-		
-		/** exit back */
-		let back1 = new THREE.Mesh(
-			new THREE.PlaneGeometry( 230, 120 ),
-			new THREE.MeshBasicMaterial( { color: this.backColor } )
-		)
-		back1.position.set( 300, -235, 30 )			
-		this.sc.add( back1 )	
-		
+				
 		this.htmlElems = document.getElementById( 'copeElems' )	
 		this.htmlElems.style.display = "none"
+		
+		
+		/** BACKGROUND PLANES ********************/
+		
+		/** health bar */
+		let back = new THREE.Mesh(
+			new THREE.PlaneGeometry( 230, 150 ),
+			this.matBlackFrames
+		)
+		back.position.set( -280, -240, 50  )
+		back.rotation.x = -0.4			
+		this.sc.add( back )	
+		
+		/** rotations bar */
+		back = new THREE.Mesh(
+			new THREE.CircleGeometry( 55, 32 ),
+			this.matBlackFrames	
+		) 
+		back.position.set( 0, -140, -3 )
+		back.rotation.x = 0.2			
+		this.sc.add( back )	
+
+		/** compas bar */ 
+		back = new THREE.Mesh(
+			new THREE.CircleGeometry( 50, 32 ),
+			this.matBlackFrames	
+		) 
+		back.position.set( -250, 140, 45 )
+		back.rotation.x = 0.2 
+		back.rotation.y = 0.7			
+		this.sc.add( back )
+		
+		/** locator */
+		back = new THREE.Mesh(
+			new THREE.CircleGeometry( 125, 28 ),
+			this.matBlackFrames	
+		) 
+		back.position.set( -370, 215, 55 )
+		back.rotation.x = 0.2 
+		back.rotation.y = 0.7			
+		this.sc.add( back )				
+		
+		/** ammo/fuel back plane */
+		back = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 115, 230 ),
+			this.matBlackFrames				
+		) 
+		back.position.set( 340, 200, 50 )
+		back.rotation.x = 0.2	
+		back.rotation.y = -0.7		
+		this.sc.add( back )
+
+		/** exit back */
+		back = new THREE.Mesh(
+			new THREE.PlaneGeometry( 230, 130 ),
+			this.matBlackFrames	
+		)
+		back.position.set( 285, -235, 60 )			
+		this.sc.add( back )		
 	}
+	
+	
+	/** UPDATE COPE PER SECOND ********************/
 		
 	render( scene, renderer, time ) {
 		
 		if ( ! this.car ) return
-		
-		/** update noiseShader */ 
-		this.noiseShaderUniforms.iTime.value += time * 40
+			
 		
 		/** draw Compass */
-		this.compass.rotation.z = -this.car.model.rotation.y
+		this.bars.compas.obj.rotation.z = -this.car.model.rotation.y
 		
 		/** draw gunRotation */
-		this.gunRotation.rotation.z = this.car.modelGun.rotation.y
+		this.bars.rotations.laberGunRot.rotation.z = this.car.modelGun.rotation.y
 		
-		/** draw Locator */
+		/** draw Locator scene */
 		sv.update( this.car )
 		
 		/** draw Fuel */
@@ -1026,13 +1013,7 @@ class Cope {
 		}
 					
 		/** render cope screens */	
-		renderer.render( sv.scene, sv.camera, this.scrLocatorTexture )	
-		renderer.render( sv.scene, sv.cameraParams, this.scrHealthTexture )		
-		renderer.render( scene, s.carCameras.gun, this.scrGunTexture )
-		renderer.render( scene, s.carCameras.front, this.scrFrontTexture )
-		renderer.render( scene, s.carCameras.back, this.scrBackTexture )
-		renderer.render( scene, s.carCameras.left, this.scrLeftTexture )
-		renderer.render( scene, s.carCameras.right, this.scrRightTexture )
+		this.updateScreens( renderer, time )
 
 		/** exit cope */
 		if ( keys.enter && this.isCanExit ) exitCope()
@@ -1042,75 +1023,143 @@ class Cope {
 			if ( this.car.shoot() ) { 
 				this.removeBulletShoot()	
 				keys.space = false
+				this.screens.gun.uniforms.amountNoise.value = 0.3
 				let bullet = new Bullet( this.car )
 			}	
 		}			
 	}
 	
+	
+	/** EXIT / ENTER COPE FUNCTIONS ***************/
+	
 	hideView() {
 		
 		this.htmlElems.style.display = "none"
+		this.car.saveCopeParams( this.screens, this.bars )		
 		this.car = null
-		this.dellBullets()
+		this.dellBullets() 
 	}
 	
 	showView( car ) {
 		
 		this.htmlElems.style.display = "block"
 		this.car = car
-		this.createBulletsBar( this.car )	
+		this.setScreensAmountnoise( car.cope )
+		this.createBulletsBar( car )	
 		this.updateFuelBar()
 	}
 	
-	
-	/** BARS FUNCTIONS ************************/
-	
-	createBulletsBar( car ) {
-	
-		for ( let i = 0; i < car.ammo; i ++ ) {
-			let b = this.ammoLabel.clone()
-			b.position.x = 3
-			b.position.y = i * 6 - 85
-			b.position.z = 2
-			this.ammoBarBack.add( b )
-			this.arrBulletsLabel.push( b )
-		}
-	}
 
-	removeBulletShoot() {
-	
-		this.ammoBarBack.remove( this.arrBulletsLabel[ this.arrBulletsLabel.length - 1 ] )
-		this.arrBulletsLabel[ this.arrBulletsLabel - 1 ] = null
-		this.arrBulletsLabel.splice( this.arrBulletsLabel.length - 1, 1 )
-	}
+	/** SET VALS FOR SCREENS AND BARS ***********/
 
-	dellBullets() {
-	
-		for ( let i = 0; i < this.arrBulletsLabel.length; i ++  ) {
-			this.ammoBarBack.remove( this.arrBulletsLabel[ i ] )
-			this.arrBulletsLabel[ this.arrBulletsLabel[ i ] ] = null		
-			this.arrBulletsLabel.splice( i, 1 )
-			i --
-		}
-	}
-
-	updateFuelBar() {
+	setScreensAmountnoise( ob ) {
 		
-		if ( this.car.currentFuel > 1 ) {
-			this.fuelLabel.scale.y = this.car.currentFuel / this.car.allFuel
-			this.fuelLabel.position.y =  this.fuelLabel.scale.y * 90 - 90
+		ob.noNoiseAmmo == true ? this.showBar( this.bars.ammo )	: this.destroyBar( this.bars.ammo )	
+		ob.noNoiseFuel == true ? this.showBar( this.bars.fuel )	: this.destroyBar( this.bars.fuel )		
+		ob.noNoiseCompas == true ? this.showBar( this.bars.compas )	: this.destroyBar( this.bars.compas )
+		ob.noNoiseRorations == true ? this.showBar( this.bars.rotations )	: this.destroyBar( this.bars.rotations )			
+		
+		this.screens.gun.standartNoise = this.screens.gun.uniforms.amountNoise.value = ob.noiseGun
+		this.screens.front.standartNoise = this.screens.front.uniforms.amountNoise.value = ob.noiseFront
+		this.screens.back.standartNoise = this.screens.back.uniforms.amountNoise.value = ob.noiseBack
+		this.screens.left.standartNoise = this.screens.left.uniforms.amountNoise.value = ob.noiseLeft
+		this.screens.right.standartNoise = this.screens.right.uniforms.amountNoise.value = ob.noiseRight
+		this.screens.locator.standartNoise = this.screens.locator.uniforms.amountNoise.value = ob.noiseLocator 
+		this.screens.health.standartNoise = this.screens.health.uniforms.amountNoise.value = ob.noiseHealth 		
+	}
+
+
+	/** SET DAMAGES ***********************/
+	
+	damageGun( dam ) {
+		
+		this.screens.gun.standartNoise = 1.0 - this.car.health.gun / 20
+		if ( this.car.health.gun < 5 ) this.destroyBar( this.bars.ammo )	
+	}	
+
+	damageBase( dam ) {
+		
+		let minus = 4/20 * dam 		
+		switch ( Math.floor( Math.random() * 4 ) ) {
+			case 0:
+				this.screens.front.standartNoise = this.minusDamage( this.screens.front.standartNoise, minus ) 			
+				break
+			case 1:
+				this.screens.back.standartNoise = this.minusDamage( this.screens.back.standartNoise, minus )		
+				break	
+			case 2:
+				this.screens.left.standartNoise = this.minusDamage( this.screens.left.standartNoise, minus )		
+				break	
+			case 3:
+				this.screens.right.standartNoise = this.minusDamage( this.screens.right.standartNoise, minus ) 			
+				break				
+		}	
+	}
+	
+	damageCope( dam ) {
+		
+		let minus = 3/20 * dam 		
+		switch ( Math.floor( Math.random() * 3 ) ) {
+			case 0:
+				this.screens.locator.standartNoise = this.minusDamage( this.screens.locator.standartNoise, minus ) 			
+				break
+			case 1:
+				this.screens.health.standartNoise = this.minusDamage( this.screens.health.standartNoise, minus )		
+				break
+			case 2:
+				if ( this.bars.compas.obj.visible && this.car.health.cope < 5 ) this.destroyBar( this.bars.compas )		
+				break			
+		}	
+	}
+
+	damageWeels( dam ) {
+		
+		if ( this.car.health.weels < 5 ) this.destroyBar( this.bars.fuel )				
+		if ( this.car.health.weels < 11 ) this.destroyBar( this.bars.rotations )				
+	}		
+
+	minusDamage( val, minus ) {
+		
+		let result = val + minus
+		if ( result > 1 ) {
+			return 1
 		} else {
-			this.fuelLabel.scale.y = 0.000001
-		}			
-	}
+			return result
+		}
+	}		
 
-	updateWeelsBar() {
+	boomForScreens() {
 		
-		this.weelsBarL.rotation.z = this.car.spdRot * 70.0
-		this.weelsBarR.rotation.z = this.car.spdRot * 70.0		
+		for ( var key in this.screens ) {
+			this.screens[key].uniforms.amountNoise.value = Math.random() * 0.5 + 0.2
+		}
+	}	
+	
+		
+	/** UPDATE VIEWS SCREENS ***************/ 
+
+	updateScreens( renderer, time ) {
+
+		this.renderScreen( renderer, this.screens.locator, time )
+		this.renderScreen( renderer, this.screens.health, time )			
+		this.renderScreen( renderer, this.screens.gun, time )
+		this.renderScreen( renderer, this.screens.front, time )	
+		this.renderScreen( renderer, this.screens.back, time )	
+		this.renderScreen( renderer, this.screens.left, time )	
+		this.renderScreen( renderer, this.screens.right, time )		
 	}
 
-	updateHealthBars() {
+	renderScreen( renderer, obj, time ) {
+				
+		obj.uniforms.iTime.value += time * 5
+		obj.uniforms.amountNoise.value > obj.standartNoise ? 
+				obj.uniforms.amountNoise.value -= 0.01 
+			: 
+				obj.uniforms.amountNoise.value = obj.standartNoise  			
+		renderer.render( obj.scene, obj.camera, obj.map )			
+	}	
+	
+	updateHealthScreenBars() {
 		
 		this.health.gunbar.count = this.car.health.gun
 		this.health.copebar.count = this.car.health.cope	
@@ -1121,7 +1170,258 @@ class Cope {
 		sv.updateLabelBar( this.health.basebar )
 		sv.updateLabelBar( this.health.gunbar )
 		sv.updateLabelBar( this.health.weelsbar )		
+	}		
+	
+	
+	/** FUNCTIONS FOR ALL SCREENS ************************/	
+	
+	createScreen( obj ) {
+		
+		obj.map = new THREE.WebGLRenderTarget( 
+			obj.pos.width, obj.pos.height, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			} )
+		obj.mat = this.noiseShaderMat.clone()
+		
+		if ( obj.type == 'plane')	
+			obj.mesh = new THREE.Mesh(
+				new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
+				obj.mat
+			)
+
+		if ( obj.type == 'circle')	
+			obj.mesh = new THREE.Mesh(
+				new THREE.CircleGeometry( obj.pos.width/2, 28 ),
+				obj.mat
+			)			
+			
+		obj.uniforms = obj.mat.uniforms
+		obj.uniforms.render.value = obj.map.texture
+		
+		obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
+		obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
+		this.sc.add( obj.mesh )		
+	}
+		
+		
+	/** AMMO BAR FUNCTIONS ************************/
+	
+	initAmmoBar( b = {				
+					screen: null,
+					obj: null,
+					arrChildrens: null,
+					update: null,
+				} ) {
+					
+		b.screen = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 35, 200 ),
+			this.matScreens			
+		) 
+		b.screen.position.set( 310, 200, 50 )
+		b.screen.rotation.x = 0.2	
+		b.screen.rotation.y = -0.7			
+		this.sc.add( b.screen )	
+		
+		b.obj = new THREE.Object3D()
+		b.screen.add(b.obj)
+		
+		b.labelProto = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 10, 3, 3 ),
+			this.matClocksLight
+		)
+		b.arrChildrens = []
+	}		
+	
+	createBulletsBar( car ) {
+	
+		for ( let i = 0; i < car.ammo; i ++ ) {
+			let b = this.bars.ammo.labelProto.clone()
+			b.position.x = 3
+			b.position.y = i * 6 - 85
+			b.position.z = 2
+			this.bars.ammo.obj.add( b )
+			this.bars.ammo.arrChildrens.push( b )
+		}
+	}
+
+	removeBulletShoot() {
+	
+		this.bars.ammo.obj.remove( this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length - 1 ] )
+		this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length - 1 ] = null
+		this.bars.ammo.arrChildrens.splice( this.bars.ammo.arrChildrens.length - 1, 1 )
+	}
+
+	dellBullets() {
+	
+		for ( let i = 0; i < this.bars.ammo.arrChildrens.length; i ++  ) {
+			this.bars.ammo.obj.remove(this.bars.ammo.arrChildrens[ i ] )
+			this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length[ i ] ] = null		
+			this.bars.ammo.arrChildrens.splice( i, 1 )
+			i --
+		}
+	}
+
+	
+	/** FUEL BAR FUNCTIONS ************************/
+	
+	initFuelBar( b = {				
+					screen: null,
+					obj: null,
+					arrChildrens: null,
+					update: null,
+				} ) {
+					
+		b.screen = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 35, 200 ),
+			this.matScreens			
+		) 
+		b.screen.position.set( 350, 195, 70)
+		b.screen.rotation.x = 0.2	
+		b.screen.rotation.y = -0.7			
+		this.sc.add( b.screen )	
+		
+		b.obj = new THREE.Object3D()
+		b.screen.add(b.obj)
+		
+		b.label = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 10, 170 ),
+			this.matClocksLight
+		)
+		b.label.position.z = 5
+		b.obj.add( b.label ) 
+	}
+	
+	updateFuelBar() {
+		
+		if ( this.car.currentFuel > 1 ) {
+			this.bars.fuel.label.scale.y = this.car.currentFuel / this.car.allFuel
+			this.bars.fuel.label.position.y =  this.bars.fuel.label.scale.y * 90 - 90
+		} else {
+			this.bars.fuel.label.scale.y = 0.000001
+		}			
+	}
+	
+
+	/** COMPAS BAR FUNCTIONS ************************/		
+	
+	initCompasBar( b = {				
+					screen: null,
+					obj: null,
+					arrChildrens: null,
+					update: null,
+				} ) {
+					
+		b.screen = new THREE.Mesh(
+			new THREE.CircleGeometry( 35, 32 ),
+			this.matScreens	
+		)
+		b.screen.position.set( -250, 140, 50 )
+		b.screen.rotation.x = 0.2	
+		b.screen.rotation.y = 0.7			
+		this.sc.add( b.screen )	
+		
+		b.obj = new THREE.Object3D()
+		b.screen.add(b.obj)
+		
+		b.label1 = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
+			this.matClocksLight
+		)
+		b.label1.rotation.x = 0
+		b.label1.position.set( 0, 15, 7 )
+		b.obj.add( b.label1 )
+		
+		b.label2 = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 3, 30, 1 ),
+			new THREE.MeshBasicMaterial( { color: 0x000000 } )
+		)
+		b.label2.rotation.x = 0
+		b.label2.position.set( 0, -15, 7 )
+		b.obj.add( b.label2 )		
 	}	
+	
+	
+	/** ROTATIONS BAR FUNCTIONS ************************/	
+	
+	initRotationsBar( b = {				
+					screen: null,
+					obj: null,
+					arrChildrens: null,
+					update: null,
+				} ) {
+					
+		b.screen = new THREE.Mesh(
+			new THREE.CircleGeometry( 45, 32 ),
+			this.matScreens		
+		) 
+		b.screen.position.set( 0, -140, 0 )
+		b.screen.rotation.x = 0.2			
+		this.sc.add( b.screen )	
+		
+		b.obj = new THREE.Object3D()
+		b.screen.add(b.obj)
+		
+		b.labelFL = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 9, 25 ),
+			this.matClocksLight		
+		)
+		b.labelFL.position.set( -18, 20, 3 )
+		b.obj.add( b.labelFL )
+
+		b.labelFR = b.labelFL.clone()
+		b.labelFR.position.set( 18, 20, 3 )
+		b.obj.add( b.labelFR )	
+
+		b.labelBL = b.labelFL.clone()
+		b.labelBL.position.set( -18, -20, 3 )
+		b.obj.add( b.labelBL )	
+
+		b.labelBR = b.labelFL.clone()
+		b.labelBR.position.set( 18, -20, 3 )
+		b.obj.add( b.labelBR )
+
+		/** gun rotation */
+		b.laberGunRot = new THREE.Mesh(
+			new THREE.CircleGeometry( 10, 32 ),
+			this.matClocksLight	
+		)
+		b.laberGunRot.position.set( 0, 0, 8 )
+		b.obj.add( b.laberGunRot )
+
+		b.labelGun = new THREE.Mesh(
+			new THREE.PlaneBufferGeometry( 7, 35 ),
+			this.matClocksLight		
+		)
+		b.labelGun.position.set( 0, 10, 9 )
+		b.laberGunRot.add( b.labelGun )		
+	}	
+	
+	updateWeelsBar() {
+		
+		this.bars.rotations.labelFL.rotation.z = this.car.spdRot * 70.0
+		this.bars.rotations.labelFR.rotation.z = this.car.spdRot * 70.0		
+	}	
+	
+	
+	/** FUNCTIONS FOR ALL BARS **************************/
+	
+	destroyBar( b ) {
+		
+		if ( b.obj.visible ) { 
+			b.obj.visible = false
+			b.screen.material = new THREE.MeshLambertMaterial( { map: b.screenNoiseMap } )
+			b.screen.material.needsUpdate = true
+		}	
+	}
+
+	showBar( b ) {
+	
+		b.screen.material = this.matScreens	
+		b.screen.material.needsUpdate = true
+		b.obj.visible = true
+	}		
+	
 }
 
 
@@ -1172,7 +1472,12 @@ class Hero {
 		if ( ! this.nearCar ) return
 		
 		if ( keys.enter ) enterCope( this.nearCar )
-		if ( keys.B ) addBomb( this.nearCar )		
+		if ( keys.B ) addBomb( this.nearCar )
+		if ( keys.R ) {
+			this.nearCar.repair()
+			keys.R = false
+			if ( ! this.nearCar.checkHealth() ) buttRepairCar.style.opacity = 0				
+		}			
 	}
 	
 	hideView() {
@@ -1189,7 +1494,8 @@ class Hero {
 	showButtonsCar( car ) {
 		
 		buttEnterCope.style.opacity = 1.0
-		if ( ! g.heroBomb ) buttAddBomb.style.opacity = 1.0		
+		if ( ! g.heroBomb ) buttAddBomb.style.opacity = 1.0	
+		if ( car.checkHealth() ) buttRepairCar.style.opacity = 1.0 	
 		this.nearCar = car
 	}
 	
@@ -1197,6 +1503,7 @@ class Hero {
 		
 		buttEnterCope.style.opacity = 0
 		buttAddBomb.style.opacity = 0
+		buttRepairCar.style.opacity = 0 			
 		this.nearCar = null	
 	}
 }
@@ -1319,6 +1626,28 @@ const geomAnimateExplosive = b => {
 	}
 		
 	geom.verticesNeedUpdate = true
+}
+
+const createNoiseTexture = ( w, h ) => {
+	
+	const pixelData = []
+	for ( let y = 0; y < w; ++y ) {
+		for ( let x = 0; x < h; ++x ) {
+			const a = Math.floor( Math.random() * 256 )
+			pixelData.push( a, a, a, 1 )
+		}
+	}
+	const dataTexture = new THREE.DataTexture(
+		Uint8Array.from( pixelData ),
+		w,
+		h,
+		THREE.RGBAFormat,
+		THREE.UnsignedByteType,
+		THREE.UVMapping
+	)
+	dataTexture.needsUpdate = true
+
+	return dataTexture
 }
 
  
@@ -1460,7 +1789,7 @@ const animate = () => {
 			/** hitcar TEST FUNCTION */
 			if ( Math.random() * 10 < 1 ) {
 				cope.car.hit()
-				cope.updateHealthBars()
+				cope.updateHealthScreenBars()
 			}				
 		}
 	}
@@ -1531,6 +1860,8 @@ const keys = {
 	right: false,
 	A: false,
 	D: false,
+	B: false,
+	R: false,
 	enter: false,
 	space: false
 }
@@ -1571,7 +1902,10 @@ const keyUpdate = ( keyEvent, down ) => {
 			break
 		case 66:
 			keys.B = down				
-			break	
+			break
+		case 82:
+			keys.R = down				
+			break				
 	}
 }
  
@@ -1597,6 +1931,11 @@ buttEnterCope.onclick = () => keys.enter = true
 
 let buttAddBomb = document.getElementById('addBomb') 
 buttEnterCope.onclick = () =>  keys.B = true
+
+let buttRepairCar = document.getElementById('repair') 
+buttEnterCope.onclick = () =>  { 
+	keys.R = true 
+}	
 
 let buttFire = document.getElementById( 'gunFire' ) 
 buttFire.onclick = () => keys.space = true
