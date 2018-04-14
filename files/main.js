@@ -1024,9 +1024,12 @@ class Cope {
 	saveInCarCopeParams() {
 		
 		let obj = {}
-		for ( let key in this.bars ) obj[ key ] = this.bars[ key ].obj.visible	
-		for ( let key in this.screens ) obj[ key ] = this.screens[ key ].standartNoise
-
+		
+		for ( let key in this.screens ) {
+			 this.screens[key].type == 'screen' ?  
+				obj[ key ] = this.screens[ key ].standartNoise : obj[ key ] = this.screens[ key ].obj.visible
+		}
+		
 		return obj	
 	}
 
