@@ -81,8 +81,7 @@ const loadAssets = () => {
 		sv.spaceVirt()		
 		initCarCameras()
 	
-		cope = new Cope()
-		
+		cope = new Cope()	
 		cope.renderPass.enabled = false
 		
 		hero = new Hero( s.scene )
@@ -127,19 +126,18 @@ class Car {
 			base: 20,
 			weels: 20
 		}
-		this.cope = {
-			noiseGun: 0,
-			noiseFront: 0,
-			noiseBack: 0,
-			noiseLeft: 0,
-			noiseRight: 0,
-			noiseHealth: 0,
-			noiseLocator: 0,
-			
-			noNoiseAmmo: true,
-			noNoiseFuel: true,
-			noNoiseCompas: true,
-			noNoiseRorations: true,			
+		this.copeParams = {
+			gun: 0,
+			front: 0,
+			back: 0,
+			left: 0,
+			right: 0,
+			health: 0,
+			locator: 0,		
+			ammo: true,
+			fuel: true,
+			compas: true,
+			rotations: true,			
 		}
 		this.allFuel = 4000
 		this.currentFuel = 4000
@@ -364,51 +362,31 @@ class Car {
 		else { return 0 }	
 	}
 	
-	saveCopeParams( scr, bars ) {
+	saveCopeParams( params ) {
 
-		this.cope.noNoiseAmmo = bars.ammo.obj.visible
-		this.cope.noNoiseFuel = bars.fuel.obj.visible
-		this.cope.noNoiseCompas = bars.compas.obj.visible
-		this.cope.noNoiseRorations = bars.rotations.obj.visible
-		
-		this.cope.noiseGun = scr.gun.standartNoise
-		this.cope.noiseFront = scr.front.standartNoise
-		this.cope.noiseBack = scr.back.standartNoise
-		this.cope.noiseLeft = scr.left.standartNoise
-		this.cope.noiseRight = scr.right.standartNoise
-		this.cope.noiseHealth = scr.health.standartNoise
-		this.cope.noiseLocator = scr.locator.standartNoise		
+		for ( let key in params ) this.copeParams[ key ] = params[ key ]  
 	}
 	
 	repair() {
 		
-		this.cope.noNoiseAmmo = true
-		this.cope.noNoiseFuel = true
-		this.cope.noNoiseCompas = true
-		this.cope.noNoiseRorations = true
+		for ( let key in this.copeParams ) {
+			
+			if ( typeof this.copeParams[ key ] === 'boolean' ) {
+				this.copeParams[ key ] = true
+			} else {
+				this.copeParams[ key ] = 0
+			}		
+		}
 		
-		this.cope.noiseGun = 0
-		this.cope.noiseFront = 0
-		this.cope.noiseBack = 0
-		this.cope.noiseLeft = 0
-		this.cope.noiseRight = 0
-		this.cope.noiseHealth = 0
-		this.cope.noiseLocator = 0	
-		
-		this.health.gun = 20
-		this.health.cope = 20
-		this.health.base = 20
-		this.health.weels = 20			
+		for ( let key in this.health ) this.health[ key ] = 20
 	}
 	
 	checkHealth() {
 		
-		let h = false 
-		if ( this.health.gun < 20 ) h = true
-		if ( this.health.cope < 20 ) h = true
-		if ( this.health.base < 20 ) h = true
-		if ( this.health.weels < 20 ) h = true
-
+		let h = false
+		for ( let key in this.health ) {
+			if ( this.health[key] < 20 ) h = true
+		}
 		return h	
 	}		
 }
@@ -774,151 +752,6 @@ class Cope {
 		s.composer.addPass( this.renderPass )
 
 		
-		/** SCREENS INIT *************************/
-		
-		this.screens = {
-			
-			gun: {
-				pos: { width: 700, height: 250, x: 0, y: 300, z: -30, rX: 0.2, rY: 0 },
-				mesh: null, map: null, mat: null, uniforms: null,
-				standartNoise: 0.08,
-				type: 'plane',
-				scene: s.scene,					
-				camera: s.carCameras.gun,   
-			},
-			front: {
-				pos: { width: 420, height: 260, x: 0, y: -20, z: -30, rX: 0, rY: 0 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				standartNoise: 0.08,				
-				type: 'plane',	
-				scene: s.scene,					
-				camera: s.carCameras.front,   				
-			},
-			back: {
-				pos: { width: 440, height: 210, x: 0, y: -280, z:-30, rX: -0.3, rY: 0 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				type: 'plane',	
-				standartNoise: 0.08,				
-				scene: s.scene,					
-				camera: s.carCameras.back,   				
-			},
-			left: {
-				pos: { width: 350, height: 320, x: -380, y: -28, z: -30, rX: 0, rY: 1.0 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				type: 'plane',	
-				standartNoise: 0.08,				
-				scene: s.scene,					
-				camera: s.carCameras.left,   	
-			},
-			right: {
-				pos: { width: 350, height: 320, x: 380, y: -28, z: 0, rX: 0, rY: -1.0 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				type: 'plane',
-				standartNoise: 0.08,				
-				scene: s.scene,				
-				camera: s.carCameras.right,				
-			},
-			locator: {
-				pos: { width: 220, height: 220, x: -370, y: 215, z: 60, rX: 0.2, rY: 0.7 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				type: 'circle',
-				standartNoise: 0.02,				
-				scene: sv.scene,	
-				camera: sv.camera,						
-			},
-			health: {
-				pos: { width: 210, height: 130, x: -280, y: -240, z: 53, rX: -0.4, rY: 0 },
-				mesh: null, map: null, mat: null, uniforms: null, 
-				type: 'plane',
-				standartNoise: 0.02,				
-				scene: sv.scene,	
-				camera: sv.cameraParams,				
-			}
-		}
-		
-		this.createScreen( this.screens.gun )
-		this.createScreen( this.screens.front )		
-		this.createScreen( this.screens.back )	
-		this.createScreen( this.screens.left )	
-		this.createScreen( this.screens.right )	
-		this.createScreen( this.screens.locator )
-		this.createScreen( this.screens.health )
-
-		
-		/** HEALTH VIRTUAL SCENE BARS *************/
-			
-		this.health = {}
-		
-		this.health.gunbar = sv.updateLabelBar( { 
-			width: 100, x: -15, y: 40, 
-			arr: [],
-			count: 20	
-		} )	
-		
-		this.health.copebar = sv.updateLabelBar( { 
-			width: 100, x: -15, y: 15, 
-			arr: [],
-			count: 20		
-		} )	
-
-		this.health.basebar = sv.updateLabelBar( { 
-			width: 100, x: -15, y: -10,
-			arr: [],	
-			count: 20	
-		} )	
-
-		this.health.weelsbar = sv.updateLabelBar( { 
-			width: 100, x: -15, y: -35, arr: [],
-			count: 20	
-		} )			
-		
-	
-		/** BARS INIT *****************************/
-		
-		this.bars = {
-			ammo: {
-				labelProto: null,
-				screen: null,
-				screenNoiseMap: createNoiseTexture( 35, 200 ),
-				obj: null,
-				arrChildrens: null,
-				update: null,
-			},
-			fuel: {
-				screen: null,
-				screenNoiseMap: createNoiseTexture( 35, 200 ),				
-				obj: null,
-				arrChildrens: null,
-				update: null,
-			},
-			rotations: {
-				screen: null,
-				screenNoiseMap: createNoiseTexture( 100, 100 ),				
-				obj: null,
-				arrChildrens: null,
-				update: null,
-			},
-			compas: {
-				screen: null,
-				screenNoiseMap: createNoiseTexture( 100, 100 ),					
-				obj: null,
-				arrChildrens: null,
-				update: null,			
-			},				
-		} 		
-		
-		this.initAmmoBar( this.bars.ammo )	
-		this.initFuelBar( this.bars.fuel ) 
-		this.initCompasBar( this.bars.compas ) 		
-		this.initRotationsBar( this.bars.rotations ) 		
-	
-				
-		/** BUTTONS INIT **************************/
-				
-		this.htmlElems = document.getElementById( 'copeElems' )	
-		this.htmlElems.style.display = "none"
-		
-		
 		/** BACKGROUND PLANES ********************/
 		
 		/** health bar */
@@ -976,6 +809,145 @@ class Cope {
 		)
 		back.position.set( 285, -235, 60 )			
 		this.sc.add( back )		
+		
+
+		/** BUTTONS INIT **************************/
+				
+		this.htmlElems = document.getElementById( 'copeElems' )	
+		this.htmlElems.style.display = "none"		
+		
+		
+		/** SCREENS INIT *************************/
+		
+		this.screens = {
+			
+			gun: {
+				type: 'screen',				
+				pos: { width: 700, height: 250, x: 0, y: 300, z: -30, rX: 0.2, rY: 0 },
+				typeGeom: 'plane',				
+				mesh: null, map: null, mat: null, uniforms: null,
+				standartNoise: 0.08,
+				scene: s.scene,					
+				camera: s.carCameras.gun,
+				init: ( s ) => { this.createScreen( s ) }	
+			},
+			front: {
+				type: 'screen',						
+				pos: { width: 420, height: 260, x: 0, y: -20, z: -30, rX: 0, rY: 0 },
+				typeGeom: 'plane',
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.08,					
+				scene: s.scene,					
+				camera: s.carCameras.front,
+				init: ( s ) => { this.createScreen( s ) }	  				
+			},
+			back: {
+				type: 'screen',						
+				pos: { width: 440, height: 210, x: 0, y: -280, z:-30, rX: -0.3, rY: 0 },
+				typeGeom: 'plane',
+				mesh: null, map: null, mat: null, uniforms: null, 	
+				standartNoise: 0.08,				
+				scene: s.scene,					
+				camera: s.carCameras.back,
+				init: ( s ) => { this.createScreen( s ) }	   				
+			},
+			left: {
+				type: 'screen',						
+				pos: { width: 350, height: 320, x: -380, y: -28, z: -30, rX: 0, rY: 1.0 },
+				typeGeom: 'plane',	
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.08,				
+				scene: s.scene,					
+				camera: s.carCameras.left,
+				init: ( s ) => { this.createScreen( s ) }					
+			},
+			right: {
+				type: 'screen',						
+				pos: { width: 350, height: 320, x: 380, y: -28, z: 0, rX: 0, rY: -1.0 },
+				typeGeom: 'plane',
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.08,				
+				scene: s.scene,				
+				camera: s.carCameras.right,
+				init: ( s ) => { this.createScreen( s ) }						
+			},
+			locator: {
+				type: 'screen',						
+				pos: { width: 220, height: 220, x: -370, y: 215, z: 60, rX: 0.2, rY: 0.7 },
+				typeGeom: 'circle',
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.02,				
+				scene: sv.scene,	
+				camera: sv.camera,	
+				init: ( s ) => { this.createScreen( s ) }					
+			},
+			health: {
+				type: 'screen',						
+				pos: { width: 210, height: 130, x: -280, y: -240, z: 53, rX: -0.4, rY: 0 },
+				typeGeom: 'plane',
+				mesh: null, map: null, mat: null, uniforms: null, 
+				standartNoise: 0.02,				
+				scene: sv.scene,	
+				camera: sv.cameraParams,
+				init: ( s ) => { this.createScreen( s ) },				
+				indicators: {
+					gun: sv.updateLabelBar( { 
+						width: 100, x: -15, y: 40, 
+						arr: [],
+						count: 20	
+					} ),	
+					cope: sv.updateLabelBar( { 
+						width: 100, x: -15, y: 15, 
+						arr: [],
+						count: 20		
+					} ),	
+					base: sv.updateLabelBar( { 
+						width: 100, x: -15, y: -10,
+						arr: [],	
+						count: 20	
+					} ),	
+					weels: sv.updateLabelBar( { 
+						width: 100, x: -15, y: -35, arr: [],
+						count: 20	
+					} )				
+				}					
+			},
+			ammo: {
+				type: 'bar',
+				labelProto: null,
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 35, 200 ),
+				obj: null,
+				arrChildrens: null,
+				init: ( s ) => { this.initAmmoBar( s ) } 
+			},
+			fuel: {
+				type: 'bar',				
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 35, 200 ),				
+				obj: null,
+				arrChildrens: null,
+				init: ( s ) => { this.initFuelBar( s ) } 
+			},
+			rotations: {
+				type: 'bar',				
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 100, 100 ),				
+				obj: null,
+				arrChildrens: null,
+				init: ( s ) => { this.initRotationsBar( s ) } 
+			},
+			compas: {
+				type: 'bar',				
+				screen: null,
+				screenNoiseMap: createNoiseTexture( 100, 100 ),					
+				obj: null,
+				arrChildrens: null,
+				init: ( s ) => { this.initCompasBar( s ) } 			
+			},			
+		}
+		
+		for ( let key in this.screens ) this.screens[ key ].init( this.screens[ key ] )				
 	}
 	
 	
@@ -987,10 +959,10 @@ class Cope {
 			
 		
 		/** draw Compass */
-		this.bars.compas.obj.rotation.z = -this.car.model.rotation.y
+		this.screens.compas.obj.rotation.z = -this.car.model.rotation.y
 		
 		/** draw gunRotation */
-		this.bars.rotations.laberGunRot.rotation.z = this.car.modelGun.rotation.y
+		this.screens.rotations.laberGunRot.rotation.z = this.car.modelGun.rotation.y
 		
 		/** draw Locator scene */
 		sv.update( this.car )
@@ -1035,7 +1007,7 @@ class Cope {
 	hideView() {
 		
 		this.htmlElems.style.display = "none"
-		this.car.saveCopeParams( this.screens, this.bars )		
+		this.car.saveCopeParams( this.saveInCarCopeParams() )	
 		this.car = null
 		this.dellBullets() 
 	}
@@ -1044,37 +1016,40 @@ class Cope {
 		
 		this.htmlElems.style.display = "block"
 		this.car = car
-		this.setScreensAmountnoise( car.cope )
+		this.setScreensAmountnoise( car.copeParams )
 		this.createBulletsBar( car )	
 		this.updateFuelBar()
 	}
 	
+	saveInCarCopeParams() {
+		
+		let obj = {}
+		for ( let key in this.bars ) obj[ key ] = this.bars[ key ].obj.visible	
+		for ( let key in this.screens ) obj[ key ] = this.screens[ key ].standartNoise
 
-	/** SET VALS FOR SCREENS AND BARS ***********/
+		return obj	
+	}
 
 	setScreensAmountnoise( ob ) {
 		
-		ob.noNoiseAmmo == true ? this.showBar( this.bars.ammo )	: this.destroyBar( this.bars.ammo )	
-		ob.noNoiseFuel == true ? this.showBar( this.bars.fuel )	: this.destroyBar( this.bars.fuel )		
-		ob.noNoiseCompas == true ? this.showBar( this.bars.compas )	: this.destroyBar( this.bars.compas )
-		ob.noNoiseRorations == true ? this.showBar( this.bars.rotations )	: this.destroyBar( this.bars.rotations )			
-		
-		this.screens.gun.standartNoise = this.screens.gun.uniforms.amountNoise.value = ob.noiseGun
-		this.screens.front.standartNoise = this.screens.front.uniforms.amountNoise.value = ob.noiseFront
-		this.screens.back.standartNoise = this.screens.back.uniforms.amountNoise.value = ob.noiseBack
-		this.screens.left.standartNoise = this.screens.left.uniforms.amountNoise.value = ob.noiseLeft
-		this.screens.right.standartNoise = this.screens.right.uniforms.amountNoise.value = ob.noiseRight
-		this.screens.locator.standartNoise = this.screens.locator.uniforms.amountNoise.value = ob.noiseLocator 
-		this.screens.health.standartNoise = this.screens.health.uniforms.amountNoise.value = ob.noiseHealth 		
-	}
+		for ( let key in ob ) {
+			if ( typeof ob[ key ] === "boolean" ) {
+				ob[ key ] == true ? this.showBar( this.screens[ key ] ) : this.destroyBar( this.screens[ key ] )					
+			} else {
+				if ( this.screens[ key ].type != "screen" ) break
+				this.screens[ key ].standartNoise = this.screens[ key ].uniforms.amountNoise.value = ob[ key ]			
+			}
+		}
+	}	
 
 
-	/** SET DAMAGES ***********************/
+	/** SET DAMAGES TO CLOCKS ************/
 	
 	damageGun( dam ) {
 		
 		this.screens.gun.standartNoise = 1.0 - this.car.health.gun / 20
-		if ( this.car.health.gun < 5 ) this.destroyBar( this.bars.ammo )	
+		if ( this.car.health.gun < 5 && this.screens.ammo.obj.visible ) 
+			this.destroyBar( this.screens.ammo )	
 	}	
 
 	damageBase( dam ) {
@@ -1107,15 +1082,15 @@ class Cope {
 				this.screens.health.standartNoise = this.minusDamage( this.screens.health.standartNoise, minus )		
 				break
 			case 2:
-				if ( this.bars.compas.obj.visible && this.car.health.cope < 5 ) this.destroyBar( this.bars.compas )		
+				if ( this.screens.compas.obj.visible && this.car.health.cope < 5 ) this.destroyBar( this.screens.compas )		
 				break			
 		}	
 	}
 
 	damageWeels( dam ) {
 		
-		if ( this.car.health.weels < 5 ) this.destroyBar( this.bars.fuel )				
-		if ( this.car.health.weels < 11 ) this.destroyBar( this.bars.rotations )				
+		if ( this.car.health.weels < 5 && this.screens.fuel.obj.visible) this.destroyBar( this.screens.fuel )				
+		if ( this.car.health.weels < 11 && this.screens.rotations.obj.visible) this.destroyBar( this.screens.rotations )				
 	}		
 
 	minusDamage( val, minus ) {
@@ -1131,6 +1106,8 @@ class Cope {
 	boomForScreens() {
 		
 		for ( var key in this.screens ) {
+			
+			if ( this.screens[ key ].type != "screen" ) break 
 			this.screens[key].uniforms.amountNoise.value = Math.random() * 0.5 + 0.2
 		}
 	}	
@@ -1140,68 +1117,61 @@ class Cope {
 
 	updateScreens( renderer, time ) {
 
-		this.renderScreen( renderer, this.screens.locator, time )
-		this.renderScreen( renderer, this.screens.health, time )			
-		this.renderScreen( renderer, this.screens.gun, time )
-		this.renderScreen( renderer, this.screens.front, time )	
-		this.renderScreen( renderer, this.screens.back, time )	
-		this.renderScreen( renderer, this.screens.left, time )	
-		this.renderScreen( renderer, this.screens.right, time )		
-	}
-
-	renderScreen( renderer, obj, time ) {
-				
-		obj.uniforms.iTime.value += time * 5
-		obj.uniforms.amountNoise.value > obj.standartNoise ? 
+		for ( let key in this.screens ) {
+			
+			if ( this.screens[key].type != "screen") break
+			
+			let obj = this.screens[ key ]			
+			obj.uniforms.iTime.value += time * 5
+			obj.uniforms.amountNoise.value > obj.standartNoise ? 
 				obj.uniforms.amountNoise.value -= 0.01 
-			: 
+				: 
 				obj.uniforms.amountNoise.value = obj.standartNoise  			
-		renderer.render( obj.scene, obj.camera, obj.map )			
-	}	
+			
+			renderer.render( obj.scene, obj.camera, obj.map )	
+		}	
+	}
 	
 	updateHealthScreenBars() {
 		
-		this.health.gunbar.count = this.car.health.gun
-		this.health.copebar.count = this.car.health.cope	
-		this.health.basebar.count = this.car.health.base
-		this.health.weelsbar.count = this.car.health.weels		
-			
-		sv.updateLabelBar( this.health.copebar )
-		sv.updateLabelBar( this.health.basebar )
-		sv.updateLabelBar( this.health.gunbar )
-		sv.updateLabelBar( this.health.weelsbar )		
+		for ( let key in this.screens.health.indicators ) {
+			this.screens.health.indicators[ key ].count = this.car.health[ key ]
+			sv.updateLabelBar( this.screens.health.indicators[ key ] )
+		}				
 	}		
 	
 	
 	/** FUNCTIONS FOR ALL SCREENS ************************/	
 	
 	createScreen( obj ) {
-		
-		obj.map = new THREE.WebGLRenderTarget( 
-			obj.pos.width, obj.pos.height, { 
-				minFilter: THREE.LinearFilter, 
-				magFilter: THREE.NearestFilter
-			} )
-		obj.mat = this.noiseShaderMat.clone()
-		
-		if ( obj.type == 'plane')	
-			obj.mesh = new THREE.Mesh(
-				new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
-				obj.mat
-			)
-
-		if ( obj.type == 'circle')	
-			obj.mesh = new THREE.Mesh(
-				new THREE.CircleGeometry( obj.pos.width/2, 28 ),
-				obj.mat
-			)			
 			
-		obj.uniforms = obj.mat.uniforms
-		obj.uniforms.render.value = obj.map.texture
-		
-		obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
-		obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
-		this.sc.add( obj.mesh )		
+			//console.log( obj )
+			obj.map = new THREE.WebGLRenderTarget( 
+				obj.pos.width, obj.pos.height, { 
+					minFilter: THREE.LinearFilter, 
+					magFilter: THREE.NearestFilter
+				} )
+			obj.mat = this.noiseShaderMat.clone()
+			
+			if ( obj.typeGeom == 'plane')	
+				console.log('!')
+				obj.mesh = new THREE.Mesh(
+					new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
+					obj.mat
+				)
+
+			if ( obj.typeGeom == 'circle')	
+				obj.mesh = new THREE.Mesh(
+					new THREE.CircleGeometry( obj.pos.width/2, 28 ),
+					obj.mat
+				)			
+				
+			obj.uniforms = obj.mat.uniforms
+			obj.uniforms.render.value = obj.map.texture
+			
+			obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
+			obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
+			this.sc.add( obj.mesh )			
 	}
 		
 		
@@ -1236,28 +1206,28 @@ class Cope {
 	createBulletsBar( car ) {
 	
 		for ( let i = 0; i < car.ammo; i ++ ) {
-			let b = this.bars.ammo.labelProto.clone()
+			let b = this.screens.ammo.labelProto.clone()
 			b.position.x = 3
 			b.position.y = i * 6 - 85
 			b.position.z = 2
-			this.bars.ammo.obj.add( b )
-			this.bars.ammo.arrChildrens.push( b )
+			this.screens.ammo.obj.add( b )
+			this.screens.ammo.arrChildrens.push( b )
 		}
 	}
 
 	removeBulletShoot() {
 	
-		this.bars.ammo.obj.remove( this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length - 1 ] )
-		this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length - 1 ] = null
-		this.bars.ammo.arrChildrens.splice( this.bars.ammo.arrChildrens.length - 1, 1 )
+		this.screens.ammo.obj.remove( this.screens.ammo.arrChildrens[ this.screens.ammo.arrChildrens.length - 1 ] )
+		this.screens.ammo.arrChildrens[ this.screens.ammo.arrChildrens.length - 1 ] = null
+		this.screens.ammo.arrChildrens.splice( this.screens.ammo.arrChildrens.length - 1, 1 )
 	}
 
 	dellBullets() {
 	
-		for ( let i = 0; i < this.bars.ammo.arrChildrens.length; i ++  ) {
-			this.bars.ammo.obj.remove(this.bars.ammo.arrChildrens[ i ] )
-			this.bars.ammo.arrChildrens[ this.bars.ammo.arrChildrens.length[ i ] ] = null		
-			this.bars.ammo.arrChildrens.splice( i, 1 )
+		for ( let i = 0; i < this.screens.ammo.arrChildrens.length; i ++  ) {
+			this.screens.ammo.obj.remove(this.screens.ammo.arrChildrens[ i ] )
+			this.screens.ammo.arrChildrens[ this.screens.ammo.arrChildrens.length[ i ] ] = null		
+			this.screens.ammo.arrChildrens.splice( i, 1 )
 			i --
 		}
 	}
@@ -1289,16 +1259,17 @@ class Cope {
 			this.matClocksLight
 		)
 		b.label.position.z = 5
+		b.label.position.y = 0
 		b.obj.add( b.label ) 
 	}
 	
 	updateFuelBar() {
 		
 		if ( this.car.currentFuel > 1 ) {
-			this.bars.fuel.label.scale.y = this.car.currentFuel / this.car.allFuel
-			this.bars.fuel.label.position.y =  this.bars.fuel.label.scale.y * 90 - 90
+			this.screens.fuel.label.scale.y = this.car.currentFuel / this.car.allFuel
+			this.screens.fuel.label.position.y =  this.screens.fuel.label.scale.y * 90 - 90
 		} else {
-			this.bars.fuel.label.scale.y = 0.000001
+			this.screens.fuel.label.scale.y = 0.000001
 		}			
 	}
 	
@@ -1399,8 +1370,8 @@ class Cope {
 	
 	updateWeelsBar() {
 		
-		this.bars.rotations.labelFL.rotation.z = this.car.spdRot * 70.0
-		this.bars.rotations.labelFR.rotation.z = this.car.spdRot * 70.0		
+		this.screens.rotations.labelFL.rotation.z = this.car.spdRot * 70.0
+		this.screens.rotations.labelFR.rotation.z = this.car.spdRot * 70.0		
 	}	
 	
 	
