@@ -60,20 +60,17 @@ class Hero {
 		this.renderPass.enabled = true		
 	}
 	
-	appendCarIfNear(car) {
-	
-		if (car == 'none') {					
+	appendNearCar(car) {
+		
+		if (!car) {					
 			this.nearCar = null	
 			setOpasityButtonsHeroNearCar(0)						
-			return	
-		} else {
-			setOpasityButtonsHeroNearCar(1)			
+		} else {			
 			buttEnterCope.style.opacity = 1.0
 			if ( ! g.heroBomb ) buttAddBomb.style.opacity = 1.0	
 			if ( car.checkHealth() ) buttRepairCar.style.opacity = 1.0 	
 			this.nearCar = car
-        }		
-					
+        }						
 	}
 }
 
@@ -109,3 +106,4 @@ const addBomb = car => {
 	if ( ! g.heroBomb ) g.heroBomb = new Bomb( car )
 	buttAddBomb.style.opacity = 0	
 }
+

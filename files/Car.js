@@ -74,7 +74,7 @@ class Car {
 		this.geoms.base = prepearGeometryToExploisive( s.geomCar.clone() )	
 		this.modelBase = new THREE.Mesh(
 			this.geoms.base.geom,
-			new THREE.MeshPhongMaterial( { color: 0xdddd55 } )
+			new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
 		)
 		this.modelBase.position.y = -22 
 		this.model.add(this.modelBase)
@@ -83,7 +83,7 @@ class Car {
 		this.geoms.gun =  prepearGeometryToExploisive( s.geomCarGun.clone() ) 
 		this.modelGun = new THREE.Mesh(
 			this.geoms.gun.geom,
-			new THREE.MeshPhongMaterial( { color: 0x05e099 } )
+			new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
 		)
 		this.modelGun.position.y = -22
 		this.model.add( this.modelGun )	
@@ -180,6 +180,8 @@ class Car {
 		
 		if ( this.lives < 0 && this.state == "none" ) { 
 			this.state ='explosive'
+			//console.log('B!')
+			s.rendererCreateBoomScreen()
 			cope.boomForScreens()
 		}	
 	}
@@ -223,7 +225,11 @@ class Car {
 		this.isRemovable = true
 	}
 
-	hit() {
+	hit( updateCopeIfIt ) {
+		
+		if ( Math.random() > 0.05 ) return //testFunc   
+		
+		if ( updateCopeIfIt ) updateCopeIfIt() 
 		
 		let dam = Math.floor( Math.random() * 3 )
 		

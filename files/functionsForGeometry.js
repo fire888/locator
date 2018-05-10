@@ -10,6 +10,17 @@ const checkKvadrant = obj => {
 	} )
 }
 
+const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID ) => {
+  
+  let itemWitchIntersept = false
+  targetsArr.forEach((item, i, arr) => {
+    if (obj.kvadrant.x == item.kvadrant.x && obj.kvadrant.z == item.kvadrant.z) {
+      if (item.id != exclusionObjID) itemWitchIntersept = item
+    }
+  })
+  return itemWitchIntersept 
+}	
+
 const prepearGeometryToExploisive = ob => {
 		
 	let gObject = {
@@ -83,7 +94,7 @@ const createNoiseTexture = ( w, h ) => {
 	for ( let y = 0; y < w; ++y ) {
 		for ( let x = 0; x < h; ++x ) {
 			const a = Math.floor( Math.random() * 256 )
-			pixelData.push( a, a, a, 1 )
+			pixelData.push( 0, a*0.7, 0, 1 )
 		}
 	}
 	const dataTexture = new THREE.DataTexture(

@@ -15,10 +15,10 @@ sv.spaceVirt = () => {
 	/** SCENE FOR COPE CLOCKS *********************/
 	
 	sv.scene = new THREE.Scene()
-	sv.scene.background = new THREE.Color( 0x060c1a )
-	sv.scene.fog = new THREE.FogExp2( 0x060c1a, 0.0012 )		
+	sv.scene.background = new THREE.Color( 0x002500 )
+	sv.scene.fog = new THREE.FogExp2( 0x002500, 0.0012 )		
 	
-	sv.ambient = new THREE.AmbientLight( 0x06253a, 1.0 )
+	sv.ambient = new THREE.AmbientLight( 0x002500, 1.0 )
 	sv.scene.add( sv.ambient )	
 	
 	sv.camera =  new THREE.PerspectiveCamera( 70, 300 / 300, 1, 10000 )
@@ -216,7 +216,7 @@ const NoiseShader = {
 			'vec2 uv = vUv;',
 			'vec4 r = texture2D( render, uv );',
 			'float n = gold_noise(uv, iTime);',
-			'gl_FragColor  = vec4( n * 0.6, n * 0.6, n * 0.6,  1.0) * amountNoise * 2.0 + r * ( 1.0 - amountNoise );',
+			'gl_FragColor  = vec4( n * 0.0, n * 0.6, n * 0.0,  1.0) * amountNoise * 01.0 + r * ( 1.0 - amountNoise );',
 		'}'
 	].join("\n")
 }	
@@ -253,11 +253,11 @@ class Cope {
 		this.light = new THREE.AmbientLight( 0xffffff, 1.0 )
 		this.sc.add( this.light )
 		
-		this.backColor = 0x080603
-		this.scrColor = 0x060c1a
+		this.backColor = 0x000300
+		this.scrColor = 0x002500
 		this.noiseShaderMat = new THREE.ShaderMaterial( NoiseShader )
-		this.matClocksLight = new THREE.MeshBasicMaterial( { color: 0x007733 } )
-		this.matScreens = new THREE.MeshBasicMaterial( { color: 0x060c1a } )		
+		this.matClocksLight = new THREE.MeshBasicMaterial( { color: 0x008000 } )
+		this.matScreens = new THREE.MeshBasicMaterial( { color: 0x003500 } )		
 		this.matBlackFrames = new THREE.MeshBasicMaterial( { color: this.backColor } )			
 		
 		this.renderPass = new THREE.RenderPass( this.sc, this.cam )
@@ -470,7 +470,12 @@ class Cope {
 	render( scene, renderer, time ) {
 		
 		if ( ! this.car ) return
-			
+		
+		if ( this.car.state != 'explosive' ) { 
+		  this.car.move() 
+		} else  { 
+		  return exitCope()
+		}		
 		
 		/** draw Compass */
 		this.screens.compas.obj.rotation.z = -this.car.model.rotation.y

@@ -20,9 +20,9 @@
  
 /** INSTANSES OF GAME OBJECT */
 const g = {
-	arrBullets: [],
-	arrCars: [],
-	heroBomb: null
+  arrBullets: [],
+  arrCars: [],
+  heroBomb: null
 }
 
 /** UI BUTTONS/KEYBOARD SPACE */
@@ -30,10 +30,10 @@ const ui = () => {}
 
 /** SCENE ASSETS */
 const s = {
-	loader: new THREE.OBJLoader(),
-	geomCar: null,
-	geomCarGun: null,
-	carCameras: {}	
+  loader: new THREE.OBJLoader(),
+  geomCar: null,
+  geomCarGun: null,
+  carCameras: {}	
 } 
 
 /** MAIN VARS */
@@ -42,7 +42,7 @@ let cope, hero
 
 
 /**************************************************;
- * LOAD SCENE
+ * LOAD
  **************************************************/
 
  
@@ -51,11 +51,11 @@ window.onload = () => loadAssets()
 
 const loadAssets = () => {	
   return new Promise((resolve) => {  
-	s.loadModelCar(resolve) 		
+      s.loadGeometry('s.geomCar', 'files/assets/car.obj', resolve)	
   })
   .then(() => {
     return new Promise((resolve) => {	
-      s.loadModelGun(resolve)	
+      s.loadGeometry('s.geomCarGun', 'files/assets/carGun.obj', resolve)	
     })
   })
   .then(() => { 
@@ -63,38 +63,21 @@ const loadAssets = () => {
   })
 }  
 
- 
-s.loadModelCar = res => {
-	
-  s.loader.load('files/assets/car.obj', (obj) => {
-    obj.traverse((child) => {	
-      if (child instanceof THREE.Mesh != true) return
-      if (typeof child.geometry.attributes.position.array != "object") return
-	  
-      s.geomCar = child.geometry
-      res()
-    })
-  })	
-}
-
-
-s.loadModelGun = res => {
-	
-  s.loader.load('files/assets/carGun.obj', (obj) => {
+s.loadGeometry = (targetVariable, path, onloadFunc) => {
+  s.loader.load(path, (obj) => {
     obj.traverse((child) => {
       if (child instanceof THREE.Mesh != true) return
-      if (typeof child.geometry.attributes.position.array != "object") return
-	  
-      s.geomCarGun = child.geometry
-	  res()
+      if (typeof child.geometry.attributes.position.array != "object") return 
+      eval(targetVariable + '= child.geometry') 	  
+	  onloadFunc()
     })
-  })	
+  })
 }
 
 
 
 /**************************************************;
- * INIT GAME
+ * INIT 
  **************************************************/
 
 const initGame = () => {
@@ -129,7 +112,7 @@ const initRenderer = () => {
 const initScene = () => { 
 
   s.scene = new THREE.Scene()
-  s.scene.background = new THREE.Color( 0x060c1a )
+  s.scene.background = new THREE.Color( 0x00000 )
   s.scene.fog = new THREE.FogExp2( 0x060c1a, 0.0012 )		
 
   s.lightPoint = new THREE.PointLight()
@@ -141,11 +124,8 @@ const initScene = () => {
 
   s.floor = new THREE.Mesh(
 	new THREE.PlaneGeometry(10000, 10000, 100, 100),
-	new THREE.MeshBasicMaterial({
-		color: 0x0bd592,
-		wireframe: true,
-		wireframeLinewidth: 0.5
-	}))
+	new THREE.ShaderMaterial(matShaderFloor)
+  )
   s.floor.rotation.x = -Math.PI/2
   s.floor.position.y = -30
   s.scene.add(s.floor)
@@ -183,7 +163,7 @@ const initCars = () => {
 
  
 /**************************************************;
- * ANIMATE GAME PER FRAME
+ * ANIMATE PER FRAME
  **************************************************/
   
 const animate = () => {
@@ -198,110 +178,103 @@ const animate = () => {
   requestAnimationFrame(animate)	
 }
 
-
 const animateHero = () => {
 	
-  if (! hero.isOutOfCar) return	
+  if ( ! hero.isOutOfCar ) return	
   
   hero.render(s.renderer, s.scene)
-  hero.appendCarIfNear( checkNearCar() )
+  hero.appendNearCar(check_CAR_near_HERO())	  
 }
 
-const checkNearCar = () => {
+const check_CAR_near_HERO = ( nearestCar = false ) => {
   
-  let isHeroNearCar = false	
   g.arrCars.forEach((car, i, arr) => {
-    if (hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z) {
-      if (car.state == 'none') {
-		isHeroNearCar = true		
-		return car
+    if ( hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z ) {
+      if ( car.state == 'none' ) {
+		nearestCar = car
       }		  
     }
   })
-  if (! isHeroNearCar) return 'none'
+  return nearestCar	  
 }
-
 
 const animateCope = () => {
 	
-	let time = s.clock.getDelta()	
-	if ( cope ) {
-		cope.render( s.scene, s.renderer, time )
-		if ( cope.car ) {
-			cope.car.state != 'explosive' ? cope.car.move() : exitCope()	
-			
-			/** hitcar TEST FUNCTION */
-			if ( Math.random() * 10 < 1 ) {
-				cope.car.hit()
-				cope.updateHealthScreenBars()
-			}				
-		}
-	}
+  if ( cope.car == null ) return 
+
+  let time = s.clock.getDelta()	
+  cope.car.hit(cope.updateHealthScreenBars()) //test func    
+  cope.render(s.scene, s.renderer, time)
 }
 
 const animateBullets = () => {
-	/** update bullets */
-	g.arrBullets.forEach( ( bullet, i, arr ) => {
-		bullet.render()
-		g.arrCars.forEach( ( car ) => {
-			if ( car.kvadrant.x == bullet.kvadrant.x && car.kvadrant.z == bullet.kvadrant.z ) {
-				if ( car.id != bullet.carId && car.state == 'none' ) {
-					bullet.deleteObj()
-					car.lives --
-					car.checkLife()
-				}	
-			}
-		} )	
-		if ( bullet.isRemovable ){
-			arr.splice( i, 1 )
-			i --
-			bullet = null
-		}			
-	} )
+  
+  g.arrBullets.forEach((bullet, i, arr) => {
+    
+    if ( bullet.isRemovable ) { 
+      removeObjectFromArr(bullet, i, arr) 
+      return 
+    }
+    
+	bullet.render()	
+    
+	let targetCar = checkInterseptionsKvadrant(bullet, g.arrCars, bullet.carId)
+	if ( ! targetCar ) return
+    bullet.deleteObj()
+    targetCar.lives--
+    targetCar.checkLife()	
+  })
 }
 
 const animateCars = () => {
-	g.arrCars.forEach( ( car, i, arr ) => {
-		if ( car.state != "none" ) car.render()
-		if ( car.isRemovable ) {
-			arr.splice( i, 1 )
-			car = null
-			i --
-		}
-	} )
+
+  g.arrCars.forEach((car, i, arr) => {
+    if ( car.isRemovable ) {
+      removeObjectFromArr(car, i, arr)
+	  return
+	}	  
+    if ( car.state != "none" ) car.render()
+  })
 }
 
 const animateBombs = () => {
 	
-	if ( g.heroBomb ) g.heroBomb.update()
+  if ( g.heroBomb ) g.heroBomb.update()
 }
 
-THREE.AdditiveBlendingShader = {
-  uniforms: {
-    tDiffuse: { value:null },
-    tAdd: { value:null }
-  },
+const removeObjectFromArr = (item, i, arr) => {
+	
+  arr.splice(i, 1)
+  item = null
+}	  
 
-  vertexShader: [
-    "varying vec2 vUv;",
-    "void main() {",
-      "vUv = uv;",
-      "gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-    "}"
-  ].join("\n"),
+/**************************************************;
+ * POSTPROCESSING BOOM
+ **************************************************/
 
-  fragmentShader: [
-    "uniform sampler2D tDiffuse;",
-    "uniform sampler2D tAdd;",
-    "varying vec2 vUv;",
-    "void main() {",
-      "vec4 color = texture2D( tDiffuse, vUv );",
-      "vec4 add = texture2D( tAdd, vUv );",
-      "gl_FragColor = color + add;",
-    "}"
-  ].join("\n")
-};
+s.rendererCreateBoomScreen = () => {
+	
+  s.rendererMoreBoom()
+}
 
+s.rendererMoreBoom = () => {
+	
+  if ( s.simplePass.uniforms.amountFlash.value < 1.0 ){
+    s.simplePass.uniforms.amountFlash.value += 0.5
+	setTimeout( s.rendererMoreBoom, 50 )	
+  } else {
+	setTimeout( s.rendererLessBoom, 50 )	  
+  } 
+}
+
+s.rendererLessBoom = () => {
+  if ( s.simplePass.uniforms.amountFlash.value > 0.01 ){
+    s.simplePass.uniforms.amountFlash.value -= 0.03
+	setTimeout( s.rendererLessBoom, 50 )	
+  } else {
+    s.simplePass.uniforms.amountFlash.value = 0.0	  
+  } 	
+}
 
 /**************************************************;
  * RESIZE SCENE
@@ -313,7 +286,7 @@ window.addEventListener( 'resize', handleWindowResize, false )
 
 
 /**************************************************;
- * INTERFACE
+ * USER INTERFACE
  **************************************************/
 
  
