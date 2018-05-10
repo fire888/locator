@@ -45,7 +45,6 @@ let cope, hero
  * LOAD
  **************************************************/
 
- 
 window.onload = () => loadAssets()
 	
 
@@ -183,12 +182,7 @@ const animateHero = () => {
   if ( ! hero.isOutOfCar ) return	
   
   hero.render(s.renderer, s.scene)
-  hero.appendNearCar(check_CAR_near_HERO())	  
-}
-
-const check_CAR_near_HERO = () => {
-  
-  return checkInterseptionsKvadrant(hero, g.arrCars)   
+  hero.appendNearCar(checkInterseptionsKvadrant(hero, g.arrCars))	  
 }
 
 const animateCope = () => {
@@ -224,8 +218,8 @@ const animateCars = () => {
   g.arrCars.forEach((car, i, arr) => {
     if ( car.isRemovable ) {
       removeObjectFromArr(car, i, arr)
-	  return
-	}	  
+      return
+    }	  
     if ( car.state != "none" ) car.render()
   })
 }
@@ -241,14 +235,11 @@ const removeObjectFromArr = (item, i, arr) => {
   item = null
 }	  
 
-/**************************************************;
- * POSTPROCESSING BOOM
- **************************************************/
 
-s.rendererCreateBoomScreen = () => {
-	
-  s.rendererMoreBoom()
-}
+
+/**************************************************;
+ * POSTPROCESSING ANIMATION
+ **************************************************/
 
 s.rendererMoreBoom = () => {
 	
@@ -261,6 +252,7 @@ s.rendererMoreBoom = () => {
 }
 
 s.rendererLessBoom = () => {
+	
   if ( s.simplePass.uniforms.amountFlash.value > 0.01 ){
     s.simplePass.uniforms.amountFlash.value -= 0.3
 	setTimeout( s.rendererLessBoom, 50 )	
@@ -268,6 +260,8 @@ s.rendererLessBoom = () => {
     s.simplePass.uniforms.amountFlash.value = 0.0	  
   } 	
 }
+
+
 
 /**************************************************;
  * RESIZE SCENE
@@ -287,59 +281,58 @@ window.addEventListener( 'resize', handleWindowResize, false )
  
 const keys = {
 	
-	up: false,
-	down: false,
-	left: false,
-	right: false,
-	A: false,
-	D: false,
-	B: false,
-	R: false,
-	enter: false,
-	space: false
+  up: false,
+  down: false,
+  left: false,
+  right: false,
+  A: false,
+  D: false,
+  B: false,
+  R: false,
+  enter: false,
+  space: false
 }
 
 const keyUpdate = (keyEvent, down) => {
-	
-	switch(keyEvent.keyCode) {
-		
-		case 38:
-			keys.up = down
-			break
-		case 40:
-			keys.down = down
-			break
-		case 37:
-			keys.left = down
-			break
-		case 39:
-			keys.right = down
-			break
-		case 65:
-			keys.A = down
-			break
-		case 68:
-			keys.D = down
-			break
-		case 87:
-			keys.W = down
-			break
-		case 83:
-			keys.S = down
-			break
-		case 13:
-			keys.enter = down
-			break
-		case 32:
-			keys.space = down				
-			break
-		case 66:
-			keys.B = down				
-			break
-		case 82:
-			keys.R = down				
-			break				
-	}
+
+  switch(keyEvent.keyCode) {
+    case 38:
+      keys.up = down
+      break
+    case 40:
+      keys.down = down
+      break
+    case 37:
+      keys.left = down
+      break
+    case 39:
+      keys.right = down
+      break
+    case 65:
+      keys.A = down
+      break
+    case 68:
+      keys.D = down
+      break
+    case 87:
+      keys.W = down
+      break
+    case 83:
+      keys.S = down
+      break
+    case 13:
+      keys.enter = down
+      break
+    case 32:
+     keys.space = down				
+     break
+    case 66:
+     keys.B = down				
+     break
+    case 82:
+     keys.R = down				
+     break				
+  }
 }
  
 document.addEventListener( "keydown", event => keyUpdate( event, true ) )
@@ -363,17 +356,20 @@ let buttEnterCope = document.getElementById( 'enterCope' )
 buttEnterCope.onclick = () => keys.enter = true
 
 let buttAddBomb = document.getElementById('addBomb') 
-buttEnterCope.onclick = () =>  keys.B = true
+buttEnterCope.onclick = () => keys.B = true
 
 let buttRepairCar = document.getElementById('repair') 
-buttEnterCope.onclick = () =>  { 
-	keys.R = true 
-}	
+buttEnterCope.onclick = () => keys.R = true 
+
 
 let buttFire = document.getElementById( 'gunFire' ) 
 buttFire.onclick = () => keys.space = true
 
-const setOpasityButtonsHeroNearCar = opas => { 
+
+/** BUTTONS STYLES *********************************/
+
+const setOpasityButtonsHeroNearCar = opas => {
+	
 	buttEnterCope.style.opacity = opas
 	buttAddBomb.style.opacity = opas
 	buttRepairCar.style.opacity = opas 

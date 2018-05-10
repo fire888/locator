@@ -28,7 +28,7 @@ class Bomb {
 	
 	boom() {
 		
-		s.rendererCreateBoomScreen()
+		s.rendererMoreBoom()
 		this.car.model.remove( this.mesh )		
 		this.car.state = 'explosive'
 		this.car = null
