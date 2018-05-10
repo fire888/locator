@@ -10,12 +10,14 @@ const checkKvadrant = obj => {
 	} )
 }
 
-const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID ) => {
+const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID = -100 ) => {
   
   let itemWitchIntersept = false
   targetsArr.forEach((item, i, arr) => {
     if (obj.kvadrant.x == item.kvadrant.x && obj.kvadrant.z == item.kvadrant.z) {
-      if (item.id != exclusionObjID) itemWitchIntersept = item
+	  if (item.state != 'none') return	
+      if (item.id == exclusionObjID) return  
+	  itemWitchIntersept = item
     }
   })
   return itemWitchIntersept 

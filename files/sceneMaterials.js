@@ -44,8 +44,11 @@ SimpleShader = {
     "varying vec2 vUv;",
     "void main(){",
       "vec2 uv = vUv;",
-	  'vec4 txtIsh = texture2D(tDiffuse, uv);',	
-      "gl_FragColor = vec4(txtIsh.x  + amountFlash, txtIsh.y + amountFlash, txtIsh.z, 1.0);",
+	  'vec4 txtIsh = texture2D(tDiffuse, uv);',
+      
+	  'vec4 invert = vec4(txtIsh.y*amountFlash*6.0,txtIsh.y*amountFlash*6.0,txtIsh.y*amountFlash*6.0, 0.0);', 
+	  
+      "gl_FragColor = vec4(txtIsh.x  + amountFlash, txtIsh.y + amountFlash, txtIsh.z, 1.0)-invert;",
     "}"
  ].join( "\n" )
 }

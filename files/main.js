@@ -186,16 +186,9 @@ const animateHero = () => {
   hero.appendNearCar(check_CAR_near_HERO())	  
 }
 
-const check_CAR_near_HERO = ( nearestCar = false ) => {
+const check_CAR_near_HERO = () => {
   
-  g.arrCars.forEach((car, i, arr) => {
-    if ( hero.kvadrant.x == car.kvadrant.x && hero.kvadrant.z == car.kvadrant.z ) {
-      if ( car.state == 'none' ) {
-		nearestCar = car
-      }		  
-    }
-  })
-  return nearestCar	  
+  return checkInterseptionsKvadrant(hero, g.arrCars)   
 }
 
 const animateCope = () => {
@@ -216,10 +209,10 @@ const animateBullets = () => {
       return 
     }
     
-	bullet.render()	
+    bullet.render()	
     
-	let targetCar = checkInterseptionsKvadrant(bullet, g.arrCars, bullet.carId)
-	if ( ! targetCar ) return
+    let targetCar = checkInterseptionsKvadrant(bullet, g.arrCars, bullet.carId)
+    if ( ! targetCar ) return
     bullet.deleteObj()
     targetCar.lives--
     targetCar.checkLife()	
@@ -259,7 +252,7 @@ s.rendererCreateBoomScreen = () => {
 
 s.rendererMoreBoom = () => {
 	
-  if ( s.simplePass.uniforms.amountFlash.value < 1.0 ){
+  if ( s.simplePass.uniforms.amountFlash.value < 3.0 ){
     s.simplePass.uniforms.amountFlash.value += 0.5
 	setTimeout( s.rendererMoreBoom, 50 )	
   } else {
@@ -269,7 +262,7 @@ s.rendererMoreBoom = () => {
 
 s.rendererLessBoom = () => {
   if ( s.simplePass.uniforms.amountFlash.value > 0.01 ){
-    s.simplePass.uniforms.amountFlash.value -= 0.03
+    s.simplePass.uniforms.amountFlash.value -= 0.3
 	setTimeout( s.rendererLessBoom, 50 )	
   } else {
     s.simplePass.uniforms.amountFlash.value = 0.0	  
