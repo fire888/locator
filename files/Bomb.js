@@ -16,7 +16,7 @@ class Bomb {
 			new THREE.MeshBasicMaterial( { color: 0xff0000 } )
 		)
 		
-		this.mesh.position.set( 0, -21, 0 )
+		this.mesh.position.set( 0, -15, 0 )
 		car.model.add( this.mesh )
 	}
 	

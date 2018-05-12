@@ -59,7 +59,7 @@ const geomAnimateExplosive = b => {
 	
 	for ( let i = 0, l = geom.vertices.length; i < l; i += 3 ) {
 			
-		if ( geom.vertices[ i ].y > -10 ) {
+		if ( geom.vertices[ i ].y > 0 ) {
 			
 			spdBoom[ i ].y -= 0.008
 			
@@ -110,4 +110,56 @@ const createNoiseTexture = ( w, h ) => {
 	dataTexture.needsUpdate = true
 
 	return dataTexture
+}
+
+
+const prepearGeometryToAnimate = ob => {
+
+	let gObject = {
+		constY: [],	
+		constZ: [],	
+		constX: [],
+		spdBoom: [],
+		geom: ob 			
+	}
+
+	let geometry = new THREE.Geometry().fromBufferGeometry( gObject.geom )
+		
+	for ( let vi = 0; vi < geometry.vertices.length; vi ++ ) {
+			
+		gObject.constY.push( geometry.vertices[ vi ].y )   
+		gObject.constZ.push( geometry.vertices[ vi ].z ) 		
+		gObject.constX.push( geometry.vertices[ vi ].x )
+
+		gObject.spdBoom.push( {
+			x: geometry.vertices[ vi ].x/50*(-1), 
+			y: -0.5,  
+			z: geometry.vertices[ vi ].x/50*(-1)  				
+		} )	
+	}	
+	
+	gObject.geom = geometry 
+		
+	return gObject	
+}	
+
+
+const animationClose = ob => {
+
+	let { spdBoom, geom, constX, constY, constZ } = ob
+	
+	for ( let i = 0, l = geom.vertices.length; i < l; i += 3 ) {
+			
+		geom.vertices[ i ].x = constX[ i ] += spdBoom[ i ].x
+		geom.vertices[ i ].y = constY[ i ] += spdBoom[ i ].y
+		geom.vertices[ i ].z = constZ[ i ] += spdBoom[ i ].z
+		geom.vertices[ i+1 ].x = constX[ i+1 ] += spdBoom[ i ].x
+		geom.vertices[ i+1 ].y = constY[ i+1 ] += spdBoom[ i ].y
+		geom.vertices[ i+1 ].z = constZ[ i+1 ] += spdBoom[ i ].z	
+		geom.vertices[ i+2 ].x = constX[ i+2 ] += spdBoom[ i ].x
+		geom.vertices[ i+2 ].y = constY[ i+2 ] += spdBoom[ i ].y
+		geom.vertices[ i+2 ].z = constZ[ i+2 ] += spdBoom[ i ].z				
+	}
+		
+	geom.verticesNeedUpdate = true	
 }

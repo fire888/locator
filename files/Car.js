@@ -62,7 +62,7 @@ class Car {
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
 		)
-		this.model.position.set ( carParams.pos.x, 0, carParams.pos.z )
+		this.model.position.set ( carParams.pos.x, -6, carParams.pos.z )
 		s.scene.add( this.model )
 		
 		/** cleate label for locators */
@@ -181,7 +181,6 @@ class Car {
 		if ( this.lives < 0 && this.state == "none" ) { 
 			this.state ='explosive'
 			s.rendererStartFlash()
-			cope.boomForScreens()
 		}	
 	}
 
@@ -226,7 +225,7 @@ class Car {
 
 	hit( updateCopeIfIt ) {
 		
-		if ( Math.random() > 0.05 ) return //testFunc   
+		if ( Math.random() > 0.0005 ) return //testFunc   
 		
 		if ( updateCopeIfIt ) updateCopeIfIt() 
 		
@@ -291,7 +290,6 @@ class Car {
 Car.ID = 0	
 
 
-
 /**************************************************;
  * CREATE CAR CAMERAS
  **************************************************/
@@ -305,33 +303,33 @@ initCarCameras = () => {
 	
 	/** gun */
 	let cam = new THREE.PerspectiveCamera( 20, 300 / 200, 1, 10000 )
-	cam.position.set( 0, -2.5, 0 )
+	cam.position.set( 0, 4, 0 )
 	s.carCameras.pivot.add( cam )
 	s.carCameras.gun = cam
 			
 	/** front */ 
 	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-	cam.position.set( 0, -15, -30 )
+	cam.position.set( 0, -10, -30 )
 	s.carCameras.pivot.add( cam )
 	s.carCameras.front = cam	
 
 	/** back */
 	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-	cam.position.set( 0, -15, 30 )
+	cam.position.set( 0, -10, 30 )
 	cam.rotation.y = Math.PI
 	s.carCameras.pivot.add( cam )
 	s.carCameras.back = cam	
 
 	/** left */
 	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-	cam.position.set( -20, -15, 30 )
+	cam.position.set( -20, -10, 30 )
 	cam.rotation.y = Math.PI / 2	
 	s.carCameras.pivot.add( cam )
 	s.carCameras.left = cam	
 
 	/** right */
 	cam = new THREE.PerspectiveCamera( 45, 300 / 200, 1, 10000 )
-	cam.position.set( 20, -15, 30 )
+	cam.position.set( 20, -10, 30 )
 	cam.rotation.y = -Math.PI / 2	
 	s.carCameras.pivot.add( cam )
 	s.carCameras.right = cam	

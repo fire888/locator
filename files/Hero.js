@@ -12,7 +12,7 @@ class Hero {
 		this.nearCar = null
 		
 		/** camera */
-		this.cam = new THREE.PerspectiveCamera( 70, 300 / 200, 1, 10000 )			
+		this.cam = new THREE.PerspectiveCamera( 70, 300 / 200, 1, 10000 )		
 		sc.add( this.cam )
 	
 		/** renderer */

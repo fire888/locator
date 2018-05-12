@@ -167,65 +167,6 @@ sv.removeAllBar = d => {
 }
 
 
-
-/**************************************************;
- * COPE SCREENS SHADER
- **************************************************/
-
-const NoiseShader = {
-	
-	uniforms: {
-		
-		iTime: { value: 0.1 },
-		amountNoise: { value: 0.5 },
-		amountFlash: { value: 0.0 },
-		render: { value: null },
-	},
-	
-	vertexShader: [
-	
-		"varying vec2 vUv;",
-		"void main() {",
-			"vUv = uv;",
-			"gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );",
-		"}"
-	].join("\n"), 
-	
-	fragmentShader: [  
-	
-		// Gold Noise ©2017-2018 dcerisano@standard3d.com
-		// - based on the Golden Ratio, PI and the Square Root of Two
-		// - fastest noise generator function
-		// - works with all chipsets (including low precision)
-
-		'precision lowp  float;',
-		
-		'varying vec2 vUv;',
-		'uniform float iTime;',
-		'uniform sampler2D render;',
-		'uniform float amountNoise;',	
-		'uniform float amountFlash;',
-		
-		'float PHI = 1.61803398874989484820459 * 00000.1;', // Golden Ratio   
-		'float PI  = 3.14159265358979323846264 * 00000.1;', // PI
-		'float SQ2 = 1.41421356237309504880169 * 10000.0;', // Square Root of Two
-
-		'float gold_noise(in vec2 coordinate, in float seed){',
-			'return fract(sin(dot(coordinate*(seed+PHI), vec2(PHI, PI)))*SQ2);',
-		'}',
-		
-		'void main(){',   
-			'vec2 uv = vUv;',
-			'vec4 renderTex = texture2D( render, uv );',
-			'float n = gold_noise(uv, iTime);',
-			'gl_FragColor  = vec4( n * 0.0, n * 0.6, n * 0.0,  1.0) * amountNoise * 01.0 + renderTex * ( 1.0 - amountNoise ) + amountFlash;',
-		'}'
-	].join("\n")
-}	
-
-
-
-
 /**************************************************;
  * COPE
  **************************************************/
@@ -392,7 +333,7 @@ class Cope {
 				pos: { width: 220, height: 220, x: -370, y: 215, z: 60, rX: 0.2, rY: 0.7 },
 				typeGeom: 'circle',
 				mesh: null, map: null, mat: null, uniforms: null, 
-				standartNoise: 0.02,				
+				standartNoise: 0.0,				
 				scene: sv.scene,	
 				camera: sv.camera,	
 				init: ( s ) => { this.createScreen( s ) }					
@@ -402,7 +343,7 @@ class Cope {
 				pos: { width: 210, height: 130, x: -280, y: -240, z: 53, rX: -0.4, rY: 0 },
 				typeGeom: 'plane',
 				mesh: null, map: null, mat: null, uniforms: null, 
-				standartNoise: 0.02,				
+				standartNoise: 0.0,				
 				scene: sv.scene,	
 				camera: sv.cameraParams,
 				init: ( s ) => { this.createScreen( s ) },				
@@ -468,31 +409,31 @@ class Cope {
 
 	createScreen( obj ) {
 			
-			obj.map = new THREE.WebGLRenderTarget( 
-				obj.pos.width, obj.pos.height, { 
-					minFilter: THREE.LinearFilter, 
-					magFilter: THREE.NearestFilter
-				} )
-			obj.mat = this.noiseShaderMat.clone()
-			
-			if ( obj.typeGeom == 'plane')	
-				obj.mesh = new THREE.Mesh(
-					new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
-					obj.mat
-				)
+		obj.map = new THREE.WebGLRenderTarget( 
+			obj.pos.width, obj.pos.height, { 
+				minFilter: THREE.LinearFilter, 
+				magFilter: THREE.NearestFilter
+			} )
+		obj.mat = this.noiseShaderMat.clone()
+		
+		if ( obj.typeGeom == 'plane')	
+			obj.mesh = new THREE.Mesh(
+				new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
+				obj.mat
+			)
 
-			if ( obj.typeGeom == 'circle')	
-				obj.mesh = new THREE.Mesh(
-					new THREE.CircleGeometry( obj.pos.width/2, 28 ),
-					obj.mat
-				)			
-				
-			obj.uniforms = obj.mat.uniforms
-			obj.uniforms.render.value = obj.map.texture
+		if ( obj.typeGeom == 'circle')	
+			obj.mesh = new THREE.Mesh(
+				new THREE.CircleGeometry( obj.pos.width/2, 28 ),
+				obj.mat
+			)			
 			
-			obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
-			obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
-			this.sc.add( obj.mesh )			
+		obj.uniforms = obj.mat.uniforms
+		obj.uniforms.render.value = obj.map.texture
+		
+		obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
+		obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
+		this.sc.add( obj.mesh )			
 	}
 	
 	
@@ -605,7 +546,7 @@ class Cope {
 		
 		this.screens.gun.standartNoise = 1.0 - this.car.health.gun / 20
 		if ( this.car.health.gun < 5 && this.screens.ammo.obj.visible ) 
-			this.destroyBar( this.screens.ammo )	
+			this.destroyBar( this.screens.ammo )
 	}	
 
 	damageBase( dam ) {
@@ -920,31 +861,5 @@ class Cope {
 		b.obj.visible = true
 	}		
 	
-}
-
-
-/** update screens FLash **********************/
-	
-Cope.startFlashInScreens = () => {	
-  for ( let key in cope.screens ) {
-    if ( cope.screens[ key ].type != 'screen' ) return
-    Cope.moreFlashScreen( cope.screens[ key ] )
-  }
-}
-
-Cope.moreFlashScreen = scr => {
-  if ( scr.uniforms.amountFlash.value < 1.0 ) {		
-	scr.uniforms.amountFlash.value += 0.1
-	setTimeout( Cope.moreFlashScreen, 50, scr )	
-  }else{
-    Cope.lessFlashScreen(scr)	
-  }	
-}
-
-Cope.lessFlashScreen = scr => {
-  if ( scr.uniforms.amountFlash.value > 0.01 ) {		
-	scr.uniforms.amountFlash.value -= 0.1
-	setTimeout( Cope.lessFlashScreen, 50, scr )	
-  }
 }
 

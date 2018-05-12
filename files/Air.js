@@ -1,0 +1,51 @@
+
+/**************************************************;
+ * AIR
+ **************************************************/
+ 
+class Air {
+  
+  constructor(car, targetPositionDrop ) {
+	
+    this.targetPositionDrop = targetPositionDrop 	
+    this.isRemovable = false	
+    this.mesh = new THREE.Mesh(
+      s.geomAir,
+	  new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
+    )
+    this.mesh.position.set( this.targetPositionDrop.x, 300, this.targetPositionDrop.z-1500 )
+    s.scene.add(this.mesh)
+
+    this.car = car	
+  }
+  
+  render() {
+    
+    this.mesh.position.z += 5
+	
+    if ( this.mesh.position.z > this.targetPositionDrop.z+3000 ) { 
+	  this.remove()
+	  return
+	}
+
+    if ( this.car ) {
+	  if ( this.mesh.position.z < this.targetPositionDrop.z-500 ) {
+	    this.carUpdate()
+	  } else {
+	    s.startAnimationCarDrop( this.car )
+        this.car = null		
+	  }		  
+	}    
+
+  }
+  
+  carUpdate() {
+	    this.car.model.position.set( this.mesh.position.x, this.mesh.position.y-20, this.mesh.position.z )  			
+  }
+  
+  remove() {
+    s.scene.remove( this.mesh )
+    this.car = null
+	this.isRemovable = true	
+  }
+}

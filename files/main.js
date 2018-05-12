@@ -22,7 +22,8 @@
 const g = {
   arrBullets: [],
   arrCars: [],
-  heroBomb: null
+  heroBomb: null,
+  air: null
 }
 
 /** UI BUTTONS/KEYBOARD SPACE */
@@ -33,6 +34,8 @@ const s = {
   loader: new THREE.OBJLoader(),
   geomCar: null,
   geomCarGun: null,
+  geomAir: null,
+  geomParashute: null,  
   carCameras: {}	
 } 
 
@@ -57,6 +60,16 @@ const loadAssets = () => {
       s.loadGeometry('s.geomCarGun', 'files/assets/carGun.obj', resolve)	
     })
   })
+  .then(() => {
+    return new Promise((resolve) => {	
+      s.loadGeometry('s.geomAir', 'files/assets/air.obj', resolve)	
+    })
+  })
+  .then(() => {
+    return new Promise((resolve) => {	
+      s.loadGeometry('s.geomParashute', 'files/assets/parashute.obj', resolve)	
+    })
+  })   
   .then(() => { 
     initGame()
   })
@@ -86,8 +99,7 @@ const initGame = () => {
   sv.spaceVirt()		
   initCarCameras()
   initCope()
-  initHero()
-  initCars()  
+  initHero() 
   animate()	
 }
 
@@ -112,7 +124,7 @@ const initScene = () => {
 
   s.scene = new THREE.Scene()
   s.scene.background = new THREE.Color( 0x00000 )
-  s.scene.fog = new THREE.FogExp2( 0x060c1a, 0.0012 )		
+  s.scene.fog = new THREE.FogExp2( 0x000000, 0.0012 )		
 
   s.lightPoint = new THREE.PointLight()
   s.lightPoint.position.set( 0, 2000, 1000 )
@@ -123,7 +135,11 @@ const initScene = () => {
 
   s.floor = new THREE.Mesh(
 	new THREE.PlaneGeometry(10000, 10000, 100, 100),
-	new THREE.ShaderMaterial(matShaderFloor)
+	new THREE.MeshBasicMaterial({
+		color: 0x00aa00,
+		wireframe: true,
+		wireframeLinewidth: 0.5
+	})
   )
   s.floor.rotation.x = -Math.PI/2
   s.floor.position.y = -30
@@ -145,19 +161,23 @@ const initHero = () => {
   hero.showView({x:0, z:0})
 }
 
+const initAir = () => {
+  
+  let positionToDropCar = { x: 0, z: 0 }
+  if ( hero.isOutOfCar ) {
+    positionToDropCar = { x: hero.cam.position.x, z: hero.cam.position.z } 
+  } else {
+    positionToDropCar = { x: cope.car.model.position.x,  z: cope.car.model.position.z }   
+  }	 
+ 
+  g.air = new Air( new Car({pos:{x: 0, z: 0}}), positionToDropCar )
+}
 
-const initCars = () => {
-	
-  for (let i=0; i<7; i++) {
-   let carParams = { 
-      pos: {
-        x: Math.random()*100 - 50,
-        z: Math.random()*1000 - 500 		
-      }}    
-	let car = new Car(carParams)
-    g.arrCars.push(car)	
-  }
+const addParashute = car => {
+ 
+  car.parashute = new Parashute( car )
 }  
+  
  
 
  
@@ -172,7 +192,8 @@ const animate = () => {
   animateBullets()
   animateCars()
   animateBombs()
-
+  animateAir()
+  
   s.composer.render()
   requestAnimationFrame(animate)	
 }
@@ -219,7 +240,8 @@ const animateCars = () => {
     if ( car.isRemovable ) {
       removeObjectFromArr(car, i, arr)
       return
-    }	  
+    }	
+    if ( car.parashute ) car.parashute.render()	
     if ( car.state != "none" ) car.render()
   })
 }
@@ -229,6 +251,17 @@ const animateBombs = () => {
   if ( g.heroBomb ) g.heroBomb.update()
 }
 
+const animateAir = () => {
+	
+  if ( g.air ) {
+	if ( g.air.isRemovable ) g.air = null
+  } 
+  if ( g.air ) g.air.render()
+  if ( g.air == null && g.arrCars.length < 5) {
+    initAir()
+  } 	  
+}	
+
 const removeObjectFromArr = (item, i, arr) => {
 	
   arr.splice(i, 1)
@@ -236,36 +269,49 @@ const removeObjectFromArr = (item, i, arr) => {
 }	  
 
 
+s.startAnimationCarDrop = car => {
+  if ( car.model.position.y > -6 ) { 
+    car.model.position.y -= 2 
+    car.model.position.z += 2 
+
+    if ( ! car.parashute && car.model.position.y < 200  ){
+	  addParashute( car )
+	}		
+	setTimeout( s.startAnimationCarDrop, 50, car )
+  } else {
+    car.model.position.y = -6
+	car.kvadrant = checkKvadrant( car.model )
+    g.arrCars.push( car )	
+  }
+}
 
 /**************************************************;
- * POSTPROCESSING ANIMATION
+ * POSTPROCESSING ANIMATION EFFECTS
  **************************************************/
 
 s.rendererStartFlash = () => {
-	
   if ( ! hero.isOutOfCar ) {
-	Cope.startFlashInScreens()
-	return  
-  } else {
-	s.rendererMoreBoom()	  
-  }		
+    cope.boomForScreens()
+  } else {   
+    s.rendererMoreFlash()	  
+  }  		
 }  
  
-s.rendererMoreBoom = () => {
+s.rendererMoreFlash = () => {
     
   if ( s.simplePass.uniforms.amountFlash.value < 3.0 ){
     s.simplePass.uniforms.amountFlash.value += 0.5
-	setTimeout( s.rendererMoreBoom, 50 )	
+	setTimeout( s.rendererMoreFlash, 50 )	
   } else {
-	setTimeout( s.rendererLessBoom, 50 )	  
+	setTimeout( s.rendererLessFlash, 50 )	  
   } 
 }
 
-s.rendererLessBoom = () => {
+s.rendererLessFlash = () => {
 	
   if ( s.simplePass.uniforms.amountFlash.value > 0.01 ){
     s.simplePass.uniforms.amountFlash.value -= 0.3
-	setTimeout( s.rendererLessBoom, 50 )	
+	setTimeout( s.rendererLessFlash, 50 )	
   } else {
     s.simplePass.uniforms.amountFlash.value = 0.0	  
   } 	
