@@ -180,8 +180,7 @@ class Car {
 		
 		if ( this.lives < 0 && this.state == "none" ) { 
 			this.state ='explosive'
-			//console.log('B!')
-			s.rendererCreateBoomScreen()
+			s.rendererStartFlash()
 			cope.boomForScreens()
 		}	
 	}

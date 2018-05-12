@@ -20,7 +20,6 @@ class Hero {
 		s.composer.addPass( this.renderPass )
 		this.renderPass.enabled = false
 	
-		console.log(this.renderPass)
 		/** buttons */
 		this.htmlElems = document.getElementById( 'heroElems' )
 		this.htmlElems.style.display = "none"

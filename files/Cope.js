@@ -178,7 +178,8 @@ const NoiseShader = {
 		
 		iTime: { value: 0.1 },
 		amountNoise: { value: 0.5 },
-		render: { value: null } 
+		amountFlash: { value: 0.0 },
+		render: { value: null },
 	},
 	
 	vertexShader: [
@@ -203,7 +204,8 @@ const NoiseShader = {
 		'uniform float iTime;',
 		'uniform sampler2D render;',
 		'uniform float amountNoise;',	
-
+		'uniform float amountFlash;',
+		
 		'float PHI = 1.61803398874989484820459 * 00000.1;', // Golden Ratio   
 		'float PI  = 3.14159265358979323846264 * 00000.1;', // PI
 		'float SQ2 = 1.41421356237309504880169 * 10000.0;', // Square Root of Two
@@ -214,9 +216,9 @@ const NoiseShader = {
 		
 		'void main(){',   
 			'vec2 uv = vUv;',
-			'vec4 r = texture2D( render, uv );',
+			'vec4 renderTex = texture2D( render, uv );',
 			'float n = gold_noise(uv, iTime);',
-			'gl_FragColor  = vec4( n * 0.0, n * 0.6, n * 0.0,  1.0) * amountNoise * 01.0 + r * ( 1.0 - amountNoise );',
+			'gl_FragColor  = vec4( n * 0.0, n * 0.6, n * 0.0,  1.0) * amountNoise * 01.0 + renderTex * ( 1.0 - amountNoise ) + amountFlash;',
 		'}'
 	].join("\n")
 }	
@@ -463,6 +465,35 @@ class Cope {
 		
 		for ( let key in this.screens ) this.screens[ key ].init( this.screens[ key ] )				
 	}
+
+	createScreen( obj ) {
+			
+			obj.map = new THREE.WebGLRenderTarget( 
+				obj.pos.width, obj.pos.height, { 
+					minFilter: THREE.LinearFilter, 
+					magFilter: THREE.NearestFilter
+				} )
+			obj.mat = this.noiseShaderMat.clone()
+			
+			if ( obj.typeGeom == 'plane')	
+				obj.mesh = new THREE.Mesh(
+					new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
+					obj.mat
+				)
+
+			if ( obj.typeGeom == 'circle')	
+				obj.mesh = new THREE.Mesh(
+					new THREE.CircleGeometry( obj.pos.width/2, 28 ),
+					obj.mat
+				)			
+				
+			obj.uniforms = obj.mat.uniforms
+			obj.uniforms.render.value = obj.map.texture
+			
+			obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
+			obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
+			this.sc.add( obj.mesh )			
+	}
 	
 	
 	/** UPDATE COPE PER SECOND ********************/
@@ -519,8 +550,7 @@ class Cope {
 			}	
 		}			
 	}
-	
-	
+		
 	/** EXIT / ENTER COPE FUNCTIONS ***************/
 	
 	hideView() {
@@ -553,7 +583,6 @@ class Cope {
 
 		for ( let key in ob ) {
 
-			console.log( typeof ob[ key ] )
 			if ( typeof ob[ key ] == 'boolean' ) {
 				
 				if ( ob[ key ] === true ) {
@@ -646,7 +675,7 @@ class Cope {
 
 		for ( let key in this.screens ) {
 			
-			if ( this.screens[key].type != "screen") break
+			if ( this.screens[key].type != "screen" ) break
 			
 			let obj = this.screens[ key ]			
 			obj.uniforms.iTime.value += time * 5
@@ -670,36 +699,7 @@ class Cope {
 	
 	/** FUNCTIONS FOR ALL SCREENS ************************/	
 	
-	createScreen( obj ) {
-			
-			//console.log( obj )
-			obj.map = new THREE.WebGLRenderTarget( 
-				obj.pos.width, obj.pos.height, { 
-					minFilter: THREE.LinearFilter, 
-					magFilter: THREE.NearestFilter
-				} )
-			obj.mat = this.noiseShaderMat.clone()
-			
-			if ( obj.typeGeom == 'plane')	
-				console.log('!')
-				obj.mesh = new THREE.Mesh(
-					new THREE.PlaneGeometry( obj.pos.width, obj.pos.height ),
-					obj.mat
-				)
 
-			if ( obj.typeGeom == 'circle')	
-				obj.mesh = new THREE.Mesh(
-					new THREE.CircleGeometry( obj.pos.width/2, 28 ),
-					obj.mat
-				)			
-				
-			obj.uniforms = obj.mat.uniforms
-			obj.uniforms.render.value = obj.map.texture
-			
-			obj.mesh.position.set( obj.pos.x, obj.pos.y, obj.pos.z )
-			obj.mesh.rotation.set( obj.pos.rX, obj.pos.rY, 0 )		
-			this.sc.add( obj.mesh )			
-	}
 		
 		
 	/** AMMO BAR FUNCTIONS ************************/
@@ -915,11 +915,36 @@ class Cope {
 
 	showBar( b ) {
 	
-		console.log( b )
 		b.screen.material = this.matScreens	
 		b.screen.material.needsUpdate = true
 		b.obj.visible = true
 	}		
 	
+}
+
+
+/** update screens FLash **********************/
+	
+Cope.startFlashInScreens = () => {	
+  for ( let key in cope.screens ) {
+    if ( cope.screens[ key ].type != 'screen' ) return
+    Cope.moreFlashScreen( cope.screens[ key ] )
+  }
+}
+
+Cope.moreFlashScreen = scr => {
+  if ( scr.uniforms.amountFlash.value < 1.0 ) {		
+	scr.uniforms.amountFlash.value += 0.1
+	setTimeout( Cope.moreFlashScreen, 50, scr )	
+  }else{
+    Cope.lessFlashScreen(scr)	
+  }	
+}
+
+Cope.lessFlashScreen = scr => {
+  if ( scr.uniforms.amountFlash.value > 0.01 ) {		
+	scr.uniforms.amountFlash.value -= 0.1
+	setTimeout( Cope.lessFlashScreen, 50, scr )	
+  }
 }
 

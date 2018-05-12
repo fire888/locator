@@ -241,8 +241,18 @@ const removeObjectFromArr = (item, i, arr) => {
  * POSTPROCESSING ANIMATION
  **************************************************/
 
-s.rendererMoreBoom = () => {
+s.rendererStartFlash = () => {
 	
+  if ( ! hero.isOutOfCar ) {
+	Cope.startFlashInScreens()
+	return  
+  } else {
+	s.rendererMoreBoom()	  
+  }		
+}  
+ 
+s.rendererMoreBoom = () => {
+    
   if ( s.simplePass.uniforms.amountFlash.value < 3.0 ){
     s.simplePass.uniforms.amountFlash.value += 0.5
 	setTimeout( s.rendererMoreBoom, 50 )	
