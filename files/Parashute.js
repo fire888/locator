@@ -4,26 +4,26 @@
  **************************************************/
  
 class Parashute {
-  constructor(car) {
+	
+  constructor( car ) {
 				
-    this.isRemovable = false
-	this.state = 'none'
     this.car = car
 	this.objGeom = prepearGeometryToAnimate( s.geomParashute )	
     this.mesh = new THREE.Mesh(
       this.objGeom.geom,
-	  new THREE.MeshPhongMaterial({ 
+	  new THREE.MeshPhongMaterial( { 
 	    color: 0x00aa00, 
 		side: THREE.DoubleSide,
 	    transparent: true,
         opacity: 1.0			
-	  })
+	  } )
     )
-    this.mesh.position.set(0, 5, 0)
+    this.mesh.position.set( 0, 5, 0 )
     this.car.model.add( this.mesh )
   }
   
   render() {
+	  
 	 if ( this.mesh.material.opacity < 0 ) {
 		this.remove()
 		return
@@ -33,6 +33,7 @@ class Parashute {
   }
   
   remove() {
+	  
 	this.car.model.remove( this.mesh )
 	this.objGeom.geom = null
 	this.objGeom = null
@@ -42,19 +43,4 @@ class Parashute {
   }
 }
 
-/*
-s.startAnimationCarDrop = car => {
-  if ( car.model.position.y > -6 ) { 
-    car.model.position.y -= 2 
-    car.model.position.z += 2 
 
-    if ( ! car.parashute && car.model.position.y < 200  ){
-	  addParashute( car )
-	}		
-	setTimeout( s.startAnimationCarDrop, 50, car )
-  } else {
-    car.model.position.y = -6
-	car.kvadrant = checkKvadrant( car.model )
-    g.arrCars.push( car )	
-  }
-}*/

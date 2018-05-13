@@ -92,6 +92,18 @@ sv.createNewLabel = car => {
 		id: car.id,
 		mesh: l	
 	} )
+}
+
+sv.removeLabel = car => {
+	 
+	sv.arrTargets.forEach( ( label, i, arr ) => {
+		if ( label.id == car.id ) {
+		  sv.scene.remove( label.mesh )	  
+		  arr.splice( i, 1 )
+		  label = null	
+		  return
+		}
+	} )
 }	
 
 sv.update = car => {
@@ -99,25 +111,12 @@ sv.update = car => {
 	/** update labels */
 	g.arrCars.forEach( car => { 
 		sv.arrTargets.forEach ( ( label, i, arr )=> {
-			if ( car.state == "none" ) {
-			
-				if ( car.id == label.id ) {
-					label.mesh.position.x = car.model.position.x / 100
-					label.mesh.position.z = car.model.position.z / 100				
-				}
-				
-			} else {
-				
-				/** delete label if car explosive */
-				if ( car.id == label.id ) {
-					sv.scene.remove( label.mesh )
-					label.mesh = null
-					let md = arr[ i ]
-					arr.splice( i, 1 )
-					i--	
-					md = null
-				}				
-			}				
+	
+			if ( car.id == label.id ) {
+				label.mesh.position.x = car.model.position.x / 100
+				label.mesh.position.z = car.model.position.z / 100				
+			}
+										
 		} )
 	} )
 	

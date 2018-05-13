@@ -23,8 +23,6 @@ Gameplay
 | **_Player:_**        |                    |  
 |move forward          | "key up"           |
 |move backward         | "key down"         |
-|move left             | "key A"            |
-|move right            | "key D"            |
 |turn left             | "A"                |  
 |turn right            | "D"                |    
 

@@ -12,6 +12,9 @@ class Car {
 		
 		this.id = Car.ID ++
 		this.lives = 3
+		
+		this.parashute = null 
+		
 		this.health = {
 			gun: 20,
 			cope: 20,
@@ -44,7 +47,7 @@ class Car {
 		this.timerExplosion = 300
 		this.timerRemove = 200
 		
-		this.state = 'none'		
+		carParams.state ? this.state = carParams.state : this.state = 'none'		
 
 		this.spdForBullet = {
 			pX: 0, pZ:0,
@@ -55,9 +58,10 @@ class Car {
 		
 		/** MODEL ******************************/
 		
-		/** pivot */ 
+
 		this.geoms = {}
 		
+		/** pivot */ 
 		this.model = new THREE.Mesh(
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
@@ -197,9 +201,25 @@ class Car {
 	
 	render() {
 		
+		if ( this.state == 'dropFromAir' ) this.animateDropFromAir()		
 		if ( this.state == 'explosive' ) this.animateExplosive()
 		if ( this.state == "afterExplosive" ) this.timerRemove --
 		if ( this.timerRemove < 0 ) this.deleteObj()
+	}
+
+	animateDropFromAir() {
+
+		if ( this.model.position.y > -6 ) { 
+		
+			this.model.position.y -= 1 
+			this.model.position.z += 1 
+			if ( ! this.parashute && this.model.position.y < 200 ) this.parashute = new Parashute( this )//initParashute( this )	
+		} else {
+		  
+			this.model.position.y = -6
+			this.kvadrant = checkKvadrant( this.model )
+			this.parashute ? this.parashute.render() : this.state = 'none' 
+		}	
 	}
 
 	animateExplosive() {
@@ -214,6 +234,7 @@ class Car {
 
 	deleteObj() {
 		
+	    sv.removeLabel( this )
 		this.spdForBullet = null
 		s.scene.remove( this.model )
 		this.model = null

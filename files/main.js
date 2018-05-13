@@ -35,7 +35,8 @@ const s = {
   geomCar: null,
   geomCarGun: null,
   geomAir: null,
-  geomParashute: null,  
+  geomParashute: null, 
+  geomHuman: null,  
   carCameras: {}	
 } 
 
@@ -52,35 +53,40 @@ window.onload = () => loadAssets()
 	
 
 const loadAssets = () => {	
-  return new Promise((resolve) => {  
-      s.loadGeometry('s.geomCar', 'files/assets/car.obj', resolve)	
+  return new Promise( ( resolve ) => {  
+      s.loadGeometry( 's.geomCar', 'files/assets/car.obj', resolve )	
   })
-  .then(() => {
-    return new Promise((resolve) => {	
-      s.loadGeometry('s.geomCarGun', 'files/assets/carGun.obj', resolve)	
+  .then( () => {
+    return new Promise( ( resolve ) => {	
+      s.loadGeometry( 's.geomCarGun', 'files/assets/carGun.obj', resolve )	
     })
   })
-  .then(() => {
-    return new Promise((resolve) => {	
-      s.loadGeometry('s.geomAir', 'files/assets/air.obj', resolve)	
+  .then( () => {
+    return new Promise( ( resolve ) => {	
+      s.loadGeometry( 's.geomAir', 'files/assets/air.obj', resolve )
     })
   })
-  .then(() => {
-    return new Promise((resolve) => {	
-      s.loadGeometry('s.geomParashute', 'files/assets/parashute.obj', resolve)	
+  .then( () => {
+    return new Promise( ( resolve ) => {	
+      s.loadGeometry( 's.geomParashute', 'files/assets/parashute.obj', resolve )	
+    })
+  })
+  .then( () => {
+    return new Promise( ( resolve ) => {	
+      s.loadGeometry( 's.geomHuman', 'files/assets/human.obj', resolve )	
     })
   })   
-  .then(() => { 
+  .then( () => { 
     initGame()
   })
 }  
 
-s.loadGeometry = (targetVariable, path, onloadFunc) => {
-  s.loader.load(path, (obj) => {
-    obj.traverse((child) => {
-      if (child instanceof THREE.Mesh != true) return
-      if (typeof child.geometry.attributes.position.array != "object") return 
-      eval(targetVariable + '= child.geometry') 	  
+s.loadGeometry = ( targetVariable, path, onloadFunc ) => {
+  s.loader.load( path, ( obj ) => {
+    obj.traverse( ( child ) => {
+      if ( child instanceof THREE.Mesh != true ) return
+      if ( typeof child.geometry.attributes.position.array != "object" ) return 
+      eval( targetVariable + '= child.geometry' ) 	  
 	  onloadFunc()
     })
   })
@@ -89,7 +95,7 @@ s.loadGeometry = (targetVariable, path, onloadFunc) => {
 
 
 /**************************************************;
- * INIT 
+ * INITS
  **************************************************/
 
 const initGame = () => {
@@ -99,10 +105,10 @@ const initGame = () => {
   sv.spaceVirt()		
   initCarCameras()
   initCope()
-  initHero() 
+  initHero()
+  
   animate()	
 }
-
 
 const initRenderer = () => { 
 
@@ -119,7 +125,6 @@ const initRenderer = () => {
   s.simplePass.renderToScreen = true 
 }
 
-
 const initScene = () => { 
 
   s.scene = new THREE.Scene()
@@ -132,54 +137,71 @@ const initScene = () => {
 
   s.ambient = new THREE.AmbientLight( 0x06253a, 1.0 )
   s.scene.add( s.ambient )	
-
-  s.floor = new THREE.Mesh(
-	new THREE.PlaneGeometry(10000, 10000, 100, 100),
-	new THREE.MeshBasicMaterial({
-		color: 0x00aa00,
-		wireframe: true,
-		wireframeLinewidth: 0.5
-	})
+  
+  let floorMaterial = new THREE.LineBasicMaterial({ color: 0x00ff00 }) 
+  let floorGeometry = new THREE.Geometry()
+  for ( let n = -3000; n < 3000; n += 100 ) {
+      floorGeometry.vertices.push(
+	    new THREE.Vector3( n, -22, 3000 ),
+	    new THREE.Vector3( n, -22, -3000 ),
+	    new THREE.Vector3( n + 100, -22, -3000 )		
+      )		
+  }
+  for ( let n = -3000; n < 3000; n += 100 ) {
+    floorGeometry.vertices.push(
+	   new THREE.Vector3( 3000, -22, n ),
+	   new THREE.Vector3( -3000, -22, n  + 100 ),
+	   new THREE.Vector3( 3000, -22, n )		
+    )		
+  }	    
+  s.floor = new THREE.Line( floorGeometry, floorMaterial )
+  s.floor.position.set( 0, 0, 0 )
+  s.scene.add( s.floor )
+    
+  s.human = new THREE.Mesh( //TEST GEOM 
+    s.geomHuman,
+	new THREE.MeshBasicMaterial({ color: 0x000000 })
   )
-  s.floor.rotation.x = -Math.PI/2
-  s.floor.position.y = -30
-  s.scene.add(s.floor)
+  s.human.position.y = -30
+  s.scene.add( s.human ) // END TEST
   
   s.clock = new THREE.Clock()  
 }
-
 
 const initCope = () => {
 	
   cope = new Cope()	
 }
 
-
 const initHero = () => {
 	
   hero = new Hero(s.scene)
-  hero.showView({x:0, z:0})
+  hero.showView( { x: 0, z: 0 } )
 }
 
 const initAir = () => {
   
+  if ( g.air ) return
+  
   let positionToDropCar = { x: 0, z: 0 }
+  let xRandom = Math.random()*100 - 50
+  let zRandom = Math.random()*100 - 50
   if ( hero.isOutOfCar ) {
-    positionToDropCar = { x: hero.cam.position.x, z: hero.cam.position.z } 
+    positionToDropCar = { x: hero.cam.position.x + xRandom, z: hero.cam.position.z + zRandom } 
   } else {
-    positionToDropCar = { x: cope.car.model.position.x,  z: cope.car.model.position.z }   
+    positionToDropCar = { x: cope.car.model.position.x + xRandom, z: cope.car.model.position.z + zRandom }   
   }	 
  
-  g.air = new Air( new Car({pos:{x: 0, z: 0}}), positionToDropCar )
+  let newCarParams = { pos: { x: 30000, z: 0 } } 
+  g.air = new Air( new Car( newCarParams ), positionToDropCar )
 }
 
-const addParashute = car => {
+const initParashute = car => {
  
   car.parashute = new Parashute( car )
 }  
   
  
-
  
 /**************************************************;
  * ANIMATE PER FRAME
@@ -189,21 +211,25 @@ const animate = () => {
 		
   animateHero()		
   animateCope()
+  animateFloor()
   animateBullets()
   animateCars()
   animateBombs()
   animateAir()
   
   s.composer.render()
-  requestAnimationFrame(animate)	
+  requestAnimationFrame( animate )	
 }
+
+
+/** ANIMATION OBJECTS ****************************/
 
 const animateHero = () => {
 	
   if ( ! hero.isOutOfCar ) return	
   
-  hero.render(s.renderer, s.scene)
-  hero.appendNearCar(checkInterseptionsKvadrant(hero, g.arrCars))	  
+  hero.render( s.renderer, s.scene )
+  hero.appendNearCar( checkInterseptionsKvadrant( hero, g.arrCars ) )	  
 }
 
 const animateCope = () => {
@@ -211,22 +237,34 @@ const animateCope = () => {
   if ( cope.car == null ) return 
 
   let time = s.clock.getDelta()	
-  cope.car.hit(cope.updateHealthScreenBars()) //test func    
-  cope.render(s.scene, s.renderer, time)
+  cope.car.hit( cope.updateHealthScreenBars() ) //test func random hit    
+  cope.render( s.scene, s.renderer, time )
+}
+
+const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
+	
+  if ( hero.isOutOfCar ) {
+    xCoef = Math.floor( hero.cam.position.x/100 )
+    zCoef = Math.floor( hero.cam.position.z/100 )		
+  } else {
+    xCoef = Math.floor( cope.car.model.position.x/100 )
+    zCoef = Math.floor( cope.car.model.position.z/100 )		
+  }
+  s.floor.position.set( xCoef*100, -6, zCoef*100 )	
 }
 
 const animateBullets = () => {
   
-  g.arrBullets.forEach((bullet, i, arr) => {
+  g.arrBullets.forEach( ( bullet, i, arr ) => {
     
     if ( bullet.isRemovable ) { 
-      removeObjectFromArr(bullet, i, arr) 
+      removeObjectFromArr( bullet, i, arr ) 
       return 
     }
     
     bullet.render()	
     
-    let targetCar = checkInterseptionsKvadrant(bullet, g.arrCars, bullet.carId)
+    let targetCar = checkInterseptionsKvadrant( bullet, g.arrCars, bullet.carId )
     if ( ! targetCar ) return
     bullet.deleteObj()
     targetCar.lives--
@@ -236,14 +274,19 @@ const animateBullets = () => {
 
 const animateCars = () => {
 
-  g.arrCars.forEach((car, i, arr) => {
+  g.arrCars.forEach( ( car, i, arr ) => {
     if ( car.isRemovable ) {
-      removeObjectFromArr(car, i, arr)
+      removeObjectFromArr( car, i, arr )
       return
     }	
-    if ( car.parashute ) car.parashute.render()	
-    if ( car.state != "none" ) car.render()
+    if ( car.state != 'none' ) car.render()
   })
+}
+
+s.startCarDrop = car => {
+  
+  car.state = 'dropFromAir'
+  g.arrCars.push( car )   
 }
 
 const animateBombs = () => {
@@ -253,63 +296,40 @@ const animateBombs = () => {
 
 const animateAir = () => {
 	
-  if ( g.air ) {
-	if ( g.air.isRemovable ) g.air = null
-  } 
-  if ( g.air ) g.air.render()
-  if ( g.air == null && g.arrCars.length < 5) {
-    initAir()
-  } 	  
+  if ( ! g.air && g.arrCars.length < 5 ) initAir()
+  if ( ! g.air ) return
+  
+  g.air.render()  
+  if ( g.air.isRemovable ) g.air = null	  
 }	
 
-const removeObjectFromArr = (item, i, arr) => {
-	
-  arr.splice(i, 1)
+const removeObjectFromArr = ( item, i, arr ) => {
+		
+  arr.splice( i, 1 )
   item = null
 }	  
 
 
-s.startAnimationCarDrop = car => {
-  if ( car.model.position.y > -6 ) { 
-    car.model.position.y -= 2 
-    car.model.position.z += 2 
+/** POSTPROCESSING ANIMATION EFFECTS **************/
 
-    if ( ! car.parashute && car.model.position.y < 200  ){
-	  addParashute( car )
-	}		
-	setTimeout( s.startAnimationCarDrop, 50, car )
+s.rendererStartFlash = () => {
+
+  hero.isOutOfCar ? s.rendererMoreFlash() : cope.boomForScreens()
+}
+
+s.rendererMoreFlash = () => {
+
+  if ( s.simplePass.uniforms.amountFlash.value < 3.0 ) {
+    s.simplePass.uniforms.amountFlash.value += 0.5
+    setTimeout( s.rendererMoreFlash, 50 )
   } else {
-    car.model.position.y = -6
-	car.kvadrant = checkKvadrant( car.model )
-    g.arrCars.push( car )	
+    s.rendererLessFlash()
   }
 }
 
-/**************************************************;
- * POSTPROCESSING ANIMATION EFFECTS
- **************************************************/
-
-s.rendererStartFlash = () => {
-  if ( ! hero.isOutOfCar ) {
-    cope.boomForScreens()
-  } else {   
-    s.rendererMoreFlash()	  
-  }  		
-}  
- 
-s.rendererMoreFlash = () => {
-    
-  if ( s.simplePass.uniforms.amountFlash.value < 3.0 ){
-    s.simplePass.uniforms.amountFlash.value += 0.5
-	setTimeout( s.rendererMoreFlash, 50 )	
-  } else {
-	setTimeout( s.rendererLessFlash, 50 )	  
-  } 
-}
-
 s.rendererLessFlash = () => {
-	
-  if ( s.simplePass.uniforms.amountFlash.value > 0.01 ){
+
+  if ( s.simplePass.uniforms.amountFlash.value > 0.01 ) {
     s.simplePass.uniforms.amountFlash.value -= 0.3
 	setTimeout( s.rendererLessFlash, 50 )	
   } else {
@@ -349,9 +369,9 @@ const keys = {
   space: false
 }
 
-const keyUpdate = (keyEvent, down) => {
+const keyUpdate = ( keyEvent, down ) => {
 
-  switch(keyEvent.keyCode) {
+  switch( keyEvent.keyCode ) {
     case 38:
       keys.up = down
       break
@@ -380,14 +400,14 @@ const keyUpdate = (keyEvent, down) => {
       keys.enter = down
       break
     case 32:
-     keys.space = down				
-     break
+      keys.space = down				
+      break
     case 66:
-     keys.B = down				
-     break
+      keys.B = down				
+      break
     case 82:
-     keys.R = down				
-     break				
+      keys.R = down				
+      break				
   }
 }
  
@@ -411,10 +431,10 @@ buttExitCope.onclick = () => keys.enter = true
 let buttEnterCope = document.getElementById( 'enterCope' ) 
 buttEnterCope.onclick = () => keys.enter = true
 
-let buttAddBomb = document.getElementById('addBomb') 
+let buttAddBomb = document.getElementById( 'addBomb' ) 
 buttEnterCope.onclick = () => keys.B = true
 
-let buttRepairCar = document.getElementById('repair') 
+let buttRepairCar = document.getElementById( 'repair' ) 
 buttEnterCope.onclick = () => keys.R = true 
 
 
@@ -430,7 +450,5 @@ const setOpasityButtonsHeroNearCar = opas => {
 	buttAddBomb.style.opacity = opas
 	buttRepairCar.style.opacity = opas 
 }			
-
-
 
 
