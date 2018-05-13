@@ -8,7 +8,7 @@ class Parashute {
   constructor( car ) {
 				
     this.car = car
-	this.objGeom = prepearGeometryToAnimate( s.geomParashute )	
+    this.objGeom = prepearGeometryToAnimate( s.geomParashute )	
     this.mesh = new THREE.Mesh(
       this.objGeom.geom,
       new THREE.MeshPhongMaterial({ 
@@ -16,7 +16,7 @@ class Parashute {
         side: THREE.DoubleSide,
         transparent: true,
         opacity: 1.0			
-	  })
+      })
     )
     this.mesh.position.set( 0, 5, 0 )
     this.car.model.add( this.mesh )
