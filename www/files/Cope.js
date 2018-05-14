@@ -1,8 +1,4 @@
  
-
-
-
-
 /**************************************************;
  * VIRTUAL SCENE FOR COPE CLOCKS
  **************************************************/
@@ -132,13 +128,14 @@ sv.update = car => {
 /** FUNCTIONS LABELS HEALTH *******************/
 
 sv.updateLabelBar = ( 
-		d = { 
-			width: 100, 
-			x: 0, y: 0,
-			arr: [],
-			parentObj: cope.sc,
-			count: 20 
-		} ) => {
+
+	d = { 
+		width: 100, 
+		x: 0, y: 0,
+		arr: [],
+		parentObj: cope.sc,
+		count: 20 
+	} ) => {
 	
 	if ( d.arr.length != 0 ) {
 		sv.removeAllBar( d ) 
@@ -400,7 +397,7 @@ class Cope {
 				obj: null,
 				arrChildrens: null,
 				init: ( s ) => { this.initCompasBar( s ) } 			
-			},			
+			}
 		}
 		
 		for ( let key in this.screens ) this.screens[ key ].init( this.screens[ key ] )				
@@ -490,7 +487,8 @@ class Cope {
 			}	
 		}			
 	}
-		
+
+
 	/** EXIT / ENTER COPE FUNCTIONS ***************/
 	
 	hideView() {
@@ -530,10 +528,13 @@ class Cope {
 					this.showBar( this.screens[ key ] ) 
 				} else {
 					this.destroyBar( this.screens[ key ] )
-				}		
+				}
+				
 			} else {
+				
 				if ( this.screens[ key ].type != "screen" ) break
 				this.screens[ key ].standartNoise = this.screens[ key ].uniforms.amountNoise.value = ob[ key ]			
+			
 			}
 		}
 	}	
@@ -635,13 +636,8 @@ class Cope {
 			sv.updateLabelBar( this.screens.health.indicators[ key ] )
 		}				
 	}		
-	
-	
-	/** FUNCTIONS FOR ALL SCREENS ************************/	
-	
 
-		
-		
+	
 	/** AMMO BAR FUNCTIONS ************************/
 	
 	initAmmoBar( b = {				
