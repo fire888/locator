@@ -1,16 +1,15 @@
 {
   "name": "Ordos",
-  "version": "1.0.1",
+  "version": "1.0.0",
   "description": "Shooter",
   "author": "www.otrisovano.ru",  
-  "main": "shooter.js",
+  "main": "ordos.js",
   "scripts": {
-    "backend": "node shooter.js",
+    "start": "node ordos.js"
   },
   "dependencies": {
-    "express": "^4.16.2",
-    "http": "^1",	
-    "socket.io": "^1",	
-    "fs": "^1",		
+    "express": "^4.16.3",
+     "http": "^0.0.0",
+     "socket.io": "^2.1.0"
   }
 }

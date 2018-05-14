@@ -16,7 +16,6 @@
 var express = require("express");
 var app = express();
 var http = require('http').Server(app);
-console.log('server');
 var io = require('socket.io')(http);
 app.use(express.static('www'));
 var server = app.listen(3050);
