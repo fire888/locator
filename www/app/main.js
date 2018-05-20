@@ -56,26 +56,26 @@ window.onload = () => loadAssets()
 
 const loadAssets = () => {	
   return new Promise( ( resolve ) => {  
-      s.loadGeometry( 's.geomCar', 'files/assets/car.obj', resolve )
+      s.loadGeometry( 's.geomCar', 'app/assets/car.obj', resolve )
   })
   .then( () => {
     return new Promise( ( resolve ) => {
-      s.loadGeometry( 's.geomCarGun', 'files/assets/carGun.obj', resolve )
+      s.loadGeometry( 's.geomCarGun', 'app/assets/carGun.obj', resolve )
     })
   })
   .then( () => {
     return new Promise( ( resolve ) => {
-      s.loadGeometry( 's.geomAir', 'files/assets/air.obj', resolve )
+      s.loadGeometry( 's.geomAir', 'app/assets/air.obj', resolve )
     })
   })
   .then( () => {
     return new Promise( ( resolve ) => {
-      s.loadGeometry( 's.geomParashute', 'files/assets/parashute.obj', resolve )
+      s.loadGeometry( 's.geomParashute', 'app/assets/parashute.obj', resolve )
     })
   })
   .then( () => {
     return new Promise( ( resolve ) => {
-      s.loadGeometry( 's.geomHuman', 'files/assets/human.obj', resolve )
+      s.loadGeometry( 's.geomHuman', 'app/assets/human.obj', resolve )
     })
   })
   .then( () => { 
