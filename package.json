@@ -1,11 +1,11 @@
 {
-  "name": "Ordos",
+  "name": "Machine",
   "version": "1.0.0",
-  "description": "Shooter",
+  "description": "Fight race machines",
   "author": "www.otrisovano.ru",  
-  "main": "ordos.js",
+  "main": "machine.js",
   "scripts": {
-    "start": "node ordos.js"
+    "start": "node machine.js"
   },
   "dependencies": {
     "express": "^4.16.3",

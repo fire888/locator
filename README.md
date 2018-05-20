@@ -1,34 +1,19 @@
 
-# VEHICLE LOCATOR 
 
-About
-------------   
+
+Use Nodejs, Threejs.
+
+Play: www.shooter.e2e4d7d5.ru  
+ 
+
+
+# Online 3d Shooter 
+
 Online browser game on *nodejs* and *threejs*.  
   
   
-![pic](https://raw.githubusercontent.com/fire888/locator/master/www/files/assets/screenshot.jpg)  
+![pic](https://raw.githubusercontent.com/fire888/shooter/master/www/assets/shooter1.jpg)  
+  
+  
+[Play](http://js.otrisovano.ru/tests/180316Locator/01) and kill enemies for frags, and kill bots to take bullets. To kill yourself open shooter in new browser tab. 
 
-Gameplay
------------- 
-||| 
-| -------------------- | ------------------:|
-| **_Vehicle:_**       |                    |
-| move forward         | "key up"           |
-| move backward        | "key down"         |
-| turn left            | "key left"         |
-| turn right           | "key right"        |
-| 	                   |                    |
-|turn gun left         | "A"                |  
-|turn gun right        | "D"                |  
-| **_Player:_**        |                    |  
-|move forward          | "key up"           |
-|move backward         | "key down"         |
-|move left             | "key A"            |
-|move right            | "key D"            |
-|turn left             | "A"                |  
-|turn right            | "D"                |    
-
-Status
-------------   
-State: **inProgress.**  
-[Play](http://js.otrisovano.ru/tests/180316Locator/master) and check bugs :)
