@@ -10,7 +10,7 @@ class Car {
 
 		/** PARAMS *******************************/
 		
-		this.id = Car.ID ++
+		this.id = carParams.id
 		this.lives = 3
 		
 		this.parashute = null 
@@ -66,7 +66,7 @@ class Car {
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
 		)
-		this.model.position.set ( carParams.pos.x, -6, carParams.pos.z )
+		this.model.position.set ( carParams.position.x, -6, carParams.position.z )
 		s.scene.add( this.model )
 		
 		/** cleate label for locators */
@@ -232,7 +232,7 @@ class Car {
 		this.timerExplosion --
 	}
 
-	deleteObj() {
+	/*deleteObj() {
 		
 	    sv.removeLabel( this )
 		this.spdForBullet = null
@@ -242,8 +242,25 @@ class Car {
 		this.geoms.gun = null
 		this.geoms = null
 		this.isRemovable = true
+	}*/
+	
+	remove() {
+		
+	    sv.removeLabel( this )
+		this.spdForBullet = null
+		s.scene.remove( this.model )
+		this.model = null
+		this.geoms.base = null
+		this.geoms.gun = null
+		this.geoms = null
+		this.isRemovable = true			
 	}
-
+	
+	updateParamsFromServer( paramsServer ) {
+		
+		this.model.position.set( paramsServer.position.x, -6, paramsServer.position.z )	
+	}
+	
 	hit( updateCopeIfIt ) {
 		
 		if ( Math.random() > 0.0005 ) return //testFunc   

@@ -4,13 +4,13 @@
 
 
 /**
-|***************************************; 
+|***********************************************; 
 *  Project        : Machine
 *  Program name   : Client  
 *  Author         : www.otrisovano.ru
 *  Date           : 14.05.2018 
 *  Purpose        : check brain   
-|***************************************;
+|***********************************************;
 */
 
 
@@ -30,9 +30,9 @@ const clientGame = {
 
 
 
-/***************************************;
+/***********************************************;
  *  INIT CLIENT
- ***************************************/
+ ***********************************************/
 
 let socket, timerSendDataClient
 socket = io()
@@ -58,18 +58,19 @@ const getDataFromServer = () => {
 
 
 
-/***************************************;
+/***********************************************;
  *  UPDATE USER GAME OBJ
- ***************************************/
+ ***********************************************/
 
 const checkServerData = data => {
   
   updateCurrentUser( data )
   updateAnoterUsers( data )
+  updateCars( data.cars ) 
 }
 
 
-/** UPDATE CURRENT USER ****************/
+/** UPDATE CURRENT USER ************************/
 
 const updateCurrentUser = d => {
 
@@ -107,7 +108,7 @@ const setUserLocationInGameObj = () => {
 }
 
 
-/** UPDATE ANOTER USERS ****************/
+/** UPDATE ANOTER USERS ************************/
 
 const updateAnoterUsers = d => {
 
@@ -124,7 +125,6 @@ const updateAnoterUsers = d => {
     for( let i = 0; i < a.mustRemove.length; i ++ ) {
       for ( let n = 0; n < g.arrUsers.length; n ++ ) {
         if ( a.mustRemove[i].id == g.arrUsers[n].id ) {
-          console.log( 'remove' )
           g.arrUsers[n].remove()
           g.arrUsers.splice( n, 1 )
           n --
@@ -144,20 +144,56 @@ const updateAnoterUsers = d => {
   clientGame.users = a.targetArrRemovedOldAddNew
 } 
 
-const updateAnoterUser = u => {}
+
+/** UPDATE CARS ********************************/
+
+const updateCars = serverCars => {
+
+  let c = traceArrayTargetFromSource( clientGame.cars, serverCars )
+   
+  if ( c.newObjects.length > 0 ) {
+    for ( let i = 0; i < c.newObjects.length; i ++ ) {
+	  s.createNewCar( c.newObjects[i] )	
+	}
+  }
+  
+  if ( c.mustRemove.length > 0 ) {
+	  
+    for ( let i = 0; i < c.mustRemove.length; i ++ ) {
+      for ( let d = 0; d < g.arrCars.arrCars.length; d ++ ) {
+        if ( c.mustRemove[i].id == g.arrCars.arrCars[d].id ) {
+		  g.arrCars[d].remove()
+          //g.arrUsers.splice( d, 1 )
+          //d --		  
+		}		  
+	  }
+	}	  
+  }
+  
+  for ( let i = 0; i < c.targetArrRemovedOld.length; i ++ ){
+    for ( let c = 0; c < g.arrCars.length; c ++ ) {
+	  if ( c.targetArrRemovedOld ) {	
+        if ( c.targetArrRemovedOld[i].id == g.arrCars[c].id ) {
+          g.arrCars[c].updateParamsFromServer( c.targetArrRemovedOld[i] )
+	    }
+	  }		
+	}	  
+  }
+  
+  clientGame.cars = c.targetArrRemovedOldAddNew
+} 
 
 
-
-/***************************************;
+/***********************************************;
  * FUNCTION RETURN SORT ARRAY
- ***************************************/
+ ***********************************************/
 
 const traceArrayTargetFromSource = ( targetArr, sourceArr ) => {
 
   let newTargetArrRemovedOld = []
   let newTargetArrRemovedOldAddNew = []
 
-  for ( let s = 0; s < sourceArr.length; s++ ) {
+  for ( let s = 0; s < sourceArr.length; s ++ ) {
     for ( let t = 0; t < targetArr.length; t ++ ) {
       if ( s > -1 ) {
 

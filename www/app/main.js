@@ -181,8 +181,22 @@ const initHero = () => {
 s.putUserInPosition = severPos => {
 
   hero.showView( severPos )	
-}  
+}
 
+s.createNewAnotherUser = h => {
+	
+  let hh = new Human( h )
+  g.arrUsers.push( hh )
+}
+
+s.createNewCar = car => {
+  
+  console.log( 's.createNewCar' )
+  let c = new Car( car )
+  g.arrCars.push( c )  
+}
+
+/*
 const initAir = () => {
 
   if ( g.air ) return
@@ -204,11 +218,8 @@ const initParashute = car => {
  
   car.parashute = new Parashute( car )
 }
+*/
 
-s.createNewAnotherUser = h => {
-  let hh = new Human( h )
-  g.arrUsers.push( hh )
-}
 
 
 
