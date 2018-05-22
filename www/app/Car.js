@@ -47,8 +47,9 @@ class Car {
 		this.timerExplosion = 300
 		this.timerRemove = 200
 		
-		carParams.state ? this.state = carParams.state : this.state = 'none'		
-
+		//carParams.state ? this.state = carParams.state : this.state = 'none'		
+		this.state = 'none'
+		
 		this.spdForBullet = {
 			pX: 0, pZ:0,
 			pXold: 0, pZold: 0,
@@ -180,12 +181,28 @@ class Car {
 		if ( Math.abs( this.spd ) > 0.1 && this.currentFuel > 0 ) this.currentFuel -= 1
 	}
 	
-	checkLife() {
+	/*checkLife() { 
 		
 		if ( this.lives < 0 && this.state == "none" ) { 
 			this.state ='explosive'
 			s.rendererStartFlash()
 		}	
+    }*/ 
+
+	/*
+	isMustBeStartExplisive() {
+		
+		this.lives--
+		if (  this.lives < 0 && this.state == "none" ) {	
+		   return true	
+		} else {
+	       return false	
+		}
+	}*/
+	
+	startExplosive() {
+
+		this.state ='explosive'
 	}
 
 	shoot() {
@@ -232,7 +249,7 @@ class Car {
 		this.timerExplosion --
 	}
 
-	/*deleteObj() {
+	deleteObj() {
 		
 	    sv.removeLabel( this )
 		this.spdForBullet = null
@@ -242,23 +259,22 @@ class Car {
 		this.geoms.gun = null
 		this.geoms = null
 		this.isRemovable = true
-	}*/
+	}
 	
 	remove() {
 		
-	    sv.removeLabel( this )
-		this.spdForBullet = null
-		s.scene.remove( this.model )
-		this.model = null
-		this.geoms.base = null
-		this.geoms.gun = null
-		this.geoms = null
-		this.isRemovable = true			
+       this.deleteObj()		
 	}
 	
 	updateParamsFromServer( paramsServer ) {
-		
-		this.model.position.set( paramsServer.position.x, -6, paramsServer.position.z )	
+
+		if ( cope.car ) {
+	 	  if ( cope.car.id != this.id ) { 
+			this.model.position.set( paramsServer.position.x, -6, paramsServer.position.z )
+			console.log( 'UPDATE ' + this.id + ' pos.x ' + this.model.position.x )
+		   }	 			 
+		}		 
+		this.lives = paramsServer.lives
 	}
 	
 	hit( updateCopeIfIt ) {

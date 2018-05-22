@@ -14,7 +14,7 @@
 */
 
 
-
+/** obj to send no server and get data from server */
 const clientGame = {
 
   userId: Math.floor( Math.random()*1000 ),
@@ -25,7 +25,8 @@ const clientGame = {
     rotation: null
   },
   users: [],
-  cars: []
+  cars: [],
+  carsDamaged: []
 }
 
 
@@ -46,7 +47,14 @@ const initClient = () => {
 const sendDataToServer = () => {
 
   socket.emit( 'clientData', clientGame )
+  clearArrsInClientGameAfterSend() 
   timerSendDataClient = setTimeout( sendDataToServer, 500 )
+
+}
+
+const clearArrsInClientGameAfterSend = () => {
+  
+  clientGame.carsDamaged = []
 }
 
 const getDataFromServer = () => {
@@ -145,7 +153,7 @@ const updateAnoterUsers = d => {
 } 
 
 
-/** UPDATE CARS ********************************/
+/** UPDATE CARS AFTER GET SERVER *************************/
 
 const updateCars = serverCars => {
 
@@ -153,73 +161,57 @@ const updateCars = serverCars => {
    
   if ( c.newObjects.length > 0 ) {
     for ( let i = 0; i < c.newObjects.length; i ++ ) {
-	  s.createNewCar( c.newObjects[i] )	
-	}
+	    s.createNewCar( c.newObjects[i] )
+	  }
   }
   
   if ( c.mustRemove.length > 0 ) {
 	  
     for ( let i = 0; i < c.mustRemove.length; i ++ ) {
-      for ( let d = 0; d < g.arrCars.arrCars.length; d ++ ) {
-        if ( c.mustRemove[i].id == g.arrCars.arrCars[d].id ) {
-		  g.arrCars[d].remove()
-          //g.arrUsers.splice( d, 1 )
-          //d --		  
-		}		  
-	  }
-	}	  
+      console.log( ' c.mustRemove.length ' +  c.mustRemove.length )
+      for ( let d = 0; d < g.arrCars.length; d ++ ) {
+        if ( c.mustRemove[i].id == g.arrCars[d].id ) {
+          g.arrCars[d].startExplosive()
+          chancheArrayByPropertyId( g.arrCars, g.arrCarsMustRemoved, c.mustRemove[i].id )
+          d --
+          s.rendererStartFlash()		  
+		    }		  
+	    }
+	  }	  
   }
   
-  for ( let i = 0; i < c.targetArrRemovedOld.length; i ++ ){
-    for ( let c = 0; c < g.arrCars.length; c ++ ) {
-	  if ( c.targetArrRemovedOld ) {	
-        if ( c.targetArrRemovedOld[i].id == g.arrCars[c].id ) {
-          g.arrCars[c].updateParamsFromServer( c.targetArrRemovedOld[i] )
-	    }
-	  }		
-	}	  
-  }
+  console.log( c.targetArrRemovedOld.length )  
+  if ( c.targetArrRemovedOld.length > 0 ) {
+    for ( let i = 0; i < c.targetArrRemovedOld.length; i ++ ){
+      for ( let car = 0; car < g.arrCars.length; car ++ ) {
+          console.log( 'UPDATECAR CLIENT' )              
+          if ( c.targetArrRemovedOld[i].id == g.arrCars[car].id ) {
+            g.arrCars[car].updateParamsFromServer( c.targetArrRemovedOld[i] )
+          }		
+      }	  
+    }
+  }  
   
   clientGame.cars = c.targetArrRemovedOldAddNew
 } 
 
 
-/***********************************************;
- * FUNCTION RETURN SORT ARRAY
- ***********************************************/
+/** SET PROPS CAR TO SEND SERVER *************************/
 
-const traceArrayTargetFromSource = ( targetArr, sourceArr ) => {
+const clientGameputIdDamagedCar = id => {
 
-  let newTargetArrRemovedOld = []
-  let newTargetArrRemovedOldAddNew = []
+  clientGame.carsDamaged.push( id )
+}
 
-  for ( let s = 0; s < sourceArr.length; s ++ ) {
-    for ( let t = 0; t < targetArr.length; t ++ ) {
-      if ( s > -1 ) {
+const clientGameSetCarParams = car => {
 
-        if ( targetArr[t].id == sourceArr[s].id ) {
-
-          newTargetArrRemovedOld.push( sourceArr[s] )
-          newTargetArrRemovedOldAddNew.push( sourceArr[s] )
-
-          targetArr.splice( t, 1 )
-          t --
-          sourceArr.splice( s, 1 )
-          s --
-        }
-      } 
+  for ( let i = 0; i < clientGame.cars.length; i ++ ) {
+    if ( clientGame.cars[i] == car.id ) {
+      clientGame.cars[i].position = {
+        x: car.model.position.x,
+        z: car.model.position.z 
+      }
     }
-  }
-
-  for ( let s = 0; s < sourceArr.length; s ++ ) {
-    newTargetArrRemovedOldAddNew.push( sourceArr[s] )
-  }
-
-  return {
-    mustRemove: targetArr,
-    newObjects: sourceArr,
-    targetArrRemovedOld: newTargetArrRemovedOld,
-    targetArrRemovedOldAddNew: newTargetArrRemovedOldAddNew
   }
 }
 

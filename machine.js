@@ -21,7 +21,7 @@ var server = app.listen(3050);
 io.listen(server);
 console.log('Machine start');
 
-const gameObj = {
+const game = {
   users: [],
   cars: [],
   bullets: []
@@ -38,13 +38,17 @@ io.on( 'connection', function( socket ) {
   
     createNewUserIsNew( data )
     updateUserPosition( data )
+
+    if ( data.carsDamaged ) checkCarDamage( data.carsDamaged )
+    removeCarIfLifeIsNone()
+    setPositionsCars( data.cars )
   })
 })
 
 
 
 /*********************************************;
- *  UPDATE GAMEOBJ FROM SINGLE USER 
+ *  UPDATE game FROM SINGLE USER 
  *********************************************/
 
 
@@ -67,7 +71,7 @@ const createNewUserIsNew = data => {
     lost: 0
   }
 
-  gameObj.users.push( u )
+  game.users.push( u )
   
   createNewCar( { x: u.position.x, z: u.position.z } )
 }
@@ -75,25 +79,11 @@ const createNewUserIsNew = data => {
 const checkIsUserNew = d => {
 
   let isNew = true
-  gameObj.users.forEach(( u, i, arr ) => {
+  game.users.forEach(( u, i, arr ) => {
     if ( u.id == d.userId ) isNew = false
   }) 
   if ( isNew ) return true   
 } 
-
-const createNewCar = position => {
-
-  let c = {
-    id: Math.floor( Math.random()*10000 ),
-    position: { 
-      x: position.x,
-      z: position.z
-    },
-    state: 'init' 
-  }
-
-  gameObj.cars.push( c )
-}
 
 
 /** UPDATE USER POSITION *********************/
@@ -102,7 +92,7 @@ const updateUserPosition = data => {
 
   if ( data.userState != 'heroGo' ) return
 
-  let u = getUserObjFromGameObj( data )
+  let u = getUserObjFromgame( data )
   if ( ! u ) return 
   
   u.timerDisconnect = 15
@@ -112,13 +102,67 @@ const updateUserPosition = data => {
   u.position.rotation = data.position.rotation
 } 
 
-const getUserObjFromGameObj = d => {
+const getUserObjFromgame = d => {
 
-  for( let i = 0; i < gameObj.users.length; i ++ ) {
-    if ( gameObj.users[i].id == d.userId ) return gameObj.users[i]
+  for( let i = 0; i < game.users.length; i ++ ) {
+    if ( game.users[i].id == d.userId ) return game.users[i]
   }
 }
- 
+
+
+/** UPDATE CARS ********************************/
+
+const createNewCar = position => {
+
+  let c = {
+    id: Math.floor( Math.random()*10000 ),
+    position: { 
+      x: position.x,
+      z: position.z
+    },
+    state: 'init',
+    lives: 5 
+  }
+
+  game.cars.push( c )
+}
+
+const checkCarDamage  = carsDamaged => {
+  
+  if ( ! carsDamaged ) return
+  if ( carsDamaged.length == 0 ) return 
+
+  for ( let d = 0; d < carsDamaged.length; d ++ ) {
+    for ( let i = 0; i < game.cars.length; i ++ ) {
+      if ( carsDamaged[d] ==  game.cars[i].id ){
+        game.cars[i].lives --
+        console.log(  'CarID ' +  game.cars[i].id + " L: " + game.cars[i].lives )
+      }
+    }
+  } 
+}
+
+const removeCarIfLifeIsNone = () => {
+  
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    if ( game.cars[i].lives < 0 ) {
+      console.log( 'deleteCar' +  game.cars[i].id  )      
+      game.cars.splice( i, 1 )
+      i --
+    }
+  } 
+}
+
+const setPositionsCars = cars => {
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    for ( let c = 0; c < cars.length; c ++ ) {
+      if ( game.cars[i].id == cars[c].id ) {
+        game.cars[i].position.x = cars[c].position.x
+        game.cars[i].position.z = cars[c].position.z        
+      }
+    }
+  }
+}
  
 
 /*********************************************;
@@ -127,7 +171,7 @@ const getUserObjFromGameObj = d => {
 
 const sendToUsersGameData = () => {
 
-  io.sockets.emit( 'message', gameObj );
+  io.sockets.emit( 'message', game );
 }
 
 const updateGame = () => {
@@ -143,19 +187,19 @@ let timerUpdate = setTimeout( updateGame, 200 )
 
 
 /*********************************************;
- *  UPDATE GAMEOBJ AFTER SEND
+ *  UPDATE game AFTER SEND
  *********************************************/
 
 const updateCarsStates = () => {
 
-  gameObj.cars.forEach(( car, i, arr ) => {
+  game.cars.forEach(( car, i, arr ) => {
     if ( car.state == 'init' ) car.state = 'drop'
   })
   
-  for ( let i = 0; i < gameObj.users.length; i ++ ) {
-    gameObj.users[i].timerDisconnect --
-    if ( gameObj.users[i].timerDisconnect < 0 ) {
-      gameObj.users.splice( i, 1 )
+  for ( let i = 0; i < game.users.length; i ++ ) {
+    game.users[i].timerDisconnect --
+    if ( game.users[i].timerDisconnect < 0 ) {
+      game.users.splice( i, 1 )
       i --
     }
   }

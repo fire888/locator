@@ -21,7 +21,8 @@
 const g = {
 
   arrUsers: [],
-  arrCars: [],  
+  arrCars: [],
+  arrCarsMustRemoved: [],  
   arrBullets: [],
   heroBomb: null,
   air: null,
@@ -193,7 +194,9 @@ s.createNewCar = car => {
   
   console.log( 's.createNewCar' )
   let c = new Car( car )
-  g.arrCars.push( c )  
+  g.arrCars.push( c )
+  console.log( g.arrCars.length )
+  //let a = new Air( new Car( newCarParams ), positionToDropCar )
 }
 
 /*
@@ -232,9 +235,14 @@ const animate = () => {
   animateHero()
   animateCope()
   animateFloor()
-  animateBullets()
+
   animateUsers()
+
+  animateBullets()
+
   animateCars()
+  animateCarsRemoved()
+
   animateBombs()
   animateAir()
 
@@ -287,20 +295,29 @@ const animateBullets = () => {
     
     let targetCar = checkInterseptionsKvadrant( bullet, g.arrCars, bullet.carId )
     if ( ! targetCar ) return
+
     bullet.deleteObj()
-    targetCar.lives--
-    targetCar.checkLife()
+    console.log( targetCar.id + ' lives: ' +  targetCar.lives )
+    clientGameputIdDamagedCar( targetCar.id )
   })
 }
 
 const animateCars = () => {
 
   g.arrCars.forEach( ( car, i, arr ) => {
+    if ( car.state != 'none' ) car.render()
+    clientGameSetCarParams( car )
+  })
+}
+
+const animateCarsRemoved = () => {
+  
+  g.arrCarsMustRemoved.forEach( ( car, i, arr ) => {
     if ( car.isRemovable ) {
       removeObjectFromArr( car, i, arr )
       return
     }	
-    if ( car.state != 'none' ) car.render()
+    car.render()
   })
 }
 
@@ -328,12 +345,6 @@ const animateAir = () => {
   
   g.air.render()  
   if ( g.air.isRemovable ) g.air = null	  
-}
-
-const removeObjectFromArr = ( item, i, arr ) => {
-
-  arr.splice( i, 1 )
-  item = null
 }
 
 
