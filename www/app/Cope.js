@@ -105,7 +105,7 @@ sv.removeLabel = car => {
 sv.update = car => {
 	
 	/** update labels */
-	g.arrCars.forEach( car => { 
+	g.cars.forEach( car => { 
 		sv.arrTargets.forEach ( ( label, i, arr )=> {
 	
 			if ( car.id == label.id ) {
@@ -181,7 +181,7 @@ class Cope {
 		/** INIT SCENE CABINE ********************/		
 
 		this.sc = new THREE.Scene()
-		this.textureBack = new THREE.TextureLoader().load( "files/assets/back.jpg", 
+		this.textureBack = new THREE.TextureLoader().load( "app/assets/back.jpg", 
 				() => cope.sc.background = cope.textureBack 	
 			)
 	

@@ -3,29 +3,29 @@
 
 
 /**
- **************************************************; 
+ *******************************************************************; 
  *	Project        	:	MACHINE 
  *	Program name   	: 	Threejs scene 
  *	Author         	: 	www.otrisovano.ru
  *	Date           	: 	16/03/2018
  *	Purpose        	: 	check brain   
- **************************************************/ 
+ *******************************************************************/ 
 
 
 
-/**************************************************;
+/*******************************************************************;
  * VARS SPACES
- **************************************************/
+ *******************************************************************/
 
 /** INSTANSES OF GAME OBJECT */
 const g = {
 
-  arrUsers: [],
-  arrCars: [],
-  arrCarsMustRemoved: [],  
-  arrBullets: [],
+  enemies: [],
+  cars: [],
+  carsMustRemoved: [], 
+  bullets: [],
   heroBomb: null,
-  air: null,
+  air: null
 }
 
 /** UI BUTTONS/KEYBOARD SPACE */
@@ -48,9 +48,9 @@ let cope = null, hero = null
 
 
 
-/**************************************************;
+/*******************************************************************;
  * LOAD
- **************************************************/
+ *******************************************************************/
 
 window.onload = () => loadAssets()
 
@@ -103,9 +103,10 @@ s.loadGeometry = ( targetVariable, path, onloadFunc ) => {
 
 
 
-/**************************************************;
+
+/*******************************************************************;
  * INITS
- **************************************************/
+ *******************************************************************/
 
 const initGame = () => {
 
@@ -114,7 +115,6 @@ const initGame = () => {
   sv.spaceVirt()
   initCarCameras()
   initCope()
-  initHero()
 }
 
 const initRenderer = () => { 
@@ -166,7 +166,7 @@ const initScene = () => {
   s.scene.add( s.floor )
     
   s.clock = new THREE.Clock()  
-  s.fps = 60
+  s.fps = 40
 }
 
 const initCope = () => {
@@ -174,29 +174,69 @@ const initCope = () => {
   cope = new Cope()	
 }
 
-const initHero = () => {
 
-  hero = new Hero(s.scene)
+
+
+/*******************************************************************;
+ * UPDATE SCENE BY SERVER DATA 
+ *******************************************************************/ 
+
+s.initHeroIfNone = serverU => {
+  
+  if ( hero ) return
+  if ( ! serverU ) return    
+  if ( serverU.state != 'init') return
+
+  hero = new Hero( s.scene )
+  hero.showView( serverU.posX, serverU.posZ  )
+  clientGame.user.state = 'play'
 }
 
-s.putUserInPosition = severPos => {
 
-  hero.showView( severPos )	
+/** SET SERVER DATA TO ENEMIES *************************************/
+
+s.createEnemy = h => {	
+  return new Human( h )
 }
 
-s.createNewAnotherUser = h => {
-	
-  let hh = new Human( h )
-  g.arrUsers.push( hh )
+s.updateEnemyFromServer = ( target, source ) => {
+  target.updateParamsFromServer( source )
+} 
+
+s.removeEnemy = md => {
+  md.remove() 
 }
+
+s.setDataEnemiesFromServer = serverEnemies => {
+  g.enemies = transformTargetArrFromSourceArrData(
+        g.enemies, serverEnemies,
+        s.createEnemy, s.removeEnemy, s.updateEnemyFromServer 
+      )
+}
+
+
+/** SET SERVER DATA TO CARS ****************************************/
 
 s.createNewCar = car => {
-  
-  console.log( 's.createNewCar' )
-  let c = new Car( car )
-  g.arrCars.push( c )
-  console.log( g.arrCars.length )
+  return new Car( car )
   //let a = new Air( new Car( newCarParams ), positionToDropCar )
+}
+
+s.updateCarFromServer = ( target, source ) => {
+  target.updateParamsFromServer( source )
+}
+
+s.removeCar = ( md ) => {
+  md.startExplosive()  
+  g.carsMustRemoved.push( md )
+}
+
+s.setDataCarsFromServer = serverCars => {
+  
+  g.cars = transformTargetArrFromSourceArrData(
+        g.cars, serverCars,
+        s.createNewCar, s.removeCar, s.updateCarFromServer 
+      )
 }
 
 /*
@@ -226,39 +266,42 @@ const initParashute = car => {
 
 
 
-/**************************************************;
+/*******************************************************************;
  * ANIMATE PER FRAME
- **************************************************/
+ *******************************************************************/
 
 const animate = () => {
 
+  
+  $("#userId").html("heroId: " + clientGame.user.id)
+  $("#userCarId").html("heroCarId: " + clientGame.car.id)
+  
   animateHero()
-  animateCope()
-  animateFloor()
-
-  animateUsers()
-
+  animateCope()  
+  animateFloor()  
+  
+  animateEnenies()
   animateBullets()
-
   animateCars()
+  animateEmemyCars()
   animateCarsRemoved()
-
-  animateBombs()
-  animateAir()
+  //animateBombs()
+  //animateAir()
 
   s.composer.render()
   requestAnimationFrame( animate )	
 }
 
 
-/** ANIMATION OBJECTS ****************************/
+/** ANIMATION OBJECTS **********************************************/
 
 const animateHero = () => {
-
+  
+  if ( ! hero ) return
   if ( ! hero.isOutOfCar ) return
 
   hero.render( s.renderer, s.scene )
-  hero.appendNearCar( checkInterseptionsKvadrant( hero, g.arrCars ) )
+  hero.appendNearCar( checkInterseptionsKvadrant( hero, g.cars ) )
 }
 
 const animateCope = () => {
@@ -271,7 +314,8 @@ const animateCope = () => {
 }
 
 const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
-
+  
+  if ( ! hero ) return
   if ( hero.isOutOfCar ) {
     xCoef = Math.floor( hero.cam.position.x/100 )
     zCoef = Math.floor( hero.cam.position.z/100 )
@@ -284,7 +328,7 @@ const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
 
 const animateBullets = () => {
   
-  g.arrBullets.forEach( ( bullet, i, arr ) => {
+  g.bullets.forEach( ( bullet, i, arr ) => {
     
     if ( bullet.isRemovable ) { 
       removeObjectFromArr( bullet, i, arr ) 
@@ -293,26 +337,36 @@ const animateBullets = () => {
     
     bullet.render()
     
-    let targetCar = checkInterseptionsKvadrant( bullet, g.arrCars, bullet.carId )
+    let targetCar = checkInterseptionsKvadrant( bullet, g.cars, bullet.carId )
     if ( ! targetCar ) return
 
     bullet.deleteObj()
-    console.log( targetCar.id + ' lives: ' +  targetCar.lives )
     clientGameputIdDamagedCar( targetCar.id )
   })
 }
 
 const animateCars = () => {
 
-  g.arrCars.forEach( ( car, i, arr ) => {
+  g.cars.forEach( ( car, i, arr ) => {
     if ( car.state != 'none' ) car.render()
-    clientGameSetCarParams( car )
   })
 }
 
+const animateEmemyCars = () => {
+  
+  g.cars.forEach(( car ) => {
+
+    if ( car.userId == null ) return
+    if ( car.userId == clientGame.user.id ) return
+
+    car.moveByEnemy()  
+  }) 
+} 
+
+
 const animateCarsRemoved = () => {
   
-  g.arrCarsMustRemoved.forEach( ( car, i, arr ) => {
+  g.carsMustRemoved.forEach( ( car, i, arr ) => {
     if ( car.isRemovable ) {
       removeObjectFromArr( car, i, arr )
       return
@@ -324,11 +378,12 @@ const animateCarsRemoved = () => {
 s.startCarDrop = car => {
   
   car.state = 'dropFromAir'
-  g.arrCars.push( car )
+  g.cars.push( car )
 }
 
-const animateUsers = () => {
-  g.arrUsers.forEach(( u, i, arr ) => {
+const animateEnenies = () => {
+
+  g.enemies.forEach(( u, i, arr ) => {
     u.render()
   })
 }
@@ -348,7 +403,7 @@ const animateAir = () => {
 }
 
 
-/** POSTPROCESSING ANIMATION EFFECTS **************/
+/** POSTPROCESSING ANIMATION EFFECTS *******************************/
 
 s.rendererStartFlash = () => {
 
@@ -377,21 +432,21 @@ s.rendererLessFlash = () => {
 
 
 
-/**************************************************;
+/*******************************************************************;
  * RESIZE SCENE
- **************************************************/
+ *******************************************************************/
 
 const handleWindowResize = () =>  s.renderer.setSize( window.innerWidth, window.innerHeight )
 window.addEventListener( 'resize', handleWindowResize, false )
 
 
 
-/**************************************************;
+/*******************************************************************;
  * USER INTERFACE
- **************************************************/
+ *******************************************************************/
 
 
-/** KEYBOARD **************************************/
+/** KEYBOARD *******************************************************/
  
 const keys = {
 
@@ -453,7 +508,7 @@ document.addEventListener( "keydown", event => keyUpdate( event, true ) )
 document.addEventListener( "keyup", event => keyUpdate( event, false ) )
 
 
-/** BUTTONS MOUSE CLICK ****************************/
+/** BUTTONS MOUSE CLICK ********************************************/
  
 let buttGunLeft = document.getElementById( 'gunLeft' )
 buttGunLeft.onmousedown = () => keys.A = true
@@ -480,7 +535,7 @@ let buttFire = document.getElementById( 'gunFire' )
 buttFire.onclick = () => keys.space = true
 
 
-/** BUTTONS STYLES *********************************/
+/** BUTTONS STYLES *************************************************/
 
 const setOpasityButtonsHeroNearCar = opas => {
 

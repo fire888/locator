@@ -11,10 +11,6 @@ class Human {
   constructor( h ) {
 
     this.id = h.id
-    this.newPosition = {
-      x: h.position.x,
-      z: h.position.z  	  
-    }
     this.speedX = 0
     this.speedZ = 0
 
@@ -22,7 +18,7 @@ class Human {
       s.geomHuman,
       new THREE.MeshBasicMaterial({ color: 0x000000 }) 
     )
-    this.obj.position.set( h.position.x, -30, h.position.z )
+    this.obj.position.set( h.posX, -30, h.posZ )
     s.scene.add( this.obj )
   }
 
@@ -42,9 +38,22 @@ class Human {
 
   updateParamsFromServer( data ) {
     
-    this.speedX = calckSpeed( this.obj.position.x, data.position.x )
-    this.speedZ = calckSpeed( this.obj.position.z, data.position.z )
-    this.obj.rotation.copy( data.position.rotation )	
+    if ( data.isCar != null ) {
+      
+      this.obj.position.y = 100000
+
+    } else {
+
+      if (  this.obj.position.y == 100000 ) {
+        this.obj.position.y = -30
+        this.obj.position.x = data.posX
+        this.obj.position.z = data.posZ
+      }
+      
+      this.speedX = calckSpeed( this.obj.position.x, data.posX )
+      this.speedZ = calckSpeed( this.obj.position.z, data.posZ )
+      this.obj.rotation.copy( data.rotation )	      
+    }
   }
     
 }

@@ -2,10 +2,12 @@
  * FUNCTIONS FOR SCENE OBJECTS 
  **************************************************/
 
-const calckSpeed = ( pos, tgt ) => ( tgt-pos ) / s.fps 
+const calckSpeed = ( pos, tgt ) => { 
+   let spd = ( tgt-pos ) / s.fps 
+   return spd
+ } 
  
 const checkKvadrant = obj => {
-
   return ( { 
     x: Math.floor( obj.position.x / 30 ),
     z: Math.floor( obj.position.z / 30 )
@@ -13,7 +15,6 @@ const checkKvadrant = obj => {
 }
 
 const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID = -100 ) => {
-  
   let itemWitchIntersept = false
   targetsArr.forEach((item, i, arr) => {
     if (obj.kvadrant.x == item.kvadrant.x && obj.kvadrant.z == item.kvadrant.z) {

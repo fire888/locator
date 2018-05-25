@@ -2,14 +2,14 @@
   "name": "Machine",
   "version": "1.0.0",
   "description": "Fight race machines",
-  "author": "www.otrisovano.ru",  
+  "author": "www.otrisovano.ru",
   "main": "machine.js",
   "scripts": {
     "start": "node machine.js"
   },
   "dependencies": {
     "express": "^4.16.3",
-     "http": "^0.0.0",
-     "socket.io": "^2.1.0"
+    "http": "^0.0.0",
+    "socket.io": "^2.1.0"
   }
 }

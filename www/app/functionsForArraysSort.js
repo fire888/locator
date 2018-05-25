@@ -2,39 +2,92 @@
  * FUNCTION RETURN SORT ARRAY
  ***********************************************/
 
-const traceArrayTargetFromSource = ( targetArr, sourceArr ) => {
+fArrs = {
+  newObjects: null,
+  mustRemoveObjects: null,
+  sortedObjects: null,
+  complitedObjects: null
+}
 
-    let newTargetArrRemovedOld = []
-    let newTargetArrRemovedOldAddNew = []
-  
-    for ( let s = 0; s < sourceArr.length; s ++ ) {
-      for ( let t = 0; t < targetArr.length; t ++ ) {
-        if ( s > -1 ) {
-  
-          if ( targetArr[t].id == sourceArr[s].id ) {
-  
-            newTargetArrRemovedOld.push( sourceArr[s] )
-            newTargetArrRemovedOldAddNew.push( sourceArr[s] )
-  
-            targetArr.splice( t, 1 )
-            t --
-            sourceArr.splice( s, 1 )
-            s --
-          }
-        } 
+fArrs.sortArrs = ( arrTarget, arrSource ) => {
+   
+  let targetsId = []
+  for ( let i = 0; i < arrTarget.length; i ++ ) {
+    targetsId.push( arrTarget[i].id) 
+  }
+  let sourceId = []
+  for ( let i = 0; i < arrSource.length; i ++ ) {
+    sourceId.push( arrSource[i].id) 
+  }
+
+  for ( let s = 0; s < sourceId.length; s ++ ) {
+    for ( let t = 0; t < targetsId.length; t ++ ) {
+      if ( s > -1 ) {
+        if ( targetsId[t] == sourceId[s] ) {
+         targetsId.splice( t, 1 )
+         t --
+         sourceId.splice( s, 1 )
+         s -- 
+        }
       }
     }
-  
-    for ( let s = 0; s < sourceArr.length; s ++ ) {
-      newTargetArrRemovedOldAddNew.push( sourceArr[s] )
+  }
+
+  let newObjs = []
+  for ( let s = 0; s < sourceId.length; s ++ ) {
+    for ( let aS = 0; aS < arrSource.length; aS ++ ) {
+      if ( sourceId[s] == arrSource[aS].id ) {
+        newObjs.push( arrSource[aS] )
+      }
     }
-  
-    return {
-      mustRemove: targetArr,
-      newObjects: sourceArr,
-      targetArrRemovedOld: newTargetArrRemovedOld,
-      targetArrRemovedOldAddNew: newTargetArrRemovedOldAddNew
+  }
+
+  fArrs.newObjects = newObjs
+}
+
+
+/***********************************************;
+ * CHANGE TARGET ARR FROM SOURCE DATA  
+ ***********************************************/
+
+const transformTargetArrFromSourceArrData = ( 
+      targetArr, sourceArr,
+      createObj, deleteObj, updateObj 
+    ) => {
+
+  let newTargetArr = []
+
+  for ( let s = 0; s < sourceArr.length; s ++ ) {
+    for ( let t = 0; t < targetArr.length; t ++ ) {
+      if ( s > -1 ) {
+
+        if ( targetArr[t].id == sourceArr[s].id ) {
+          
+          updateObj( targetArr[t], sourceArr[s] )
+
+          newTargetArr.push( targetArr[t] )
+
+          targetArr.splice( t, 1 )
+          t --
+          sourceArr.splice( s, 1 )
+          s --
+        }
+      } 
     }
+  }
+
+  for ( let s = 0; s < sourceArr.length; s ++ ) {
+    let newObj = createObj( sourceArr[s] )
+    newTargetArr.push( newObj )
+  }
+
+  for ( let t = 0; t < targetArr.length; t ++ ) {
+    deleteObj( targetArr[t] )
+    targetArr.splice( t, 1 )
+    t --
+  }
+
+  return newTargetArr
 }
 
 

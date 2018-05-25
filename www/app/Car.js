@@ -6,12 +6,13 @@
 
 class Car {
 	 
-	constructor( carParams ) {
+	constructor( serverCarParams ) {
 
 		/** PARAMS *******************************/
 		
-		this.id = carParams.id
-		this.lives = 3
+		this.id = serverCarParams.id
+		this.userId = null
+		this.lives = serverCarParams.lives
 		
 		this.parashute = null 
 		
@@ -46,9 +47,16 @@ class Car {
 		this.isRemovable = false
 		this.timerExplosion = 300
 		this.timerRemove = 200
-		
-		//carParams.state ? this.state = carParams.state : this.state = 'none'		
+				
 		this.state = 'none'
+
+		this.targetPos = {
+			x: serverCarParams.posX,
+			z: serverCarParams.posZ
+		}
+
+		this.spdX = 0
+	    this.spdZ = 0
 		
 		this.spdForBullet = {
 			pX: 0, pZ:0,
@@ -67,7 +75,7 @@ class Car {
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
 		)
-		this.model.position.set ( carParams.position.x, -6, carParams.position.z )
+		this.model.position.set ( serverCarParams.posX, -6, serverCarParams.posZ )
 		s.scene.add( this.model )
 		
 		/** cleate label for locators */
@@ -180,25 +188,12 @@ class Car {
 		
 		if ( Math.abs( this.spd ) > 0.1 && this.currentFuel > 0 ) this.currentFuel -= 1
 	}
-	
-	/*checkLife() { 
-		
-		if ( this.lives < 0 && this.state == "none" ) { 
-			this.state ='explosive'
-			s.rendererStartFlash()
-		}	
-    }*/ 
 
-	/*
-	isMustBeStartExplisive() {
-		
-		this.lives--
-		if (  this.lives < 0 && this.state == "none" ) {	
-		   return true	
-		} else {
-	       return false	
-		}
-	}*/
+	moveByEnemy() {
+
+	    this.model.position.x += this.spdX
+	    this.model.position.z += this.spdZ		
+	}
 	
 	startExplosive() {
 
@@ -268,13 +263,27 @@ class Car {
 	
 	updateParamsFromServer( paramsServer ) {
 
-		if ( cope.car ) {
-	 	  if ( cope.car.id != this.id ) { 
-			this.model.position.set( paramsServer.position.x, -6, paramsServer.position.z )
-			console.log( 'UPDATE ' + this.id + ' pos.x ' + this.model.position.x )
-		   }	 			 
-		}		 
 		this.lives = paramsServer.lives
+		
+		if ( cope ) {
+
+		  if ( cope.car ) {	
+  
+			if ( cope.car.id == paramsServer.id ) {	
+			  return
+			}	 
+		  }
+		}
+
+		this.userId = paramsServer.isUser
+		if ( this.userId == null ) return
+		
+		this.spdX = calckSpeed( this.model.position.x, paramsServer.posX )	
+		this.spdZ = calckSpeed( this.model.position.z, paramsServer.posZ )
+		
+
+		if ( paramsServer.rotation != null )  this.model.rotation.copy( paramsServer.rotation ) 
+		this.kvadrant = checkKvadrant( this.model )
 	}
 	
 	hit( updateCopeIfIt ) {
@@ -341,7 +350,7 @@ class Car {
 	}		
 }
 
-Car.ID = 0	
+
 
 
 /**************************************************;

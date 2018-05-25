@@ -1,8 +1,3 @@
-
-"use strict"
-
-
-
 /**
 |***********************************************; 
 *  Project        : Machine
@@ -13,20 +8,29 @@
 |***********************************************;
 */
 
+'use strict'
 
-/** obj to send no server and get data from server */
+
+/** CLIENT OBJ TO SEND TO SERVER **************/
+
 const clientGame = {
+  
+  user: {
+    id: Math.floor( Math.random()*1000 ),
+    state: 'connect',
+    posX: null,
+    posZ: null,
+    rotation: null 
+  },
 
-  userId: Math.floor( Math.random()*1000 ),
-  userState: 'connect', //init, heroGo
-  position: {
-    x: null,
-    z: null,
+  car: {
+    id: null,
+    posX: null,
+    posZ: null,
     rotation: null
   },
-  users: [],
-  cars: [],
-  carsDamaged: []
+  
+  carsDamaged: [] 
 }
 
 
@@ -46,21 +50,17 @@ const initClient = () => {
 
 const sendDataToServer = () => {
 
+  setUserDataInClientObj()
   socket.emit( 'clientData', clientGame )
   clearArrsInClientGameAfterSend() 
   timerSendDataClient = setTimeout( sendDataToServer, 500 )
 
 }
 
-const clearArrsInClientGameAfterSend = () => {
-  
-  clientGame.carsDamaged = []
-}
-
 const getDataFromServer = () => {
-
-  socket.on( 'message', function ( data ) {
-    checkServerData( data ) 
+  
+  socket.on( 'message', function ( serverData ) {  
+    checkServerData( serverData ) 
   })
 }
 
@@ -70,149 +70,68 @@ const getDataFromServer = () => {
  *  UPDATE USER GAME OBJ
  ***********************************************/
 
-const checkServerData = data => {
+const checkServerData = serverData => {
   
-  updateCurrentUser( data )
-  updateAnoterUsers( data )
-  updateCars( data.cars ) 
+  let serverCurrentUser = takeawayUserData( serverData.users )  
+
+  s.initHeroIfNone( serverCurrentUser )
+  
+  s.setDataEnemiesFromServer( serverData.users )
+  s.setDataCarsFromServer( serverData.cars )
 }
 
+const takeawayUserData = users => {
 
-/** UPDATE CURRENT USER ************************/
-
-const updateCurrentUser = d => {
-
-  let u = getCurrentUserFromDataAndRemove( d )
-  if ( ! u ) return
- 
-  createThisUserIfNew( u )
-  setUserLocationInGameObj()
-}
-
-const getCurrentUserFromDataAndRemove = d => {
-
-  for ( let i = 0; i < d.users.length; i++ ) {
-    if ( d.users[i].id == clientGame.userId ) {
-      let u = d.users[i] 
-      d.users.splice( i, 1 )
+  for ( let i = 0; i < users.length; i ++ ) {
+    if ( users[i].id == clientGame.user.id ) {
+      let u = users[i]
+      users.splice( i, 1 ) 
       return u
     }
   }
 }
 
-const createThisUserIfNew = u => {
 
-  if ( u.state != 'init' ) return
 
-  clientGame.position.x = u.position.x
-  clientGame.position.z = u.position.z 
-  s.putUserInPosition( clientGame.position )
-  clientGame.userState = 'heroGo'
+
+/*********************************************************;
+ * SET DATA IN CLIENT OBJ 
+ *********************************************************/
+
+const  setUserDataInClientObj = () => {
+  
+  if ( ! hero ) return 
+
+  clientGame.user.posX = hero.cam.position.x
+  clientGame.user.posZ = hero.cam.position.z
+  clientGame.user.rotation = hero.cam.rotation
+
+  if ( cope.car == null ) {
+    clientGame.car.id = null 
+  } else { 
+    clientGame.car.id = cope.car.id
+    clientGame.car.posX = cope.car.model.position.x
+    clientGame.car.posZ = cope.car.model.position.z
+    clientGame.car.rotation = cope.car.model.rotation      
+  }   
 }
 
-const setUserLocationInGameObj = () => {
-
-  clientGame.position = hero.getPosition()
-}
-
-
-/** UPDATE ANOTER USERS ************************/
-
-const updateAnoterUsers = d => {
-
-  let a = traceArrayTargetFromSource( clientGame.users, d.users )
-
-  if ( a.newObjects.length > 0 ) {
-    for ( let i = 0; i < a.newObjects.length; i ++ ) {
-     s.createNewAnotherUser( a.newObjects[i] )
-    }
-  }
-
-  if ( a.mustRemove.length > 0 ) {
-
-    for( let i = 0; i < a.mustRemove.length; i ++ ) {
-      for ( let n = 0; n < g.arrUsers.length; n ++ ) {
-        if ( a.mustRemove[i].id == g.arrUsers[n].id ) {
-          g.arrUsers[n].remove()
-          g.arrUsers.splice( n, 1 )
-          n --
-        }
-      }
-    }
-  }
-  
-  for ( let i = 0; i < a.targetArrRemovedOld.length; i ++ ) {
-    for ( let n = 0; n < g.arrUsers.length; n ++ ) {	
-      if ( a.targetArrRemovedOld[i].id == g.arrUsers[n].id ) {
-        g.arrUsers[n].updateParamsFromServer( a.targetArrRemovedOld[i] )			  
-      }
-    }
-  }
-
-  clientGame.users = a.targetArrRemovedOldAddNew
-} 
-
-
-/** UPDATE CARS AFTER GET SERVER *************************/
-
-const updateCars = serverCars => {
-
-  let c = traceArrayTargetFromSource( clientGame.cars, serverCars )
-   
-  if ( c.newObjects.length > 0 ) {
-    for ( let i = 0; i < c.newObjects.length; i ++ ) {
-	    s.createNewCar( c.newObjects[i] )
-	  }
-  }
-  
-  if ( c.mustRemove.length > 0 ) {
-	  
-    for ( let i = 0; i < c.mustRemove.length; i ++ ) {
-      console.log( ' c.mustRemove.length ' +  c.mustRemove.length )
-      for ( let d = 0; d < g.arrCars.length; d ++ ) {
-        if ( c.mustRemove[i].id == g.arrCars[d].id ) {
-          g.arrCars[d].startExplosive()
-          chancheArrayByPropertyId( g.arrCars, g.arrCarsMustRemoved, c.mustRemove[i].id )
-          d --
-          s.rendererStartFlash()		  
-		    }		  
-	    }
-	  }	  
-  }
-  
-  console.log( c.targetArrRemovedOld.length )  
-  if ( c.targetArrRemovedOld.length > 0 ) {
-    for ( let i = 0; i < c.targetArrRemovedOld.length; i ++ ){
-      for ( let car = 0; car < g.arrCars.length; car ++ ) {
-          console.log( 'UPDATECAR CLIENT' )              
-          if ( c.targetArrRemovedOld[i].id == g.arrCars[car].id ) {
-            g.arrCars[car].updateParamsFromServer( c.targetArrRemovedOld[i] )
-          }		
-      }	  
-    }
-  }  
-  
-  clientGame.cars = c.targetArrRemovedOldAddNew
-} 
-
-
-/** SET PROPS CAR TO SEND SERVER *************************/
 
 const clientGameputIdDamagedCar = id => {
 
   clientGame.carsDamaged.push( id )
 }
 
-const clientGameSetCarParams = car => {
 
-  for ( let i = 0; i < clientGame.cars.length; i ++ ) {
-    if ( clientGame.cars[i] == car.id ) {
-      clientGame.cars[i].position = {
-        x: car.model.position.x,
-        z: car.model.position.z 
-      }
-    }
-  }
+
+
+/***********************************************;
+ *  CLEAR CLIENT OBJ 
+ ***********************************************/
+
+const clearArrsInClientGameAfterSend = () => {
+  
+  clientGame.carsDamaged = []
 }
 
 

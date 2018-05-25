@@ -47,11 +47,12 @@ class Hero {
   hideView() {
 
     this.htmlElems.style.display = "none"
+    this.cam.position.y= 100000
   }
 
-  showView( p ) {
+  showView( pX, pZ ) {
 
-    this.cam.position.set( p.x, -22, p.z )
+    this.cam.position.set( pX, -22, pZ )
     this.htmlElems.style.display = "block"
     this.renderPass.enabled = true
   }
@@ -69,20 +70,18 @@ class Hero {
     }
   }
 
-  getPosition() {
-
-    return { x: this.cam.position.x, z: this.cam.position.z, rotation: this.cam.rotation }
-  }
+  setServerData( serverU ) {} //** TEST FUNC */
 }
 
 const exitCope = () => {
- 
+
   keys.enter = false
 
   hero.isOutOfCar = true
+  cope.car.userId = null
 
-  hero.showView( cope.car.model.position )
-  cope.hideView()
+  hero.showView( cope.car.model.position.x, cope.car.model.position.z  )
+  cope.hideView()  
 
   cope.renderPass.enabled = false
   hero.renderPass.enabled = true
@@ -91,6 +90,8 @@ const exitCope = () => {
 const enterCope = car => {
 
   keys.enter = false
+  
+  if ( car.userId != null  ) return 
 
   hero.isOutOfCar = false
 
@@ -108,3 +109,4 @@ const addBomb = car => {
   buttAddBomb.style.opacity = 0	
 }
 
+  
