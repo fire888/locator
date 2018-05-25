@@ -6,11 +6,12 @@ class Bullet {
 
 	constructor( car ) {
 		
-		g.arrBullets.push( this )
+		g.bullets.push( this )
 		
 		this.id = Bullet.ID ++		
 		this.isRemovable = false
-
+		
+		this.userId = clientGame.user.id
 		this.carId = car.id		
 		this.lifeTimer = 100
 		this.kvadrant = { x: 0, z: 0 }

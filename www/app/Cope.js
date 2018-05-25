@@ -1,14 +1,14 @@
  
-/**************************************************;
+/*******************************************************************;
  * VIRTUAL SCENE FOR COPE CLOCKS
- **************************************************/
+ *******************************************************************/
  
 const sv = {} 
 
 sv.spaceVirt = () => {
 
 	
-	/** SCENE FOR COPE CLOCKS *********************/
+	/** SCENE FOR COPE CLOCKS **************************************/
 	
 	sv.scene = new THREE.Scene()
 	sv.scene.background = new THREE.Color( 0x002500 )
@@ -28,7 +28,7 @@ sv.spaceVirt = () => {
 	sv.scene.add( sv.helper )
 	
 	
-	/** LOCATOR LABELS ****************************/
+	/** LOCATOR LABELS *********************************************/
 	
 	sv.targetMesh = new THREE.Mesh(
 		new THREE.CircleGeometry( 3, 12 ),
@@ -38,7 +38,7 @@ sv.spaceVirt = () => {
 	sv.arrTargets = []
 	
 
-	/** HEALTH LABELS ****************************/
+	/** HEALTH LABELS **********************************************/
 	
 	sv.lableGun = new THREE.Mesh(
 		new THREE.BoxBufferGeometry( 30, 10, 12 ),
@@ -75,7 +75,7 @@ sv.spaceVirt = () => {
 }
 
 
-/** FUNCTIONS LABELS LOCATOR ******************/
+/** FUNCTIONS LABELS LOCATOR ***************************************/
 
 sv.createNewLabel = car => {
 	
@@ -125,7 +125,7 @@ sv.update = car => {
 }
 
 
-/** FUNCTIONS LABELS HEALTH *******************/
+/** FUNCTIONS LABELS HEALTH ****************************************/
 
 sv.updateLabelBar = ( 
 
@@ -163,22 +163,22 @@ sv.removeAllBar = d => {
 }
 
 
-/**************************************************;
+/*******************************************************************;
  * COPE
- **************************************************/
+ *******************************************************************/
 
 class Cope {
 	
 	constructor() {
 		
 		
-		/** PARAMS *******************************/	
+		/** PARAMS *************************************************/	
 		
 		this.car = null
 		this.isCanExit = true
 			
 	
-		/** INIT SCENE CABINE ********************/		
+		/** INIT SCENE CABINE **************************************/		
 
 		this.sc = new THREE.Scene()
 		this.textureBack = new THREE.TextureLoader().load( "app/assets/back.jpg", 
@@ -205,7 +205,7 @@ class Cope {
 
 
 		
-		/** BACKGROUND PLANES ********************/
+		/** BACKGROUND PLANES **************************************/
 		
 		/** health bar */
 		let back = new THREE.Mesh(
@@ -264,13 +264,13 @@ class Cope {
 		this.sc.add( back )		
 		
 
-		/** BUTTONS INIT **************************/
+		/** BUTTONS INIT *******************************************/
 				
 		this.htmlElems = document.getElementById( 'copeElems' )	
 		this.htmlElems.style.display = "none"		
 		
 		
-		/** SCREENS INIT *************************/
+		/** SCREENS INIT *******************************************/
 		
 		this.screens = {
 			
@@ -433,7 +433,7 @@ class Cope {
 	}
 	
 	
-	/** UPDATE COPE PER SECOND ********************/
+	/** UPDATE COPE PER FRAME **************************************/
 		
 	render( scene, renderer, time ) {
 		
@@ -489,7 +489,7 @@ class Cope {
 	}
 
 
-	/** EXIT / ENTER COPE FUNCTIONS ***************/
+	/** EXIT / ENTER COPE FUNCTIONS ********************************/
 	
 	hideView() {
 		
@@ -540,7 +540,7 @@ class Cope {
 	}	
 
 
-	/** SET DAMAGES TO CLOCKS ************/
+	/** SET DAMAGES TO CLOCKS **************************************/
 	
 	damageGun( dam ) {
 		
@@ -610,7 +610,7 @@ class Cope {
 	}	
 	
 		
-	/** UPDATE VIEWS SCREENS ***************/ 
+	/** UPDATE VIEWS SCREENS ***************************************/ 
 
 	updateScreens( renderer, time ) {
 
@@ -638,7 +638,7 @@ class Cope {
 	}		
 
 	
-	/** AMMO BAR FUNCTIONS ************************/
+	/** AMMO BAR FUNCTIONS *****************************************/
 	
 	initAmmoBar( b = {				
 					screen: null,
@@ -696,7 +696,7 @@ class Cope {
 	}
 
 	
-	/** FUEL BAR FUNCTIONS ************************/
+	/** FUEL BAR FUNCTIONS *****************************************/
 	
 	initFuelBar( b = {				
 					screen: null,
@@ -737,7 +737,7 @@ class Cope {
 	}
 	
 
-	/** COMPAS BAR FUNCTIONS ************************/		
+	/** COMPAS BAR FUNCTIONS ***************************************/		
 	
 	initCompasBar( b = {				
 					screen: null,
@@ -776,7 +776,7 @@ class Cope {
 	}	
 	
 	
-	/** ROTATIONS BAR FUNCTIONS ************************/	
+	/** ROTATIONS BAR FUNCTIONS ************************************/	
 	
 	initRotationsBar( b = {				
 					screen: null,
@@ -838,7 +838,7 @@ class Cope {
 	}	
 	
 	
-	/** FUNCTIONS FOR ALL BARS **************************/
+	/** FUNCTIONS FOR ALL BARS *************************************/
 	
 	destroyBar( b ) {
 		

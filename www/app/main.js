@@ -24,8 +24,8 @@ const g = {
   cars: [],
   carsMustRemoved: [], 
   bullets: [],
-  heroBomb: null,
-  air: null
+  bombs: []
+  //air: null
 }
 
 /** UI BUTTONS/KEYBOARD SPACE */
@@ -195,17 +195,11 @@ s.initHeroIfNone = serverU => {
 
 /** SET SERVER DATA TO ENEMIES *************************************/
 
-s.createEnemy = h => {	
-  return new Human( h )
-}
+s.createEnemy = h => new Human( h )
 
-s.updateEnemyFromServer = ( target, source ) => {
-  target.updateParamsFromServer( source )
-} 
+s.updateEnemyFromServer = ( target, source ) => target.updateParamsFromServer( source ) 
 
-s.removeEnemy = md => {
-  md.remove() 
-}
+s.removeEnemy = md => md.remove() 
 
 s.setDataEnemiesFromServer = serverEnemies => {
   g.enemies = transformTargetArrFromSourceArrData(
@@ -217,22 +211,18 @@ s.setDataEnemiesFromServer = serverEnemies => {
 
 /** SET SERVER DATA TO CARS ****************************************/
 
-s.createNewCar = car => {
-  return new Car( car )
-  //let a = new Air( new Car( newCarParams ), positionToDropCar )
-}
+s.createNewCar = car => new Car( car )
+//let a = new Air( new Car( newCarParams ), positionToDropCar )
 
-s.updateCarFromServer = ( target, source ) => {
-  target.updateParamsFromServer( source )
-}
+s.updateCarFromServer = ( target, source ) => target.updateParamsFromServer( source )
 
 s.removeCar = ( md ) => {
-  md.startExplosive()  
+  md.startExplosive()
+  s.rendererStartFlash()
   g.carsMustRemoved.push( md )
 }
 
 s.setDataCarsFromServer = serverCars => {
-  
   g.cars = transformTargetArrFromSourceArrData(
         g.cars, serverCars,
         s.createNewCar, s.removeCar, s.updateCarFromServer 
@@ -272,7 +262,6 @@ const initParashute = car => {
 
 const animate = () => {
 
-  
   $("#userId").html("heroId: " + clientGame.user.id)
   $("#userCarId").html("heroCarId: " + clientGame.car.id)
   
@@ -328,7 +317,7 @@ const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
 
 const animateBullets = () => {
   
-  g.bullets.forEach( ( bullet, i, arr ) => {
+  g.bullets.forEach(( bullet, i, arr ) => {
     
     if ( bullet.isRemovable ) { 
       removeObjectFromArr( bullet, i, arr ) 
@@ -336,12 +325,18 @@ const animateBullets = () => {
     }
     
     bullet.render()
+
+    if ( bullet.userId != clientGame.user.id ) return    
     
     let targetCar = checkInterseptionsKvadrant( bullet, g.cars, bullet.carId )
     if ( ! targetCar ) return
 
     bullet.deleteObj()
-    clientGameputIdDamagedCar( targetCar.id )
+
+    clientGameputIdDamagedCar({ 
+      target: targetCar.id, 
+      authorId: clientGame.user.id
+    })
   })
 }
 
@@ -362,7 +357,6 @@ const animateEmemyCars = () => {
     car.moveByEnemy()  
   }) 
 } 
-
 
 const animateCarsRemoved = () => {
   
@@ -388,13 +382,25 @@ const animateEnenies = () => {
   })
 }
 
+
+const addBomb = car => {
+
+  for ( let i = 0; i < g.bombs.length; i ++ ) {
+    if ( g.bombs[i].carId == car.id ) {
+      return
+    }
+  }
+
+  clientGame.bombs.push( { car: car.id, user: clientGame.user.id } )
+  buttAddBomb.style.opacity = 0	
+}
+
 const animateBombs = () => {
 
   if ( g.heroBomb ) g.heroBomb.update()
 }
 
 const animateAir = () => {
-
 
   if ( ! g.air ) return
   

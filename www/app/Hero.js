@@ -36,7 +36,7 @@ class Hero {
     if ( ! this.nearCar ) return
 
     if ( keys.enter ) enterCope( this.nearCar )
-    if ( keys.B ) addBomb( this.nearCar )
+    if ( keys.B ) s.addBomb( this.nearCar )
     if ( keys.R ) {
       this.nearCar.repair()
       keys.R = false
@@ -103,10 +103,6 @@ const enterCope = car => {
   cope.renderPass.enabled = true
 }
 
-const addBomb = car => {
 
-  if ( ! g.heroBomb ) g.heroBomb = new Bomb( car )
-  buttAddBomb.style.opacity = 0	
-}
 
   

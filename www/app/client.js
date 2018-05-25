@@ -30,6 +30,7 @@ const clientGame = {
     rotation: null
   },
   
+  bombs: [],
   carsDamaged: [] 
 }
 
@@ -132,6 +133,7 @@ const clientGameputIdDamagedCar = id => {
 const clearArrsInClientGameAfterSend = () => {
   
   clientGame.carsDamaged = []
+  clientGame.bombs = []
 }
 
 

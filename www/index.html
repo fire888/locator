@@ -53,6 +53,11 @@
 	button.outerCope:hover{
 		background-color: #005555;
 		color: #99ff99;		
+	}
+
+	.text {
+		font-size: 20px;
+		color: #006500;
 	}	
 	
   </style> 		
@@ -63,15 +68,31 @@
 <div id = 'copeElems'>
 	<button 
 		class = 'innerCope'	
-		id='exitCope' 
-		style ='
+		id = 'exitCope' 
+		style = '
 			position: absolute;
 			right: 16.5%;
 			bottom: 23%;
 			height: 3%;
 			width: 17%;
-			font-size: 25px;
-	'>Exit Cope 'Enter'</button>
+			font-size: 25px;'
+	>Exit Cope 'Enter'</button>
+
+	<div
+		class = 'innerCope'	
+		style = '
+			position: absolute;
+			right: 16.5%;
+			bottom: 16.5%;
+			height: 5%;
+			width: 17%;
+			font-size: 25px;'
+	>
+		<p id = 'online' class = 'text'>Enemies online: 1</p>
+		<p id = 'destroy' class = 'text'>Desrtoy Enemy Cars: 1</p>
+		<p id = 'destroyEmpty' class = 'text'>Dectroy Empty Cars: 1</p>
+		<p id = 'lost' class = 'text'>Lost Cars: 1</p>						
+	</div>
 	
 	<button 
 		class = 'innerCope'	
@@ -171,7 +192,7 @@
 <script src='app/sceneMaterials.js'></script>
 <script src='app/functionsForGeometry.js'></script>
 <script src='app/functionsForArraysSort.js'></script>
-<script src='app/CarBullet.js'></script>
+<script src='app/Bullet.js'></script>
 <script src='app/Car.js'></script>
 <script src='app/Cope.js'></script>
 <script src='app/Hero.js'></script>

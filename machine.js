@@ -34,15 +34,14 @@ console.log('Machine start')
  *********************************************/
 
 const game = {
-
   users: [],
   cars: [],
-  bullets: []
+  bullets: [],
+  bombs: []
 }
 
 
 const userProto = {
-
   id: null,
   timerDisconnect: 15,
   state: null,
@@ -50,7 +49,8 @@ const userProto = {
   posZ: null,
   rotation: null,
 
-  destroyCars: 0,
+  destroyEmptyCars: 0,
+  destroyCarsWithEnemies: 0,
   lostCars: 0,
 
   isCar: null
@@ -58,7 +58,6 @@ const userProto = {
 
 
 const carProto = {
-
   id: null,
   timerRemove: 2000,
   state: null,
@@ -66,7 +65,16 @@ const carProto = {
   posZ: null,
   rotation: null,  
   lives: 5,
+  killer: null,
   
+  isUser: null
+}
+
+
+const bombProto = {
+  id: null,
+  timerRemove: 20,
+  isCar: null,
   isUser: null
 }
 
@@ -89,6 +97,7 @@ io.on( 'connection', function( socket ) {
     
     setCarIsEmtyIfUserCarIsNull( client.user.id, client.car.id )
     checkCarsDamage( client.carsDamaged )
+    checkBombs( client.bombs )
     removeCarIfLifeIsNone()
   })
 })
@@ -196,6 +205,8 @@ const setCarIsEmtyIfUserCarIsNull = ( clientUserId, clientUserCarId ) => {
 }
 
 
+/** ADD DAMAGES FROM BULLETS *************************************/
+
 const checkCarsDamage  = carsDamaged => {
   
   if ( ! carsDamaged ) return
@@ -203,8 +214,9 @@ const checkCarsDamage  = carsDamaged => {
 
   for ( let d = 0; d < carsDamaged.length; d ++ ) {
     for ( let i = 0; i < game.cars.length; i ++ ) {
-      if ( carsDamaged[d] == game.cars[i].id ) {
+      if ( carsDamaged[d].target == game.cars[i].id ) {
         game.cars[i].lives --
+        game.cars[i].killer = carsDamaged[d].authorId
       }
     }
   } 
@@ -214,11 +226,54 @@ const checkCarsDamage  = carsDamaged => {
 const removeCarIfLifeIsNone = () => {
   
   for ( let i = 0; i < game.cars.length; i ++ ) {
-    if ( game.cars[i].lives < 0 ) {     
+    if ( game.cars[i].lives < 0 ) {
+      if ( game.cars[i].killer != null ) {
+        addBonusToKillerUser( game.cars[i] )
+      }   
       game.cars.splice( i, 1 )
       i --
     }
   } 
+}
+
+
+/** CHECK BOMBS ****************************************************/
+
+const checkBombs = bombs => {
+   
+  if ( ! bombs ) return
+  
+  for ( let b = 0; b < bombs.length; b ++ ) {
+    let bomb = Object.assign( {}, bombProto )
+    bomb.isCar = bombs[b].car
+    bomb.isUser = bomb[b].user
+  }  
+}
+
+
+/** ADD SCORES TO USERS ********************************************/
+
+
+const addBonusToKillerUser = car => {
+  game.users.forEach(( user ) => {
+    if ( car.killer == user.id ) {
+      if ( car.isUser != null ) {
+        removeBonusFromTargetCarUser( car.isUser )
+        user.destroyCarsWithEnemies ++
+      } else {
+        user.destroyEmptyCars ++
+      }
+    }
+  })
+}
+
+
+const removeBonusFromTargetCarUser = userId => {
+  game.users.forEach(( user ) => {
+    if ( user.id == userId ) {
+      user.lostCars ++
+    }
+  })
 }
       
 
@@ -230,6 +285,7 @@ const removeCarIfLifeIsNone = () => {
 
 const sendToUsersGameData = () => {
 
+  updateBombs()
   clearUsersIsDisconnect()
   clearCarsIfLongTimeNotMove() 
 
@@ -246,6 +302,19 @@ let timerUpdate = setTimeout( sendToUsersGameData, 200 )
 /***********************************************;
  *  UPDATE GAME BEFORE SEND
  ***********************************************/
+
+const updateBombs = () => {
+
+  if ( game.bombs.length == 0 ) return
+  for ( let b = 0; b < game.bombs.length; b ++ ) {
+    game.bombs[b].timerRemove -- 
+    if ( game.bombs[b].timerRemove < 0 ) {
+      let md = game.bombs[b]
+      game.bombs.splice( b, 1 )
+      b --
+    }
+  }
+} 
 
 
 const clearUsersIsDisconnect = () => {
