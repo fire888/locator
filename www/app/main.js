@@ -3,23 +3,24 @@
 
 
 /**
- *******************************************************************; 
+ ***********************************************; 
  *	Project        	:	MACHINE 
  *	Program name   	: 	Threejs scene 
  *	Author         	: 	www.otrisovano.ru
  *	Date           	: 	16/03/2018
  *	Purpose        	: 	check brain   
- *******************************************************************/ 
+ ***********************************************/ 
 
 
 
-/*******************************************************************;
+/***********************************************;
  * VARS SPACES
- *******************************************************************/
+ ***********************************************/
+
 
 /** INSTANSES OF GAME OBJECT */
-const g = {
 
+const g = {
   enemies: [],
   cars: [],
   carsMustRemoved: [], 
@@ -28,12 +29,15 @@ const g = {
   //air: null
 }
 
+
 /** UI BUTTONS/KEYBOARD SPACE */
+
 const ui = () => {}  
 
-/** SCENE ASSETS */
-const s = {
 
+/** SCENE ASSETS */
+
+const s = {
   loader: new THREE.OBJLoader(),
   geomCar: null,
   geomCarGun: null,
@@ -44,13 +48,14 @@ const s = {
 } 
 
 /** MAIN VARS */
+
 let cope = null, hero = null
 
 
 
-/*******************************************************************;
+/***********************************************;
  * LOAD
- *******************************************************************/
+ ***********************************************/
 
 window.onload = () => loadAssets()
 
@@ -104,9 +109,9 @@ s.loadGeometry = ( targetVariable, path, onloadFunc ) => {
 
 
 
-/*******************************************************************;
+/***********************************************;
  * INITS
- *******************************************************************/
+ ***********************************************/
 
 const initGame = () => {
 
@@ -177,9 +182,9 @@ const initCope = () => {
 
 
 
-/*******************************************************************;
+/***********************************************;
  * UPDATE SCENE BY SERVER DATA 
- *******************************************************************/ 
+ ***********************************************/
 
 s.initHeroIfNone = serverU => {
   
@@ -193,7 +198,7 @@ s.initHeroIfNone = serverU => {
 }
 
 
-/** SET SERVER DATA TO ENEMIES *************************************/
+/** SET SERVER DATA TO ENEMIES *****************/
 
 s.createEnemy = h => new Human( h )
 
@@ -209,7 +214,7 @@ s.setDataEnemiesFromServer = serverEnemies => {
 }
 
 
-/** SET SERVER DATA TO CARS ****************************************/
+/** SET SERVER DATA TO CARS ********************/
 
 s.createNewCar = car => new Car( car )
 //let a = new Air( new Car( newCarParams ), positionToDropCar )
@@ -256,9 +261,9 @@ const initParashute = car => {
 
 
 
-/*******************************************************************;
+/***********************************************;
  * ANIMATE PER FRAME
- *******************************************************************/
+ ***********************************************/
 
 const animate = () => {
 
@@ -282,7 +287,7 @@ const animate = () => {
 }
 
 
-/** ANIMATION OBJECTS **********************************************/
+/** ANIMATION OBJECTS **************************/
 
 const animateHero = () => {
   
@@ -409,7 +414,7 @@ const animateAir = () => {
 }
 
 
-/** POSTPROCESSING ANIMATION EFFECTS *******************************/
+/** POSTPROCESSING ANIMATION EFFECTS ***********/
 
 s.rendererStartFlash = () => {
 
@@ -438,21 +443,21 @@ s.rendererLessFlash = () => {
 
 
 
-/*******************************************************************;
+/***********************************************;
  * RESIZE SCENE
- *******************************************************************/
+ ***********************************************/
 
 const handleWindowResize = () =>  s.renderer.setSize( window.innerWidth, window.innerHeight )
 window.addEventListener( 'resize', handleWindowResize, false )
 
 
 
-/*******************************************************************;
+/***********************************************;
  * USER INTERFACE
- *******************************************************************/
+ ***********************************************/
 
 
-/** KEYBOARD *******************************************************/
+/** KEYBOARD ***********************************/
  
 const keys = {
 
@@ -514,7 +519,7 @@ document.addEventListener( "keydown", event => keyUpdate( event, true ) )
 document.addEventListener( "keyup", event => keyUpdate( event, false ) )
 
 
-/** BUTTONS MOUSE CLICK ********************************************/
+/** BUTTONS MOUSE CLICK ************************/
  
 let buttGunLeft = document.getElementById( 'gunLeft' )
 buttGunLeft.onmousedown = () => keys.A = true
@@ -541,7 +546,7 @@ let buttFire = document.getElementById( 'gunFire' )
 buttFire.onclick = () => keys.space = true
 
 
-/** BUTTONS STYLES *************************************************/
+/** BUTTONS STYLES *****************************/
 
 const setOpasityButtonsHeroNearCar = opas => {
 
@@ -549,5 +554,17 @@ const setOpasityButtonsHeroNearCar = opas => {
   buttAddBomb.style.opacity = opas
   buttRepairCar.style.opacity = opas 
 }
+
+ui.setUserScores = ( user ) => {
+
+  if ( ! user ) return 
+ 
+  $( '#destroy' ).html( 'Destroy enemies cars: ' + user.destroyCarsWithEnemies  )  
+  $( '#destroyEmpty' ).html( 'Destroy empty cars: ' + user.destroyEmptyCars  )
+  $( '#lost' ).html( 'Lost cars: ' + user.lostCars  )
+  $( '#online' ).html( 'Online enemies: ' + g.enemies.length  )
+
+}
+
 
 

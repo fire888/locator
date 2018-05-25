@@ -79,6 +79,7 @@ const checkServerData = serverData => {
   
   s.setDataEnemiesFromServer( serverData.users )
   s.setDataCarsFromServer( serverData.cars )
+  ui.setUserScores( serverCurrentUser, serverData.users.length  )
 }
 
 const takeawayUserData = users => {

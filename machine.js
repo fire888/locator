@@ -1,20 +1,20 @@
 /**
-|*********************************************;
+|***********************************************;
 *  Project        : Machine
 *  Program name   : Server  
 *  Author         : www.otrisovano.ru
 *  Date           : 15.05.2018 
 *  Purpose        : check brain   
-|*********************************************/
+|***********************************************/
 
 'use strict'
 
 
 
 
-/*********************************************;
+/***********************************************;
  *  CREATE APPLICATION
- *********************************************/
+ ***********************************************/
 
 var express = require("express")
 var app = express()
@@ -29,9 +29,9 @@ console.log('Machine start')
 
 
 
-/*********************************************;
+/***********************************************;
  *  SERVER GAME OBJECTS
- *********************************************/
+ ***********************************************/
 
 const game = {
   users: [],
@@ -81,9 +81,9 @@ const bombProto = {
 
 
 
-/*********************************************;
+/***********************************************;
  *  GET DATA FROM CLIENTS
- *********************************************/
+ ***********************************************/
 
 io.on( 'connection', function( socket ) {
   socket.on( 'clientData', function( client ) {
@@ -110,7 +110,7 @@ io.on( 'connection', function( socket ) {
  ***********************************************/
 
 
-/** FUNCTIONS USER **********************/ 
+/** FUNCTIONS USER *****************************/ 
 
 const getUserServerData = clientId => {
   
@@ -153,7 +153,7 @@ const updateServerUser = ( clientU, clientCarId, serverU ) => {
 } 
 
 
-/** FUNCTIONS CARS ********************************/
+/** FUNCTIONS CARS *****************************/
 
 const getCarServerData = id => {
 
@@ -205,7 +205,7 @@ const setCarIsEmtyIfUserCarIsNull = ( clientUserId, clientUserCarId ) => {
 }
 
 
-/** ADD DAMAGES FROM BULLETS *************************************/
+/** ADD DAMAGES FROM BULLETS *******************/
 
 const checkCarsDamage  = carsDamaged => {
   
@@ -237,7 +237,7 @@ const removeCarIfLifeIsNone = () => {
 }
 
 
-/** CHECK BOMBS ****************************************************/
+/** CHECK BOMBS ********************************/
 
 const checkBombs = bombs => {
    
@@ -251,7 +251,7 @@ const checkBombs = bombs => {
 }
 
 
-/** ADD SCORES TO USERS ********************************************/
+/** ADD SCORES TO USERS ************************/
 
 
 const addBonusToKillerUser = car => {
