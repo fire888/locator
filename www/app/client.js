@@ -36,6 +36,7 @@ const clientGame = {
 
 
 
+
 /***********************************************;
  *  INIT CLIENT
  ***********************************************/
@@ -67,6 +68,7 @@ const getDataFromServer = () => {
 
 
 
+
 /***********************************************;
  *  UPDATE USER GAME OBJ
  ***********************************************/
@@ -79,6 +81,7 @@ const checkServerData = serverData => {
   
   s.setDataEnemiesFromServer( serverData.users )
   s.setDataCarsFromServer( serverData.cars )
+  s.setDataBombsFromServer( serverData.bombs )  
   ui.setUserScores( serverCurrentUser, serverData.users.length  )
 }
 
@@ -122,6 +125,23 @@ const  setUserDataInClientObj = () => {
 const clientGameputIdDamagedCar = id => {
 
   clientGame.carsDamaged.push( id )
+}
+
+
+const addBombInClientObj = car => {
+
+  if ( car.isBomb == true ) return 
+
+  for ( let i = 0; i < g.bombs.length; i ++ ) {
+    if ( g.bombs[i].carId == car.id ) {
+      return
+    }
+  }
+  
+  car.isBomb = true  
+
+  clientGame.bombs.push( { car: car.id, user: clientGame.user.id } )
+  buttAddBomb.style.opacity = 0	
 }
 
 

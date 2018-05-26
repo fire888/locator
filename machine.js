@@ -97,8 +97,7 @@ io.on( 'connection', function( socket ) {
     
     setCarIsEmtyIfUserCarIsNull( client.user.id, client.car.id )
     checkCarsDamage( client.carsDamaged )
-    checkBombs( client.bombs )
-    removeCarIfLifeIsNone()
+    checkBombs( client.bombs ) 
   })
 })
 
@@ -223,6 +222,25 @@ const checkCarsDamage  = carsDamaged => {
 }
 
 
+
+/** CHECK BOMBS ********************************/
+
+const checkBombs = bombs => {
+   
+  if ( ! bombs ) return
+  
+  for ( let b = 0; b < bombs.length; b ++ ) {
+    let bomb = Object.assign( {}, bombProto )
+    bomb.isCar = bombs[b].car
+    bomb.isUser = bombs[b].user
+
+    game.bombs.push( bomb )
+  }  
+}
+
+
+/** REMOVE CAR IF LIVES NULL *******************/
+
 const removeCarIfLifeIsNone = () => {
   
   for ( let i = 0; i < game.cars.length; i ++ ) {
@@ -237,22 +255,7 @@ const removeCarIfLifeIsNone = () => {
 }
 
 
-/** CHECK BOMBS ********************************/
-
-const checkBombs = bombs => {
-   
-  if ( ! bombs ) return
-  
-  for ( let b = 0; b < bombs.length; b ++ ) {
-    let bomb = Object.assign( {}, bombProto )
-    bomb.isCar = bombs[b].car
-    bomb.isUser = bomb[b].user
-  }  
-}
-
-
 /** ADD SCORES TO USERS ************************/
-
 
 const addBonusToKillerUser = car => {
   game.users.forEach(( user ) => {
@@ -287,7 +290,8 @@ const sendToUsersGameData = () => {
 
   updateBombs()
   clearUsersIsDisconnect()
-  clearCarsIfLongTimeNotMove() 
+  clearCarsIfLongTimeNotMove()
+  removeCarIfLifeIsNone()
 
   io.sockets.emit( 'message', game )
   timerUpdate = setTimeout( sendToUsersGameData, 200 )  
@@ -310,11 +314,28 @@ const updateBombs = () => {
     game.bombs[b].timerRemove -- 
     if ( game.bombs[b].timerRemove < 0 ) {
       let md = game.bombs[b]
+
+      setCarLifesNullIfBombTimerOut( game.bombs[b] )
+
       game.bombs.splice( b, 1 )
       b --
+      md = null
     }
   }
-} 
+}
+
+
+const setCarLifesNullIfBombTimerOut = bomb => {
+
+  if ( ! bomb ) return
+
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    if ( game.cars[i].id == bomb.isCar) {
+      game.cars[i].lives = -1
+      game.cars[i].killer = bomb.isUser
+    }
+  }
+}
 
 
 const clearUsersIsDisconnect = () => {
@@ -344,7 +365,6 @@ const setCarEmpty = carId => {
     }
   }
 }
-
 
 
 const clearCarsIfLongTimeNotMove = () => {

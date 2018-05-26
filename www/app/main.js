@@ -234,6 +234,31 @@ s.setDataCarsFromServer = serverCars => {
       )
 }
 
+
+/** SET SERVER DATA TO BOMBS ********************/
+
+s.createNewBomb = bomb => {
+  for ( let c = 0; c < g.cars.length; c ++ ) {
+    if ( g.cars[c].id == bomb.isCar ) {
+      return new Bomb( g.cars[c] )    
+    }
+  }
+}
+
+s.explosiveBomb = bomb => {
+  bomb.boom()
+} 
+
+s.updateBomb = bomb => {}
+
+s.setDataBombsFromServer = serverBombs => {
+  g.bombs = transformTargetArrFromSourceArrData(
+        g.bombs, serverBombs,
+        s.createNewBomb, s.explosiveBomb, s.updateBomb 
+      )
+}
+
+
 /*
 const initAir = () => {
 
@@ -387,18 +412,6 @@ const animateEnenies = () => {
   })
 }
 
-
-const addBomb = car => {
-
-  for ( let i = 0; i < g.bombs.length; i ++ ) {
-    if ( g.bombs[i].carId == car.id ) {
-      return
-    }
-  }
-
-  clientGame.bombs.push( { car: car.id, user: clientGame.user.id } )
-  buttAddBomb.style.opacity = 0	
-}
 
 const animateBombs = () => {
 

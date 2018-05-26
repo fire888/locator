@@ -19,20 +19,13 @@ class Bomb {
 		this.mesh.position.set( 0, -15, 0 )
 		car.model.add( this.mesh )
 	}
-	
-	update() {
 		
-		this.timer --
-		if (this.timer < 0 ) this.boom() 
-	}
-	
 	boom() {
 		
-		s.rendererStartFlash()
+		//s.rendererStartFlash()
 		this.car.model.remove( this.mesh )		
-		this.car.state = 'explosive'
+		//this.car.state = 'explosive'
 		this.car = null
-		this.isRemovable = true
-		g.heroBomb = null	
+		this.isRemovable = true	
 	}
 }	

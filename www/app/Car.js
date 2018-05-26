@@ -47,6 +47,8 @@ class Car {
 		this.isRemovable = false
 		this.timerExplosion = 300
 		this.timerRemove = 200
+
+		this.isBomb = false
 				
 		this.state = 'none'
 
