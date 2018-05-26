@@ -239,7 +239,80 @@ const checkBombs = bombs => {
 }
 
 
-/** REMOVE CAR IF LIVES NULL *******************/
+
+/***********************************************;
+ *  SEND GAME OBJECT TO USERS
+ ***********************************************/
+
+const sendToUsersGameData = () => {
+
+  updateBombs()  
+  clearCarsIfLongTimeNotMove()
+  removeCarIfLifeIsNone()
+  clearUsersIsDisconnect()  
+
+  io.sockets.emit( 'message', game )
+  timerUpdate = setTimeout( sendToUsersGameData, 200 )  
+}
+
+
+let timerUpdate = setTimeout( sendToUsersGameData, 200 )
+
+
+
+
+/***********************************************;
+ *  UPDATE GAME BEFORE SEND
+ ***********************************************/
+
+ /** UPDATE BOMBS ******************************/
+
+const updateBombs = () => {
+
+  if ( game.bombs.length == 0 ) return
+  for ( let b = 0; b < game.bombs.length; b ++ ) {
+    game.bombs[b].timerRemove -- 
+    if ( game.bombs[b].timerRemove < 0 ) {
+      let md = game.bombs[b]
+
+      setCarLifesNullIfBombTimerOut( game.bombs[b] )
+
+      game.bombs.splice( b, 1 )
+      b --
+      md = null
+    }
+  }
+}
+
+const setCarLifesNullIfBombTimerOut = bomb => {
+
+  if ( ! bomb ) return
+
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    if ( game.cars[i].id == bomb.isCar) {
+      game.cars[i].lives = -1
+      game.cars[i].killer = bomb.isUser
+    }
+  }
+}
+
+
+/** UPDATE CARS ********************************/
+
+const clearCarsIfLongTimeNotMove = () => {
+
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    game.cars[i].timerRemove -- 
+
+    if ( game.cars[i].timerRemove < 0 ) {
+      let md = game.cars[i]
+      game.cars.splice( i, 1 )
+      i --
+      md = null
+    }
+  }
+}
+
 
 const removeCarIfLifeIsNone = () => {
   
@@ -255,7 +328,35 @@ const removeCarIfLifeIsNone = () => {
 }
 
 
-/** ADD SCORES TO USERS ************************/
+const setCarEmpty = carId => {
+
+  if ( ! carId ) return 
+
+  for ( let i = 0; i < game.cars.length; i ++ ) {
+    if ( game.cars[i].id == carId ) {
+      game.cars[i].isUser = null
+      return
+    }
+  }
+}
+
+
+/** UPDATE USERS *******************************/
+
+const clearUsersIsDisconnect = () => {
+
+  for ( let i = 0; i < game.users.length; i ++ ) {
+    game.users[i].timerDisconnect --
+    
+    if ( game.users[i].timerDisconnect < 0 ) {
+      setCarEmpty( game.users[i].isCar )
+      let md = game.users[i]  
+      game.users.splice( i, 1 )
+      i --
+      md = null
+    }
+  }
+}
 
 const addBonusToKillerUser = car => {
   game.users.forEach(( user ) => {
@@ -278,111 +379,6 @@ const removeBonusFromTargetCarUser = userId => {
     }
   })
 }
-      
-
-
-
-/***********************************************;
- *  SEND GAME OBJECT TO USERS
- ***********************************************/
-
-const sendToUsersGameData = () => {
-
-  updateBombs()
-  clearUsersIsDisconnect()
-  clearCarsIfLongTimeNotMove()
-  removeCarIfLifeIsNone()
-
-  io.sockets.emit( 'message', game )
-  timerUpdate = setTimeout( sendToUsersGameData, 200 )  
-}
-
-
-let timerUpdate = setTimeout( sendToUsersGameData, 200 )
-
-
-
-
-/***********************************************;
- *  UPDATE GAME BEFORE SEND
- ***********************************************/
-
-const updateBombs = () => {
-
-  if ( game.bombs.length == 0 ) return
-  for ( let b = 0; b < game.bombs.length; b ++ ) {
-    game.bombs[b].timerRemove -- 
-    if ( game.bombs[b].timerRemove < 0 ) {
-      let md = game.bombs[b]
-
-      setCarLifesNullIfBombTimerOut( game.bombs[b] )
-
-      game.bombs.splice( b, 1 )
-      b --
-      md = null
-    }
-  }
-}
-
-
-const setCarLifesNullIfBombTimerOut = bomb => {
-
-  if ( ! bomb ) return
-
-  for ( let i = 0; i < game.cars.length; i ++ ) {
-    if ( game.cars[i].id == bomb.isCar) {
-      game.cars[i].lives = -1
-      game.cars[i].killer = bomb.isUser
-    }
-  }
-}
-
-
-const clearUsersIsDisconnect = () => {
-
-  for ( let i = 0; i < game.users.length; i ++ ) {
-    game.users[i].timerDisconnect --
-    
-    if ( game.users[i].timerDisconnect < 0 ) {
-      setCarEmpty( game.users[i].isCar )
-      let md = game.users[i]  
-      game.users.splice( i, 1 )
-      i --
-      md = null
-    }
-  }
-}
-
-
-const setCarEmpty = carId => {
-
-  if ( ! carId ) return 
-
-  for ( let i = 0; i < game.cars.length; i ++ ) {
-    if ( game.cars[i].id == carId ) {
-      game.cars[i].isUser = null
-      return
-    }
-  }
-}
-
-
-const clearCarsIfLongTimeNotMove = () => {
-
-  for ( let i = 0; i < game.cars.length; i ++ ) {
-    game.cars[i].timerRemove -- 
-
-    if ( game.cars[i].timerRemove < 0 ) {
-      let md = game.cars[i]
-      game.cars.splice( i, 1 )
-      i --
-      md = null
-    }
-  }
-}
-
-
-
 
 
 

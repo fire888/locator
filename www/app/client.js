@@ -53,10 +53,12 @@ const initClient = () => {
 const sendDataToServer = () => {
 
   setUserDataInClientObj()
-  socket.emit( 'clientData', clientGame )
-  clearArrsInClientGameAfterSend() 
-  timerSendDataClient = setTimeout( sendDataToServer, 500 )
 
+  socket.emit( 'clientData', clientGame )
+
+  clearArrsInClientGameAfterSend() 
+
+  timerSendDataClient = setTimeout( sendDataToServer, 500 )
 }
 
 const getDataFromServer = () => {
