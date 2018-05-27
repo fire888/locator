@@ -110,7 +110,7 @@ io.on( 'connection', function( socket ) {
 
 
 /***********************************************;
- *  UPDATE GAME FROM SINGLE EVERY CLIENT 
+ *  UPDATE GAME FROM EVERY CLIENT 
  ***********************************************/
 
 
@@ -431,6 +431,13 @@ const removeBonusFromTargetCarUser = userId => {
 }
 
 
+
+
+/***********************************************;
+ *  CLEAR GAME AFTER SEND
+ ***********************************************/
+
+ 
 /** CLEAR BULLETS ******************************/
 
 const clearBulletsAfterSend = () => game.bullets = []
