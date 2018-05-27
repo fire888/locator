@@ -13,7 +13,10 @@ class Air {
       s.geomAir,
       new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
     )
+
     this.mesh.position.set( this.targetPositionDrop.x, 300, this.targetPositionDrop.z-1500 )
+    if ( car.startUserId != null ) this.mesh.position.z = this.targetPositionDrop.z-5000 
+   
     s.scene.add( this.mesh )
 
     this.car = car	

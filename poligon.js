@@ -1,11 +1,11 @@
-/**
-|***********************************************;
-*  Project        : Machine
-*  Program name   : Server  
-*  Author         : www.otrisovano.ru
-*  Date           : 15.05.2018 
-*  Purpose        : check brain   
-|***********************************************/
+
+/************************************************;
+ *  Project        : Machine
+ *  Program name   : Server  
+ *  Author         : www.otrisovano.ru
+ *  Date           : 15.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
 
 'use strict'
 
@@ -52,6 +52,7 @@ const userProto = {
   destroyEmptyCars: 0,
   destroyCarsWithEnemies: 0,
   lostCars: 0,
+  addedNewCars: 0,
 
   isCar: null
 }
@@ -59,8 +60,10 @@ const userProto = {
 
 const carProto = {
   id: null,
+  startUserId: null,
   timerRemove: 2000,
-  state: null,
+  state: 'drop',
+  timerDropping: 30,
   posX: null,
   posZ: null,
   rotation: null,  
@@ -91,13 +94,15 @@ io.on( 'connection', function( socket ) {
     let serverUser = getUserServerData( client.user.id )     
     createNewUserIfNew( client.user, serverUser )
     updateServerUser( client.user, client.car.id, serverUser )
+    checkUserNeedNewCar( client.user, serverUser )
 
     let serverUserCar = getCarServerData( client.car.id ) 
     updateServerUserCar( client.car, client.user.id, serverUserCar )
     
     setCarIsEmtyIfUserCarIsNull( client.user.id, client.car.id )
     checkCarsDamage( client.carsDamaged )
-    checkBombs( client.bombs ) 
+    checkBombs( client.bombs )
+    checkBullets( client.bullets ) 
   })
 })
 
@@ -128,13 +133,13 @@ const createNewUserIfNew = ( clientU, serverU ) => {
   let u = Object.assign( {}, userProto )
   u.id = clientU.id
   u.state = 'init'
-  u.posX = Math.floor( Math.random()*250 )
-  u.posZ = Math.floor( Math.random()*250 )
+  u.posX = Math.floor( Math.random()*2500 )
+  u.posZ = Math.floor( Math.random()*2500 )
   u.rotation = 0
-
+  createNewCar( { x: u.posX, z: u.posZ }, u.id )
   game.users.push( u )
   
-  createNewCar( { x: u.posX, z: u.posZ } )
+
 }
 
 
@@ -150,6 +155,18 @@ const updateServerUser = ( clientU, clientCarId, serverU ) => {
   serverU.posZ = clientU.posZ
   serverU.rotation = clientU.rotation
 } 
+
+
+const checkUserNeedNewCar = ( clientU, serverU ) => {
+  
+  if ( ! clientU ) return 
+  if ( ! serverU ) return 
+  
+  if ( clientU.isGetNewCar ) {
+    serverU.addedNewCars ++
+    createNewCar( { x: clientU.posX, z: clientU.posZ } )     
+  }
+}
 
 
 /** FUNCTIONS CARS *****************************/
@@ -168,14 +185,18 @@ const getCarServerData = id => {
 } 
 
 
-const createNewCar = position => {
-
+const createNewCar = ( position, uId ) => {
+  
   let c = Object.assign( {}, carProto )
   c.id =  Math.floor( Math.random()*10000 ) 
   c.posX = position.x
   c.posZ = position.z
-
+  
+  if ( uId ) c.startUserId = uId
+  
   game.cars.push( c )
+
+  return c.id
 }
 
 
@@ -188,7 +209,8 @@ const updateServerUserCar = ( clientUserCar, clientUserCarId, serverUserCar ) =>
   serverUserCar.timerRemove = 2000
   serverUserCar.posX = clientUserCar.posX
   serverUserCar.posZ = clientUserCar.posZ
-  serverUserCar.rotation = clientUserCar.rotation            
+  serverUserCar.rotation = clientUserCar.rotation
+  serverUserCar.rotationGun = clientUserCar.rotationGun 
 }
 
 
@@ -204,7 +226,7 @@ const setCarIsEmtyIfUserCarIsNull = ( clientUserId, clientUserCarId ) => {
 }
 
 
-/** ADD DAMAGES FROM BULLETS *******************/
+/** ADD DAMAGES USER DATA DAMAGE ***************/
 
 const checkCarsDamage  = carsDamaged => {
   
@@ -220,7 +242,6 @@ const checkCarsDamage  = carsDamaged => {
     }
   } 
 }
-
 
 
 /** CHECK BOMBS ********************************/
@@ -239,19 +260,34 @@ const checkBombs = bombs => {
 }
 
 
+/** CHECK BULLETS ****************************/
+
+const checkBullets = bullets => {
+  
+  if ( bullets.length == 0 ) return
+
+  for ( let b = 0; b < bullets.length; b ++ ) {
+    game.bullets.push( bullets[b] )
+  }  
+} 
+
+
+
 
 /***********************************************;
  *  SEND GAME OBJECT TO USERS
  ***********************************************/
 
 const sendToUsersGameData = () => {
-
-  updateBombs()  
+  
+  updateBombs()    
   clearCarsIfLongTimeNotMove()
-  removeCarIfLifeIsNone()
-  clearUsersIsDisconnect()  
+  removeCarIfLivesIsNone()
+  clearUsersIsDisconnect()
 
   io.sockets.emit( 'message', game )
+  clearBulletsAfterSend()  
+
   timerUpdate = setTimeout( sendToUsersGameData, 200 )  
 }
 
@@ -264,6 +300,7 @@ let timerUpdate = setTimeout( sendToUsersGameData, 200 )
 /***********************************************;
  *  UPDATE GAME BEFORE SEND
  ***********************************************/
+
 
  /** UPDATE BOMBS ******************************/
 
@@ -302,6 +339,19 @@ const setCarLifesNullIfBombTimerOut = bomb => {
 const clearCarsIfLongTimeNotMove = () => {
 
   for ( let i = 0; i < game.cars.length; i ++ ) {
+    if ( game.cars[i].state == 'drop' ) {
+      
+      game.cars[i].timerDropping --
+
+      if (  game.cars[i].timerDropping < 0 ){
+        game.cars[i].state = 'none'
+        
+      }
+
+      return       
+    }
+
+
     game.cars[i].timerRemove -- 
 
     if ( game.cars[i].timerRemove < 0 ) {
@@ -314,7 +364,7 @@ const clearCarsIfLongTimeNotMove = () => {
 }
 
 
-const removeCarIfLifeIsNone = () => {
+const removeCarIfLivesIsNone = () => {
   
   for ( let i = 0; i < game.cars.length; i ++ ) {
     if ( game.cars[i].lives < 0 ) {
@@ -381,4 +431,7 @@ const removeBonusFromTargetCarUser = userId => {
 }
 
 
+/** CLEAR BULLETS ******************************/
+
+const clearBulletsAfterSend = () => game.bullets = []
 

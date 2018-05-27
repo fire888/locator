@@ -1,17 +1,16 @@
-/**
-|***********************************************; 
-*  Project        : Machine
-*  Program name   : Client  
-*  Author         : www.otrisovano.ru
-*  Date           : 14.05.2018 
-*  Purpose        : check brain   
-|***********************************************;
-*/
+
+/*********************************************************; 
+ *  Project        : Machine
+ *  Program name   : Client  
+ *  Author         : www.otrisovano.ru
+ *  Date           : 14.05.2018 
+ *  Purpose        : check brain   
+ *********************************************************/
 
 'use strict'
 
 
-/** CLIENT OBJ TO SEND TO SERVER **************/
+/** CLIENT OBJ TO SEND TO SERVER *************************/
 
 const clientGame = {
   
@@ -20,7 +19,8 @@ const clientGame = {
     state: 'connect',
     posX: null,
     posZ: null,
-    rotation: null 
+    rotation: null,
+    isGetNewCar: false  
   },
 
   car: {
@@ -31,15 +31,16 @@ const clientGame = {
   },
   
   bombs: [],
-  carsDamaged: [] 
+  bullets: [],
+  carsDamaged: []
 }
 
 
 
 
-/***********************************************;
+/*********************************************************;
  *  INIT CLIENT
- ***********************************************/
+ *********************************************************/
 
 let socket, timerSendDataClient
 socket = io()
@@ -56,7 +57,8 @@ const sendDataToServer = () => {
 
   socket.emit( 'clientData', clientGame )
 
-  clearArrsInClientGameAfterSend() 
+  clearArrsInClientGameAfterSend()
+  clearUserGetNewCar()
 
   timerSendDataClient = setTimeout( sendDataToServer, 500 )
 }
@@ -64,18 +66,18 @@ const sendDataToServer = () => {
 const getDataFromServer = () => {
   
   socket.on( 'message', function ( serverData ) {  
-    checkServerData( serverData ) 
+    updateGameFromServerData( serverData ) 
   })
 }
 
 
 
 
-/***********************************************;
- *  UPDATE USER GAME OBJ
- ***********************************************/
+/*********************************************************;
+ *  UPDATE USER GAME FROM SERVER
+ *********************************************************/
 
-const checkServerData = serverData => {
+const updateGameFromServerData = serverData => {
   
   let serverCurrentUser = takeawayUserData( serverData.users )  
 
@@ -83,7 +85,8 @@ const checkServerData = serverData => {
   
   s.setDataEnemiesFromServer( serverData.users )
   s.setDataCarsFromServer( serverData.cars )
-  s.setDataBombsFromServer( serverData.bombs )  
+  s.setDataBombsFromServer( serverData.bombs )
+  s.setDataBulletsFromServer( serverData.bullets )
   ui.setUserScores( serverCurrentUser, serverData.users.length  )
 }
 
@@ -102,7 +105,7 @@ const takeawayUserData = users => {
 
 
 /*********************************************************;
- * SET DATA IN CLIENT OBJ 
+ * SET DATA IN CLIENT OBJ TO SEND TO SERVER 
  *********************************************************/
 
 const  setUserDataInClientObj = () => {
@@ -119,7 +122,8 @@ const  setUserDataInClientObj = () => {
     clientGame.car.id = cope.car.id
     clientGame.car.posX = cope.car.model.position.x
     clientGame.car.posZ = cope.car.model.position.z
-    clientGame.car.rotation = cope.car.model.rotation      
+    clientGame.car.rotation = cope.car.model.rotation
+    clientGame.car.rotationGun = cope.car.modelGun.rotation    
   }   
 }
 
@@ -147,16 +151,44 @@ const addBombInClientObj = car => {
 }
 
 
+const addBulletInClientObj = bullet => clientGame.bullets.push( bullet )
+
+
+let isBlockUserGetNewCar = false
+
+const getNewCar = () => {
+  
+  keys.C = false
+
+  if ( isBlockUserGetNewCar == true ) return
+  isBlockUserGetNewCar = true
+
+  clientGame.user.isGetNewCar = true
+  getNewCarButt.style.display = 'none'
+
+  setTimeout ( ()=>{ 
+      isBlockUserGetNewCar = false
+      getNewCarButt.style.display = 'block'       
+    }, 15000 )
+ }
+
+
 
 
 /***********************************************;
- *  CLEAR CLIENT OBJ 
+ *  CLEAR TEMPS FROM CLIENT OBJ 
  ***********************************************/
 
 const clearArrsInClientGameAfterSend = () => {
   
   clientGame.carsDamaged = []
   clientGame.bombs = []
+  clientGame.bullets = []
 }
 
+
+const clearUserGetNewCar = () => {
+
+  clientGame.user.isGetNewCar = false
+}
 

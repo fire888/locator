@@ -1,0 +1,207 @@
+
+/** MAIN PROP. */
+
+@font-face {
+	font-family: tech; 
+	src: url(ShareTechMono-Regular.ttf); 		
+}
+
+* {
+	margin: 0px;
+	padding: 0px;
+}
+	
+body {
+	font-size: 30px;
+	font-family: tech;
+	color:  rgba(231, 229, 231, 0.7);
+	overflow: hidden;
+	background-color: #001d00;
+} 
+
+a {
+	color: rgba(231, 229, 231, 0.7);
+	text-decoration: none;
+}
+
+a:hover{
+	text-decoration: underline;
+}
+
+/** START BLOCK */
+
+#startScreen {
+	font-size: 18px;
+	background-image:  url(back.png);
+	background-color: #000000;	
+	background-repeat: no-repeat;	
+	background-position: top center;	
+	height: 100%;	
+	width: 100%;
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	z-index: 20000;
+	transition: 1.5s;
+}
+
+#startBlockWr {
+	padding: 15px;
+}
+
+#startBlock{
+	background-color: rgba(0, 0, 0, 0.8);
+	max-width: 340px;
+	min-height: 300px;
+	margin: 0 auto;
+	padding: 20px;
+	margin-top: 50px;	
+	text-align: center;
+	border: 20px solid rgba(231, 229, 231, 0.7);	
+	overflow: hidden;
+	color:  rgba(231, 229, 231, 0.7);
+}
+
+#logo{
+	font-size: 60px;
+}
+
+#name{
+	font-weight: 800;
+	font-size: 30px;
+	margin-top: -20px;
+}
+
+#slogan{
+	font-size: 12px;
+}
+
+#startmess {
+	margin: 0 auto;	
+	margin-top: 20px; 
+	max-width: 250px;
+	text-align: justify;
+}
+
+#mess{
+	margin: 0 auto;
+	max-width: 250px;
+	margin-bottom: 15px;
+	margin-top: 30px;
+	text-align: justify;
+}
+
+#startmess ul{
+	margin: 0 auto;
+	max-width: 250px;
+	text-align: left;
+	margin-bottom:  30px;	
+}
+
+#startmess ul li{
+	margin-left: 30px;
+}
+
+#loadBar{
+	display: block;
+	margin-top: 10px;
+	width: 240px;
+	height: 40px;
+	margin-bottom: 60px;
+	min-height: 30px; 
+	background-color: rgba(0, 0, 0, 0.7);			
+	border: 5px solid rgba(231, 229, 231, 0.7);    
+	color: white;
+	overflow: hidden;
+}
+
+#loadAnimate {
+	margin-left: -1300px;
+	margin-top: -10px; 
+}
+
+#startbutton {
+	display: none;
+	font-weight: 800;
+	font-size: 30px;
+	width: 240px;
+	height: 40px;
+	margin-top: 10px;
+	margin-bottom: 60px;	
+	background-color: rgba(0, 0, 0, 0.7);	
+	cursor: pointer;
+	user-select: none;	
+	-ms-user-select: none;
+	-moz-user-select: none;
+	-khtml-user-select: none;
+	-webkit-user-select: none;	
+	color: rgba(231, 229, 231, 0.7);  
+	border: 5px solid rgba(231, 229, 231, 0.7);  	
+	text-align: center;
+	transition: 0.3s;
+}
+
+#startbutton:hover{	
+	background-color: rgba(231, 229, 231, 0.7); 
+	color: rgba(0, 0, 0, 0.7);  	
+}
+
+#copyRight {
+	margin: 0 auto;
+	margin-top: 0px;
+	color: rgba(42, 45, 95, 0.8);
+	width: 400px;
+	text-align: center;
+}
+
+/** GAME CONTENT */
+ 
+#gameScreen {
+	z-index: 5;
+	display: none;
+	overflow: hidden;
+}
+
+#copeElems{
+	display: none;
+}	
+
+button.innerCope{
+	font-family: tech; 	
+	background-color: #114011;
+	color: #009900;
+	border: 0px;
+	box-shadow: 0 0 20px rgba(10,173,90,0.2); 
+	border-radius: 4px;
+	transition: 0.4s;
+	overflow: hidden;	
+} 
+
+button.innerCope:hover{
+	background-color: #005555;
+	color: #99ff99;		
+}
+
+button.outerCope{
+	font-family: tech; 	
+	background-color: #006500;
+	color: #00bbbb;
+	border: 0px;
+	box-shadow: 0 0 20px rgba(00,173,173,0.5); 
+	border-radius: 4px;
+	transition: 0.4s;
+	overflow: hidden;	
+} 
+
+button.outerCope:hover{
+	background-color: #005555;
+	color: #99ff99;		
+}
+
+.text {
+	font-size: 14px;
+	color: #006500;
+}	
+
+
+

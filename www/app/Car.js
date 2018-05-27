@@ -76,19 +76,23 @@ class Car {
 			new THREE.BoxGeometry( 0.001, 0.001, 0.001 ),
 			new THREE.MeshPhongMaterial( { color: 0x000000 } )	
 		)
-		this.model.position.set ( serverCarParams.posX, -6, serverCarParams.posZ )
+		if ( serverCarParams.state == 'drop' ) { 
+			this.kvadrant = { x: 100000, z: 100000 }
+			this.model.position.set ( serverCarParams.posX, 100000, serverCarParams.posZ )			
+		} else {
+			this.model.position.set ( serverCarParams.posX, -6, serverCarParams.posZ )
+			this.kvadrant = checkKvadrant( this.model )									
+		}	
 		s.scene.add( this.model )
 		
 		/** cleate label for locators */
 		sv.createNewLabel( this )
-
-		this.kvadrant = checkKvadrant( this.model )
 		
 		/** prepear base */
 		this.geoms.base = prepearGeometryToExploisive( s.geomCar.clone() )	
 		this.modelBase = new THREE.Mesh(
 			this.geoms.base.geom,
-			new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
+			new THREE.MeshPhongMaterial( { color: 0x00aa00, transparent: true } )
 		)
 		this.modelBase.position.y = -22 
 		this.model.add(this.modelBase)
@@ -97,7 +101,7 @@ class Car {
 		this.geoms.gun =  prepearGeometryToExploisive( s.geomCarGun.clone() ) 
 		this.modelGun = new THREE.Mesh(
 			this.geoms.gun.geom,
-			new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
+			new THREE.MeshPhongMaterial( { color: 0x00aa00, transparent: true } )
 		)
 		this.modelGun.position.y = -22
 		this.model.add( this.modelGun )	
@@ -226,7 +230,7 @@ class Car {
 		
 			this.model.position.y -= 1 
 			this.model.position.z += 1 
-			if ( ! this.parashute && this.model.position.y < 200 ) this.parashute = new Parashute( this )//initParashute( this )	
+			if ( ! this.parashute && this.model.position.y < 200 ) this.parashute = new Parashute( this )	
 		} else {
 		  
 			this.model.position.y = -6
@@ -239,6 +243,8 @@ class Car {
 		
 		if ( this.timerExplosion < 0 ) this.state = 'afterExplosive'
 		
+		this.modelBase.material.opacity -= 0.004
+		this.modelGun.material.opacity -= 0.004	
 		geomAnimateExplosive( this.geoms.base )
 		geomAnimateExplosive( this.geoms.gun )	
 		
@@ -281,8 +287,8 @@ class Car {
 		
 		this.spdX = calckSpeed( this.model.position.x, paramsServer.posX )	
 		this.spdZ = calckSpeed( this.model.position.z, paramsServer.posZ )
+		this.modelGun.rotation.copy( paramsServer.rotationGun ) 
 		
-
 		if ( paramsServer.rotation != null )  this.model.rotation.copy( paramsServer.rotation ) 
 		this.kvadrant = checkKvadrant( this.model )
 	}

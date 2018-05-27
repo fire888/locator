@@ -5,9 +5,7 @@
 class Bullet {
 
 	constructor( car ) {
-		
-		g.bullets.push( this )
-		
+				
 		this.id = Bullet.ID ++		
 		this.isRemovable = false
 		
@@ -30,6 +28,31 @@ class Bullet {
 		this.mesh.position.set( gun.getWorldPosition().x, -5, gun.getWorldPosition().z )		
 		this.mesh.translateZ( -10 )
 		s.scene.add( this.mesh )
+	}
+
+	getParamsForClient() {
+
+        this.mesh.translateZ( -this.spd )
+		this.mesh.position.x -= this.spdXCar
+		this.mesh.position.z -= this.spdZCar
+		let pX = this.mesh.position.x
+		let pZ = this.mesh.position.z
+		this.mesh.position.x += this.spdXCar
+		this.mesh.position.z += this.spdZCar									
+		this.mesh.translateZ( this.spd )
+
+		let spdX = pX - this.mesh.position.x 
+		let spdZ = pZ - this.mesh.position.z 
+
+		return {
+			id: this.id,
+			userId: this.userId,
+			carId: this.carId,
+			posX: this.mesh.position.x,
+			posZ: this.mesh.position.z, 
+			spdX: spdX,
+			spdZ: spdZ 
+		}
 	}
 	
 	render() {

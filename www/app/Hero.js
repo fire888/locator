@@ -13,6 +13,7 @@ class Hero {
 
     this.cam = new THREE.PerspectiveCamera( 70, 300 / 200, 1, 10000 )
     sc.add( this.cam )
+    this.cam.position.y = 1000000
 
     this.renderPass = new THREE.RenderPass( sc, this.cam )
     s.composer.addPass( this.renderPass )
@@ -32,11 +33,13 @@ class Hero {
     if ( keys.down ) this.cam.translateZ( 0.5 )	
     if ( keys.A ) this.cam.translateX( -0.7 )
     if ( keys.D ) this.cam.translateX( 0.7 )
+    if ( keys.C ) getNewCar()
 
     if ( ! this.nearCar ) return
 
     if ( keys.enter ) enterCope( this.nearCar )
     if ( keys.B ) addBombInClientObj( this.nearCar )
+    this.nearCar.isBomb ? buttAddBomb.style.display = 'none' : buttAddBomb.style.display = 'block' 
     if ( keys.R ) {
       this.nearCar.repair()
       keys.R = false
@@ -47,7 +50,7 @@ class Hero {
   hideView() {
 
     this.htmlElems.style.display = "none"
-    this.cam.position.y= 100000
+    this.cam.position.y = 100000
   }
 
   showView( pX, pZ ) {

@@ -5,7 +5,7 @@
   "author": "www.otrisovano.ru",
   "main": "machine.js",
   "scripts": {
-    "start": "node machine.js"
+    "start": "node poligon.js"
   },
   "dependencies": {
     "express": "^4.16.3",

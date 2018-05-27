@@ -2,68 +2,29 @@
 <html lang="en" >
 <head>
   <meta charset="UTF-8">
-  <style> 
-    @font-face {
-		font-family: tech; 
-		src: url(app/assets/ShareTechMono-Regular.ttf); 		
-    }	  
-	* { 
-		margin: 0px;
-		padding: 0px;
-	}
-	body{
-		font-size: 30px;
-		font-family: tech;
-		color: #B3BDA5;
-		overflow: hidden;
-		background-color: #05e099;
-	}
-
-	#copeElems{
-		display: none;
-	}	
-	
-	button.innerCope{
-		font-family: tech; 	
-		background-color: #114011;
-		color: #009900;
-		border: 0px;
-		box-shadow: 0 0 20px rgba(10,173,90,0.2); 
-		border-radius: 4px;
-		transition: 0.4s;
-		overflow: hidden;	
-	} 
-	
-	button.innerCope:hover{
-		background-color: #005555;
-		color: #99ff99;		
-	}
-	
-	button.outerCope{
-		font-family: tech; 	
-		background-color: #006500;
-		color: #00bbbb;
-		border: 0px;
-		box-shadow: 0 0 20px rgba(00,173,173,0.5); 
-		border-radius: 4px;
-		transition: 0.4s;
-		overflow: hidden;	
-	} 
-	
-	button.outerCope:hover{
-		background-color: #005555;
-		color: #99ff99;		
-	}
-
-	.text {
-		font-size: 16px;
-		color: #006500;
-	}	
-	
-  </style> 		
+  <link rel="stylesheet" href="app/styles/style.css">	 		
 </head>
 <body>
 
+<div id="startScreen">
+	<div id="startBlockWr">
+		<div id="startBlock">
+			<img id="logo" src = "app/styles/logo.png"/>
+			<p id="name">Poligon</p>
+			<p id="slogan"><i>online</i></p>
+			<div id="startmess">
+				<p id="mess">Small online shooter. Kill enemies for frags, and kill bots to take bullets. To kill yourself open shooter in new browser tab. </p>
+				<div id="loadMess">Loading:</div>
+				<div id="loadBar"><img id = 'loadAnimate' src = "app/styles/loading.png"/></div>					
+				<div id="startbutton">&#9760;</div>
+			</div>
+		</div>
+	</div>
+	<div id="copyRight">
+		<a href="https://github.com/fire888/shooter" target="_blank">source code</a><br/><br/>
+		<a href="http://otrisovano.ru/" target="_blank">&#169;&nbsp;www.otrisovano.ru</a>
+	</div>		
+</div>	
 
 <div id = 'copeElems'>
 	<button 
@@ -88,10 +49,11 @@
 			width: 17%;
 			font-size: 25px;'
 	>
-		<p id = 'online' class = 'text'>Enemies online: 1</p>
-		<p id = 'destroy' class = 'text'>Desrtoy Enemy Cars: 1</p>
-		<p id = 'destroyEmpty' class = 'text'>Dectroy Empty Cars: 1</p>
-		<p id = 'lost' class = 'text'>Lost Cars: 1</p>						
+		<p id = 'online' class = 'text'>Enemies online: 0</p>
+		<p id = 'destroy' class = 'text'>Desrtoy Enemy Cars: 0</p>
+		<p id = 'destroyEmpty' class = 'text'>Dectroy Empty Cars: 0</p>
+		<p id = 'lost' class = 'text'>Lost Cars: 0</p>
+		<p id = 'getCars' class = 'text'>Get Cars: 0</p>						
 	</div>
 	
 	<button 
@@ -132,7 +94,7 @@
 	
 </div>
 
-<div id = 'heroElems'>
+<div id = 'heroElems' style = 'display: none;'>
 	<button 
 		class = 'outerCope'
 		id='enterCope' 
@@ -170,14 +132,34 @@
 			width: 25%;
 			font-size: 25px;
 			opacity: 0;
-	'>Repair Car 'R'</button>	
-			
+	'>Repair Car 'R'</button>
+
+	<button
+	id = 'getNewCar'
+	class = 'outerCope' 
+	style ='
+		position: absolute;
+		bottom: 3%;
+		right: 3%;
+		height: 2%;
+		width: 15%;
+		font-size: 15px;
+		opacity: 1;
+		z-index: 1000;'	
+	>Get New Car 'C'</button>
+
 </div>
 
-<div id = 'debug' style = 'position: absolute; left: 30px; top: 30px; background-color: #003333; font-size: 15px;'>
-	<p id = 'userId'>sfsf</p>
-	<p id = 'userCarId'></p> 
-</div> 
+<script>
+	let loadAnimate = document.getElementById( 'loadAnimate' )
+	let imgMargin = -1300
+	let animation = () => {
+		imgMargin +=1
+		loadAnimate.style.marginLeft = imgMargin + 'px'
+        if ( imgMargin > -30 ) imgMargin = -1300
+	} 
+	let loaderInterval = setInterval( animation, 30 ) 
+</script>
 
 <script src="app/jsLibs/jquery.js"></script> 
 <script src="app/jsLibs/socket.io.js"></script> 
@@ -193,6 +175,7 @@
 <script src='app/functionsForGeometry.js'></script>
 <script src='app/functionsForArraysSort.js'></script>
 <script src='app/Bullet.js'></script>
+<script src='app/BulletEnemy.js'></script>
 <script src='app/Car.js'></script>
 <script src='app/Cope.js'></script>
 <script src='app/Hero.js'></script>

@@ -483,7 +483,8 @@ class Cope {
 				this.removeBulletShoot()	
 				keys.space = false
 				this.screens.gun.uniforms.amountNoise.value = 0.3
-				let bullet = new Bullet( this.car )
+				
+				s.createBullet(  this.car )
 			}	
 		}			
 	}

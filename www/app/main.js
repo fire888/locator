@@ -25,8 +25,9 @@ const g = {
   cars: [],
   carsMustRemoved: [], 
   bullets: [],
-  bombs: []
-  //air: null
+  bulletsEnemy: [],
+  bombs: [],
+  airs: []
 }
 
 
@@ -46,6 +47,7 @@ const s = {
   geomHuman: null,  
   carCameras: {}	
 } 
+
 
 /** MAIN VARS */
 
@@ -91,9 +93,11 @@ const loadAssets = () => {
     initClient()
   })
   .then( () => {
-    animate()
+    ui.gameReady()
+    //animate()
   })
 }
+
 
 s.loadGeometry = ( targetVariable, path, onloadFunc ) => {
   s.loader.load( path, ( obj ) => {
@@ -122,6 +126,7 @@ const initGame = () => {
   initCope()
 }
 
+
 const initRenderer = () => { 
 
   s.renderer = new THREE.WebGLRenderer()
@@ -136,6 +141,7 @@ const initRenderer = () => {
   s.composer.addPass( s.simplePass )
   s.simplePass.renderToScreen = true 
 }
+
 
 const initScene = () => { 
 
@@ -193,7 +199,6 @@ s.initHeroIfNone = serverU => {
   if ( serverU.state != 'init') return
 
   hero = new Hero( s.scene )
-  hero.showView( serverU.posX, serverU.posZ  )
   clientGame.user.state = 'play'
 }
 
@@ -216,10 +221,25 @@ s.setDataEnemiesFromServer = serverEnemies => {
 
 /** SET SERVER DATA TO CARS ********************/
 
-s.createNewCar = car => new Car( car )
-//let a = new Air( new Car( newCarParams ), positionToDropCar )
+s.createNewCar = car => { 
+  
+  if ( car.state == 'drop' ) {
+    
+    let c = new Car( car )
+    g.airs.push( new Air( c, { x: car.posX, z: car.posZ } ) )  
+    
+    if ( car.startUserId == clientGame.user.id ) enterCope( c )
+    return c
+  } 
+
+  if ( car.state == 'none') {
+    return new Car( car )
+  }   
+}  
+
 
 s.updateCarFromServer = ( target, source ) => target.updateParamsFromServer( source )
+
 
 s.removeCar = ( md ) => {
   md.startExplosive()
@@ -227,7 +247,9 @@ s.removeCar = ( md ) => {
   g.carsMustRemoved.push( md )
 }
 
+
 s.setDataCarsFromServer = serverCars => {
+  
   g.cars = transformTargetArrFromSourceArrData(
         g.cars, serverCars,
         s.createNewCar, s.removeCar, s.updateCarFromServer 
@@ -245,11 +267,12 @@ s.createNewBomb = bomb => {
   }
 }
 
-s.explosiveBomb = bomb => {
-  bomb.boom()
-} 
+
+s.explosiveBomb = bomb =>  bomb.boom()
+
 
 s.updateBomb = bomb => {}
+
 
 s.setDataBombsFromServer = serverBombs => {
   g.bombs = transformTargetArrFromSourceArrData(
@@ -259,29 +282,20 @@ s.setDataBombsFromServer = serverBombs => {
 }
 
 
-/*
-const initAir = () => {
+/** SET SERVER DATA BULLETS ********************/
 
-  if ( g.air ) return
-  
-  let positionToDropCar = { x: 0, z: 0 }
-  let xRandom = Math.random()*100 - 50
-  let zRandom = Math.random()*100 - 50
-  if ( hero.isOutOfCar ) {
-    positionToDropCar = { x: hero.cam.position.x + xRandom, z: hero.cam.position.z + zRandom }
-  } else {
-    positionToDropCar = { x: cope.car.model.position.x + xRandom, z: cope.car.model.position.z + zRandom }
+s.setDataBulletsFromServer = bullets => {
+
+  if ( ! bullets ) return 
+  if ( bullets.length == 0 ) return
+
+  for ( let b = 0; b < bullets.length; b ++ ) {
+    if ( bullets[b].userId != clientGame.user.id ) {
+      let bullet = new BulletEnemy( bullets[b] )
+      g.bulletsEnemy.push( bullet )
+    }
   }
-
-  let newCarParams = { pos: { x: 30000, z: 0 } }
-  g.air = new Air( new Car( newCarParams ), positionToDropCar )
 }
-
-const initParashute = car => {
- 
-  car.parashute = new Parashute( car )
-}
-*/
 
 
 
@@ -301,11 +315,11 @@ const animate = () => {
   
   animateEnenies()
   animateBullets()
+  animateBulletsEnemy()
   animateCars()
   animateEmemyCars()
   animateCarsRemoved()
-  //animateBombs()
-  //animateAir()
+  animateAirs()
 
   s.composer.render()
   requestAnimationFrame( animate )	
@@ -323,6 +337,7 @@ const animateHero = () => {
   hero.appendNearCar( checkInterseptionsKvadrant( hero, g.cars ) )
 }
 
+
 const animateCope = () => {
 
   if ( cope.car == null ) return
@@ -331,6 +346,7 @@ const animateCope = () => {
   cope.car.hit( cope.updateHealthScreenBars() ) //test func random hit
   cope.render( s.scene, s.renderer, time )
 }
+
 
 const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
   
@@ -344,6 +360,15 @@ const animateFloor = ( xCoef = 0, zCoef = 0 ) => {
   }
   s.floor.position.set( xCoef*100, -6, zCoef*100 )
 }
+
+
+s.createBullet = car => {
+
+  let bullet = new Bullet( car )
+  addBulletInClientObj( bullet.getParamsForClient() )
+  g.bullets.push( bullet )
+}  
+
 
 const animateBullets = () => {
   
@@ -370,12 +395,32 @@ const animateBullets = () => {
   })
 }
 
+
+const animateBulletsEnemy = () => {
+
+  if ( g.bulletsEnemy.length == 0 ) return 
+  
+  for ( let b = 0; b < g.bulletsEnemy.length; b ++  ) {
+    
+    g.bulletsEnemy[b].render()
+
+    if ( g.bulletsEnemy[b].isRemovable ) {
+      let md = g.bulletsEnemy[b]
+      g.bulletsEnemy.splice( b, 1 )
+      b --
+      md = null
+    }
+  }
+}
+
+
 const animateCars = () => {
 
-  g.cars.forEach( ( car, i, arr ) => {
+  g.cars.forEach(( car, i, arr ) => {
     if ( car.state != 'none' ) car.render()
   })
 }
+
 
 const animateEmemyCars = () => {
   
@@ -388,6 +433,7 @@ const animateEmemyCars = () => {
   }) 
 } 
 
+
 const animateCarsRemoved = () => {
   
   g.carsMustRemoved.forEach( ( car, i, arr ) => {
@@ -399,11 +445,12 @@ const animateCarsRemoved = () => {
   })
 }
 
+
 s.startCarDrop = car => {
   
   car.state = 'dropFromAir'
-  g.cars.push( car )
 }
+
 
 const animateEnenies = () => {
 
@@ -413,17 +460,21 @@ const animateEnenies = () => {
 }
 
 
-const animateBombs = () => {
+const animateAirs = () => {
 
-  if ( g.heroBomb ) g.heroBomb.update()
-}
-
-const animateAir = () => {
-
-  if ( ! g.air ) return
+  if ( g.airs.length == 0 ) return
   
-  g.air.render()  
-  if ( g.air.isRemovable ) g.air = null	  
+  for ( let a = 0; a < g.airs.length; a ++ ) {  
+    g.airs[a].render()  
+    
+    if ( g.airs[a].isRemovable ) {
+
+      let md = g.airs[a]
+      g.airs.splice( a, 1 )
+      a -- 
+      md = null
+    }
+  }    	  
 }
 
 
@@ -483,7 +534,8 @@ const keys = {
   B: false,
   R: false,
   enter: false,
-  space: false
+  space: false,
+  C: false
 }
 
 const keyUpdate = ( keyEvent, down ) => {
@@ -525,6 +577,9 @@ const keyUpdate = ( keyEvent, down ) => {
     case 82:
       keys.R = down
       break
+    case 67:
+      keys.C = down 
+      break 
   }
 }
 
@@ -554,12 +609,14 @@ buttEnterCope.onclick = () => keys.B = true
 let buttRepairCar = document.getElementById( 'repair' )
 buttEnterCope.onclick = () => keys.R = true 
 
-
 let buttFire = document.getElementById( 'gunFire' )
 buttFire.onclick = () => keys.space = true
 
+let getNewCarButt = document.getElementById( 'getNewCar' )
+getNewCarButt.onclick = () => keys.C = true
 
-/** BUTTONS STYLES *****************************/
+
+/** STYLES *************************************/
 
 const setOpasityButtonsHeroNearCar = opas => {
 
@@ -575,8 +632,22 @@ ui.setUserScores = ( user ) => {
   $( '#destroy' ).html( 'Destroy enemies cars: ' + user.destroyCarsWithEnemies  )  
   $( '#destroyEmpty' ).html( 'Destroy empty cars: ' + user.destroyEmptyCars  )
   $( '#lost' ).html( 'Lost cars: ' + user.lostCars  )
+  $( '#getCars' ).html( 'Get new cars: ' + user.addedNewCars  )  
   $( '#online' ).html( 'Online enemies: ' + g.enemies.length  )
 
+}
+
+
+/** START SCREEN *******************************/
+
+ui.gameReady = () => {
+  clearInterval( loaderInterval )
+  $( '#loadBar' ).css({ 'display': 'none' })
+  $( '#startbutton' ).css({ 'display': 'block' })
+  $( '#startbutton' ).click( () => {
+    $( '#startScreen' ).css({ 'opacity': 0 })
+    animate()
+  })
 }
 
 
