@@ -643,6 +643,7 @@ ui.setUserScores = ( user ) => {
 ui.gameReady = () => {
   clearInterval( loaderInterval )
   $( '#loadBar' ).css({ 'display': 'none' })
+  $( '#loadMess' ).html( 'Start: ' )  
   $( '#startbutton' ).css({ 'display': 'block' })
   $( '#startbutton' ).click( () => {
     $( '#startScreen' ).css({ 'opacity': 0 })
