@@ -1,12 +1,22 @@
 
-"use strict"
+/***********************************************; 
+ *  Project        : Poligon
+ *  Program name   : Class Enemy 
+ *  Author         : www.otrisovano.ru
+ *  Date           : 14.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
+
+'use strict'
+
+
 
 
 /**************************************************;
- * HUMAN
+ * Enemy
  **************************************************/
 
-class Human {
+class Enemy {
 
   constructor( h ) {
 
@@ -55,7 +65,7 @@ class Human {
       this.obj.rotation.copy( data.rotation )	      
     }
   }
-    
 }
+
 
 

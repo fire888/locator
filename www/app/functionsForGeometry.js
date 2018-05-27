@@ -1,11 +1,22 @@
-/**************************************************;
- * FUNCTIONS FOR SCENE OBJECTS 
- **************************************************/
+
+/***********************************************; 
+ *  Project        : Machine
+ *  Program name   : Geometry Break functions 
+ *  Author         : www.otrisovano.ru
+ *  Date           : 14.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
+
+'use strict'
+
+
+
 
 const calckSpeed = ( pos, tgt ) => { 
    let spd = ( tgt-pos ) / s.fps 
    return spd
  } 
+
  
 const checkKvadrant = obj => {
   return ( { 
@@ -13,6 +24,7 @@ const checkKvadrant = obj => {
     z: Math.floor( obj.position.z / 30 )
   } )
 }
+
 
 const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID = -100 ) => {
   let itemWitchIntersept = false
@@ -25,6 +37,7 @@ const checkInterseptionsKvadrant = (obj, targetsArr, exclusionObjID = -100 ) => 
   })
   return itemWitchIntersept 
 }
+
 
 const prepearGeometryToExploisive = ob => {
 
@@ -55,6 +68,7 @@ const prepearGeometryToExploisive = ob => {
 
   return gObject	
 }
+
 
 const geomAnimateExplosive = b => {
 
@@ -93,6 +107,7 @@ const geomAnimateExplosive = b => {
   geom.verticesNeedUpdate = true
 }
 
+
 const createNoiseTexture = ( w, h ) => {
 
   const pixelData = []
@@ -114,6 +129,7 @@ const createNoiseTexture = ( w, h ) => {
 
   return dataTexture
 }
+
 
 const prepearGeometryToAnimate = ob => {
 
@@ -165,3 +181,6 @@ const animationClose = ob => {
 
   geom.verticesNeedUpdate = true
 }
+
+
+

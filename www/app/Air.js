@@ -1,4 +1,17 @@
 
+/************************************************;
+ *  Project        : Poligon
+ *  Program name   : Class Air 
+ *  Author         : www.otrisovano.ru
+ *  Date           : 15.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
+
+'use strict'
+
+
+
+
 /**************************************************;
  * AIR
  **************************************************/
@@ -14,8 +27,8 @@ class Air {
       new THREE.MeshPhongMaterial( { color: 0x00aa00 } )
     )
 
-    this.mesh.position.set( this.targetPositionDrop.x, 300, this.targetPositionDrop.z-1500 )
-    if ( car.startUserId != null ) this.mesh.position.z = this.targetPositionDrop.z-5000 
+    this.mesh.position.set( this.targetPositionDrop.x, 300, this.targetPositionDrop.z - 1500 )
+    if ( car.startUserId != null ) this.mesh.position.z = this.targetPositionDrop.z - 5000 
    
     s.scene.add( this.mesh )
 
@@ -52,4 +65,6 @@ class Air {
     this.isRemovable = true	
   }
 }
+
+
 

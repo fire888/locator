@@ -1,15 +1,14 @@
 
-"use strict"
+/***********************************************; 
+ *  Project        : Poligon
+ *  Program name   : Main scene 
+ *  Author         : www.otrisovano.ru
+ *  Date           : 14.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
 
+'use strict'
 
-/**
- ***********************************************; 
- *	Project        	:	MACHINE 
- *	Program name   	: 	Threejs scene 
- *	Author         	: 	www.otrisovano.ru
- *	Date           	: 	16/03/2018
- *	Purpose        	: 	check brain   
- ***********************************************/ 
 
 
 
@@ -121,7 +120,7 @@ const initGame = () => {
 
   initRenderer()
   initScene()
-  sv.spaceVirt()
+  sv.initSpaceCopeClocks()
   initCarCameras()
   initCope()
 }
@@ -205,11 +204,11 @@ s.initHeroIfNone = serverU => {
 
 /** SET SERVER DATA TO ENEMIES *****************/
 
-s.createEnemy = h => new Human( h )
-
-s.updateEnemyFromServer = ( target, source ) => target.updateParamsFromServer( source ) 
+s.createEnemy = h => new Enemy( h )
 
 s.removeEnemy = md => md.remove() 
+
+s.updateEnemyFromServer = ( target, source ) => target.updateParamsFromServer( source ) 
 
 s.setDataEnemiesFromServer = serverEnemies => {
   g.enemies = transformTargetArrFromSourceArrData(
@@ -237,16 +236,13 @@ s.createNewCar = car => {
   }   
 }  
 
-
-s.updateCarFromServer = ( target, source ) => target.updateParamsFromServer( source )
-
-
 s.removeCar = ( md ) => {
   md.startExplosive()
   s.rendererStartFlash()
   g.carsMustRemoved.push( md )
 }
 
+s.updateCarFromServer = ( target, source ) => target.updateParamsFromServer( source )
 
 s.setDataCarsFromServer = serverCars => {
   
@@ -267,12 +263,9 @@ s.createNewBomb = bomb => {
   }
 }
 
-
 s.explosiveBomb = bomb =>  bomb.boom()
 
-
 s.updateBomb = bomb => {}
-
 
 s.setDataBombsFromServer = serverBombs => {
   g.bombs = transformTargetArrFromSourceArrData(
@@ -305,15 +298,12 @@ s.setDataBulletsFromServer = bullets => {
  ***********************************************/
 
 const animate = () => {
-
-  $("#userId").html("heroId: " + clientGame.user.id)
-  $("#userCarId").html("heroCarId: " + clientGame.car.id)
   
   animateHero()
   animateCope()  
   animateFloor()  
   
-  animateEnenies()
+  animateEnemies()
   animateBullets()
   animateBulletsEnemy()
   animateCars()
@@ -452,7 +442,7 @@ s.startCarDrop = car => {
 }
 
 
-const animateEnenies = () => {
+const animateEnemies = () => {
 
   g.enemies.forEach(( u, i, arr ) => {
     u.render()
@@ -634,7 +624,6 @@ ui.setUserScores = ( user ) => {
   $( '#lost' ).html( 'Lost cars: ' + user.lostCars  )
   $( '#getCars' ).html( 'Get new cars: ' + user.addedNewCars  )  
   $( '#online' ).html( 'Online enemies: ' + g.enemies.length  )
-
 }
 
 

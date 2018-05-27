@@ -1,19 +1,20 @@
 
-/*********************************************************; 
- *  Project        : Machine
+/***********************************************; 
+ *  Project        : Poligon
  *  Program name   : Client  
  *  Author         : www.otrisovano.ru
  *  Date           : 14.05.2018 
  *  Purpose        : check brain   
- *********************************************************/
+ ***********************************************/
 
 'use strict'
+
+
 
 
 /** CLIENT OBJ TO SEND TO SERVER *************************/
 
 const clientGame = {
-  
   user: {
     id: Math.floor( Math.random()*1000 ),
     state: 'connect',
@@ -22,15 +23,13 @@ const clientGame = {
     rotation: null,
     isGetNewCar: false  
   },
-
   car: {
     id: null,
     posX: null,
     posZ: null,
     rotation: null
   },
-  
-  bombs: [],
+  bombs: [], 
   bullets: [],
   carsDamaged: []
 }
@@ -128,10 +127,7 @@ const  setUserDataInClientObj = () => {
 }
 
 
-const clientGameputIdDamagedCar = id => {
-
-  clientGame.carsDamaged.push( id )
-}
+const clientGameputIdDamagedCar = id => clientGame.carsDamaged.push( id )
 
 
 const addBombInClientObj = car => {
@@ -154,20 +150,20 @@ const addBombInClientObj = car => {
 const addBulletInClientObj = bullet => clientGame.bullets.push( bullet )
 
 
-let isBlockUserGetNewCar = false
+let isBlockUserToGetNewCar = false
 
 const getNewCar = () => {
   
   keys.C = false
 
-  if ( isBlockUserGetNewCar == true ) return
-  isBlockUserGetNewCar = true
+  if ( isBlockUserToGetNewCar == true ) return
+  isBlockUserToGetNewCar = true
 
   clientGame.user.isGetNewCar = true
   getNewCarButt.style.display = 'none'
 
   setTimeout ( ()=>{ 
-      isBlockUserGetNewCar = false
+      isBlockUserToGetNewCar = false
       getNewCarButt.style.display = 'block'       
     }, 15000 )
  }
@@ -187,8 +183,7 @@ const clearArrsInClientGameAfterSend = () => {
 }
 
 
-const clearUserGetNewCar = () => {
+const clearUserGetNewCar = () => clientGame.user.isGetNewCar = false
 
-  clientGame.user.isGetNewCar = false
-}
+
 

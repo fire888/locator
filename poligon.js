@@ -1,6 +1,6 @@
 
 /************************************************;
- *  Project        : Machine
+ *  Project        : Pologon
  *  Program name   : Server  
  *  Author         : www.otrisovano.ru
  *  Date           : 15.05.2018 
@@ -24,7 +24,7 @@ app.use(express.static('www'))
 var server = app.listen(3050)
 io.listen(server)
 
-console.log('Machine start')
+console.log('POLIGON start')
 
 
 
@@ -138,8 +138,6 @@ const createNewUserIfNew = ( clientU, serverU ) => {
   u.rotation = 0
   createNewCar( { x: u.posX, z: u.posZ }, u.id )
   game.users.push( u )
-  
-
 }
 
 
@@ -195,8 +193,6 @@ const createNewCar = ( position, uId ) => {
   if ( uId ) c.startUserId = uId
   
   game.cars.push( c )
-
-  return c.id
 }
 
 
@@ -226,7 +222,7 @@ const setCarIsEmtyIfUserCarIsNull = ( clientUserId, clientUserCarId ) => {
 }
 
 
-/** ADD DAMAGES USER DATA DAMAGE ***************/
+/** ADD DAMAGES FROM CLIENT DATA DAMAGE ********/
 
 const checkCarsDamage  = carsDamaged => {
   
@@ -441,4 +437,6 @@ const removeBonusFromTargetCarUser = userId => {
 /** CLEAR BULLETS ******************************/
 
 const clearBulletsAfterSend = () => game.bullets = []
+
+
 

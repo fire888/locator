@@ -1,45 +1,61 @@
 
-/**************************************************;
+/************************************************;
+ *  Project        : Poligon
+ *  Program name   : Class BulletEnemy 
+ *  Author         : www.otrisovano.ru
+ *  Date           : 15.05.2018 
+ *  Purpose        : check brain   
+ ***********************************************/
+
+'use strict'
+
+
+
+
+/***********************************************;
  * BULLET ENEMY
- **************************************************/
+ ***********************************************/
 
 class BulletEnemy {
 
-	constructor( params ) {
-				
-		this.id = params.id		
-		this.isRemovable = false
+  constructor( params ) {
 		
-		this.userId = params.userId
-		this.carId = params.carId
-		this.lifeTimer = 100
-		
-		this.spdX = params.spdX
-		this.spdZ = params.spdZ
-		
-		this.mesh = new THREE.Mesh (
-			new THREE.SphereGeometry( 2, 7, 7 ),
-			new THREE.MeshBasicMaterial( { color: 0xffff88 } )  	
-		)
-		 
-		this.mesh.position.set( params.posX, -5, params.posZ )		
-		s.scene.add( this.mesh )
-	}
-	
-	render() {
+    this.id = params.id		
+    this.isRemovable = false
 
-		this.mesh.position.x += this.spdX
-		this.mesh.position.z += this.spdZ	
-        this.mesh.position.y -= 0.2
-        this.lifeTimer--
+    this.userId = params.userId
+    this.carId = params.carId
+    this.lifeTimer = 100
+
+    this.spdX = params.spdX
+    this.spdZ = params.spdZ
+
+    this.mesh = new THREE.Mesh (
+      new THREE.SphereGeometry( 2, 7, 7 ),
+      new THREE.MeshBasicMaterial( { color: 0xffff88 } )  	
+    )
+	
+    this.mesh.position.set( params.posX, -5, params.posZ )		
+    s.scene.add( this.mesh )
+  }
+	
+  render() {
+
+    this.mesh.position.x += this.spdX
+    this.mesh.position.z += this.spdZ	
+    this.mesh.position.y -= 0.2
+    this.lifeTimer--
         
-		if ( this.lifeTimer < 0 ) this.deleteObj()
-	}
+    if ( this.lifeTimer < 0 ) this.deleteObj()
+  }
 	
-	deleteObj() {
+  deleteObj() {
 
-		s.scene.remove( this.mesh )
-		this.mesh = null
-		this.isRemovable = true
-	}
+    s.scene.remove( this.mesh )
+    this.mesh = null
+    this.isRemovable = true
+  }
 }
+
+
+

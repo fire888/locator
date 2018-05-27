@@ -1,49 +1,15 @@
-/***********************************************;
- * FUNCTION RETURN SORT ARRAY
+
+/***********************************************; 
+ *  Project        : Poligon
+ *  Program name   : Arrays Functions
+ *  Author         : www.otrisovano.ru
+ *  Date           : 14.05.2018 
+ *  Purpose        : check brain   
  ***********************************************/
 
-fArrs = {
-  newObjects: null,
-  mustRemoveObjects: null,
-  sortedObjects: null,
-  complitedObjects: null
-}
+'use strict'
 
-fArrs.sortArrs = ( arrTarget, arrSource ) => {
-   
-  let targetsId = []
-  for ( let i = 0; i < arrTarget.length; i ++ ) {
-    targetsId.push( arrTarget[i].id) 
-  }
-  let sourceId = []
-  for ( let i = 0; i < arrSource.length; i ++ ) {
-    sourceId.push( arrSource[i].id) 
-  }
 
-  for ( let s = 0; s < sourceId.length; s ++ ) {
-    for ( let t = 0; t < targetsId.length; t ++ ) {
-      if ( s > -1 ) {
-        if ( targetsId[t] == sourceId[s] ) {
-         targetsId.splice( t, 1 )
-         t --
-         sourceId.splice( s, 1 )
-         s -- 
-        }
-      }
-    }
-  }
-
-  let newObjs = []
-  for ( let s = 0; s < sourceId.length; s ++ ) {
-    for ( let aS = 0; aS < arrSource.length; aS ++ ) {
-      if ( sourceId[s] == arrSource[aS].id ) {
-        newObjs.push( arrSource[aS] )
-      }
-    }
-  }
-
-  fArrs.newObjects = newObjs
-}
 
 
 /***********************************************;
@@ -92,21 +58,25 @@ const transformTargetArrFromSourceArrData = (
 
 
 
+
 /***********************************************;
  * GET FROM ONE ARR,REMOVE / PUT IN SECOND 
  ***********************************************/
 
 const chancheArrayByPropertyId = ( sourceArr, targetArr, prop ) => {
 
-    for ( let i = 0; i < sourceArr.length; i ++ ) {
-        if ( sourceArr[i].id == prop ) {
-            let obj = sourceArr[i]
-            sourceArr.splice( i, 1 )
-            targetArr.push( obj )
-            return 
-        }
+  for ( let i = 0; i < sourceArr.length; i ++ ) {
+    if ( sourceArr[i].id == prop ) {
+      let obj = sourceArr[i]
+      sourceArr.splice( i, 1 )
+      targetArr.push( obj )
+      return 
     }
+  }
 } 
+
+
+
 
 /***********************************************;
  * REMOVE ITEM FROM ARRAY 
@@ -114,6 +84,6 @@ const chancheArrayByPropertyId = ( sourceArr, targetArr, prop ) => {
 
 const removeObjectFromArr = ( item, i, arr ) => {
 
-    arr.splice( i, 1 )
-    item = null
-  }
+  arr.splice( i, 1 )
+  item = null
+}
