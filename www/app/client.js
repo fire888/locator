@@ -80,8 +80,10 @@ const updateGameFromServerData = serverData => {
   
   let serverCurrentUser = takeawayUserData( serverData.users )  
 
-  s.initHeroIfNone( serverCurrentUser )
+  //s.initHeroIfNone( serverCurrentUser )
   
+  //removeEnimiesWhichNotInGame( serverData.users, serverData.cars )
+
   s.setDataEnemiesFromServer( serverData.users )
   s.setDataCarsFromServer( serverData.cars )
   s.setDataBombsFromServer( serverData.bombs )
@@ -100,6 +102,26 @@ const takeawayUserData = users => {
   }
 }
 
+
+const removeEnimiesWhichNotInGame = ( users, cars ) => {
+
+  for ( let i = 0; i < users.length; i ++ ) {
+    if ( users[i].state != 'play' ) {
+      removeUserCarWichDriverNotInGame( cars, users[i].id )
+      users.splice( i, 1 )
+      i --
+    }
+  }
+} 
+
+const removeUserCarWichDriverNotInGame = ( cars, uId ) => {
+  for ( let c = 0; c < cars.length; c ++  ) {
+    if ( cars[c].isUser == uId ) {
+      cars.splice( c, 1 )
+      c --
+    }
+  }
+} 
 
 
 

@@ -87,7 +87,7 @@ a:hover{
 	margin: 0 auto;
 	max-width: 250px;
 	margin-bottom: 15px;
-	margin-top: 30px;
+	margin-top: 40px;
 	text-align: justify;
 }
 
@@ -100,6 +100,10 @@ a:hover{
 
 #startmess ul li{
 	margin-left: 30px;
+}
+
+#loadMess {
+	margin-top: 40px;
 }
 
 #loadBar{
@@ -148,6 +152,8 @@ a:hover{
 
 #copyRight {
 	margin: 0 auto;
+	font-size: 12px;
+	line-height: 20px;
 	margin-top: 0px;
 	color: rgba(42, 45, 95, 0.8);
 	width: 400px;

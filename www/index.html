@@ -13,7 +13,7 @@
 			<p id="name">Poligon</p>
 			<p id="slogan"><i>online</i></p>
 			<div id="startmess">
-				<p id="mess">Small online shooter. Kill enemies for frags, and kill bots to take bullets. To kill yourself open shooter in new browser tab. </p>
+				<p id="mess">Ordos military poligon to train drivers for the war on Arrakis.<br/><br/> Destroy enemies. Get from base new vehicles.</p>
 				<div id="loadMess">Loading:</div>
 				<div id="loadBar"><img id = 'loadAnimate' src = "app/styles/loading.png"/></div>					
 				<div id="startbutton">&#9760;</div>
@@ -21,7 +21,7 @@
 		</div>
 	</div>
 	<div id="copyRight">
-		<a href="https://github.com/fire888/shooter" target="_blank">source code</a><br/><br/>
+		<a href="https://github.com/fire888/locator" target="_blank">source code</a><br/>
 		<a href="http://otrisovano.ru/" target="_blank">&#169;&nbsp;www.otrisovano.ru</a>
 	</div>		
 </div>	
@@ -150,16 +150,7 @@
 
 </div>
 
-<script>
-	let loadAnimate = document.getElementById( 'loadAnimate' )
-	let imgMargin = -1300
-	let animation = () => {
-		imgMargin +=1
-		loadAnimate.style.marginLeft = imgMargin + 'px'
-        if ( imgMargin > -30 ) imgMargin = -1300
-	} 
-	let loaderInterval = setInterval( animation, 30 ) 
-</script>
+<script src="app/checkIsComputerAndStartAnimationLoading.js"></script> 
 
 <script src="app/jsLibs/jquery.js"></script> 
 <script src="app/jsLibs/socket.io.js"></script> 
@@ -186,8 +177,6 @@
 
 <script src='app/client.js'></script>
 <script src='app/main.js'></script>
-
-
 
 
 </body>

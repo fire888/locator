@@ -33,6 +33,8 @@ console.log('POLIGON start')
  *  SERVER GAME OBJECTS
  ***********************************************/
 
+const newConnectedUsers = [] 
+
 const game = {
   users: [],
   cars: [],
@@ -125,25 +127,54 @@ const getUserServerData = clientId => {
 }
 
 
+/** CREATE NEW USER */
+
 const createNewUserIfNew = ( clientU, serverU ) => {
- 
-  if ( clientU.state != 'connect' ) return
+   
+  if ( ! clientU ) return
+  if ( ! clientU.id ) return
   if ( serverU != null ) return
   
+  let newU = 'isNot'
+  
+  for ( let u = 0; u < newConnectedUsers.length; u ++ ) {
+    if ( newConnectedUsers[u].id = clientU.id ) {
+      
+      newU = 'isHave'
+
+      if ( clientU.state == 'play' ) {
+        createUserObjectAndCar( clientU )
+        newConnectedUsers.splice( u, 1 )
+        u --
+      }
+    }
+  }
+
+  if ( newU == 'isNot' ) {
+    newConnectedUsers.push({ id: clientU.id, state: 'init', timerDisconnect: 15 })
+  }
+}
+
+
+const createUserObjectAndCar = clientU => {
+
   let u = Object.assign( {}, userProto )
   u.id = clientU.id
-  u.state = 'init'
+  u.state = 'play'
   u.posX = Math.floor( Math.random()*2500 )
   u.posZ = Math.floor( Math.random()*2500 )
   u.rotation = 0
   createNewCar( { x: u.posX, z: u.posZ }, u.id )
   game.users.push( u )
-}
+} 
 
+
+/** UPDATE USERS */ 
 
 const updateServerUser = ( clientU, clientCarId, serverU ) => {
 
   if ( clientU.state == 'connect' ) return
+  if ( clientU.state == 'waitReadyToPlay' ) return  
   if ( serverU == null ) return
 
   serverU.timerDisconnect = 15
@@ -282,7 +313,8 @@ const sendToUsersGameData = () => {
   clearUsersIsDisconnect()
 
   io.sockets.emit( 'message', game )
-  clearBulletsAfterSend()  
+  clearBulletsAfterSend()
+  checkNewUsersIsDisconnect() 
 
   timerUpdate = setTimeout( sendToUsersGameData, 200 )  
 }
@@ -439,4 +471,16 @@ const removeBonusFromTargetCarUser = userId => {
 const clearBulletsAfterSend = () => game.bullets = []
 
 
+/** CLEAR NEW CONNECTED USERS  *****************/
+
+const checkNewUsersIsDisconnect = () => {
+
+  for ( let u = 0; u < newConnectedUsers.length; u ++  ) {
+    newConnectedUsers[u].timerDisconnect --
+    if ( newConnectedUsers[u].timerDisconnect < 0 ) {
+      newConnectedUsers.splice( u, 1 )
+      u --
+    } 
+  }
+}
 

@@ -120,6 +120,7 @@ const initGame = () => {
 
   initRenderer()
   initScene()
+  hero = new Hero( s.scene )
   sv.initSpaceCopeClocks()
   initCarCameras()
   initCope()
@@ -191,20 +192,11 @@ const initCope = () => {
  * UPDATE SCENE BY SERVER DATA 
  ***********************************************/
 
-s.initHeroIfNone = serverU => {
-  
-  if ( hero ) return
-  if ( ! serverU ) return    
-  if ( serverU.state != 'init') return
-
-  hero = new Hero( s.scene )
-  clientGame.user.state = 'play'
-}
-
-
 /** SET SERVER DATA TO ENEMIES *****************/
 
-s.createEnemy = h => new Enemy( h )
+s.createEnemy = h => { 
+  return new Enemy( h )
+}  
 
 s.removeEnemy = md => md.remove() 
 
@@ -630,12 +622,16 @@ ui.setUserScores = ( user ) => {
 /** START SCREEN *******************************/
 
 ui.gameReady = () => {
-  clearInterval( loaderInterval )
+
+  if ( StartLoader.isMobile ) return 
+
+  clearInterval( StartLoader.loaderInterval )
   $( '#loadBar' ).css({ 'display': 'none' })
   $( '#loadMess' ).html( 'Start: ' )  
   $( '#startbutton' ).css({ 'display': 'block' })
   $( '#startbutton' ).click( () => {
     $( '#startScreen' ).css({ 'opacity': 0 })
+    clientGame.user.state = 'play'
     animate()
   })
 }
