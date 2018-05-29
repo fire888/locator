@@ -18,8 +18,8 @@ Gameplay
 | turn left            | "key left"         |
 | turn right           | "key right"        |
 | 	                   |                    |
-|turn gun left         | "A"                |  
-|turn gun right        | "D"                |  
+|turn gun left         | "key A"            |  
+|turn gun right        | "key D"            |  
 | **_Player:_**        |                    |  
 |move forward          | "key up"           |
 |move backward         | "key down"         |
