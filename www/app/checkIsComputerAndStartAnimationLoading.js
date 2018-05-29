@@ -8,40 +8,40 @@
  ***********************************************/
 
 ( function( window ) { 
-    'use strict'
+  'use strict'
 
-    const StartLoader = window.startLoader || {};
-    
-    window.StartLoader = StartLoader;
-    StartLoader.isMobile = false;     
+  const StartLoader = window.startLoader || {};
 
-    function setStopMobileMess() {
-        
-        let loaderBar = document.getElementById( 'loadBar' );
-        loaderBar.style.display = 'none'; 
-        let loadMess = document.getElementById( 'loadMess' );
-        loadMess.innerHTML =   "<i>Sory....<br/>" + 
-          "<br/>Game need keyboard. Come in from computer or notebook.</i>";
-        StartLoader.isMobile = true;    
-    }
+  window.StartLoader = StartLoader;
+  StartLoader.isMobile = false;     
 
-    function startLoadAnimation () {
+  function setStopMobileMess() {
 
-        let loadAnimate = document.getElementById( 'loadAnimate' );
-        let imgMargin = -1300;
-        let animation = () => {
-            imgMargin +=1;
-            loadAnimate.style.marginLeft = imgMargin + 'px';
-            if ( imgMargin > -30 ) { imgMargin = -1300; }
-        } 
-        StartLoader.loaderInterval = setInterval( animation, 30 );
-    }
+    let loaderBar = document.getElementById( 'loadBar' );
+    loaderBar.style.display = 'none'; 
+    let loadMess = document.getElementById( 'loadMess' );
+    loadMess.innerHTML =   "<i>Sory....<br/>" + 
+      "<br/>Game need keyboard. Come in from computer or notebook.</i>";
+    StartLoader.isMobile = true;    
+  }
 
-	if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ) {
-        setStopMobileMess()	
-	} else {
-        startLoadAnimation()
-    }
+  function startLoadAnimation () {
+
+    let loadAnimate = document.getElementById( 'loadAnimate' );
+    let imgMargin = -1300;
+    let animation = () => {
+      imgMargin +=1;
+      loadAnimate.style.marginLeft = imgMargin + 'px';
+      if ( imgMargin > -30 ) { imgMargin = -1300; }
+    } 
+    StartLoader.loaderInterval = setInterval( animation, 30 );
+  }
+
+  if ( /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test( navigator.userAgent ) ) {
+    setStopMobileMess();
+  } else {
+    startLoadAnimation();
+  }
 
 } )( window );
 
