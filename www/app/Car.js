@@ -306,7 +306,7 @@ class Car {
 	
   hit( updateCopeIfIt ) {
 		
-    if ( Math.random() > 0.0005 ) return //testFunc   
+    if ( Math.random() > 0.001 ) return //testFunc   
 		
     if ( updateCopeIfIt ) updateCopeIfIt() 
 		

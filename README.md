@@ -25,10 +25,10 @@ Gameplay
 |move backward         | "key down"         |
 |move left             | "key A"            |
 |move right            | "key D"            |
-|turn left             | "key left"         |  
-|turn right            | "key right"        |    
+|turn left             | "A"                |  
+|turn right            | "D"                |    
 
 Status
 ------------   
 State: **inProgress.**  
-[Let's Play](http://poligon.e2e4d7d5.ru)
+[Play](http://js.otrisovano.ru/tests/180316Locator/master) and check bugs :)
