@@ -20,8 +20,8 @@
     let loaderBar = document.getElementById( 'loadBar' );
     loaderBar.style.display = 'none'; 
     let loadMess = document.getElementById( 'loadMess' );
-    loadMess.innerHTML =   "<i>Sory....<br/>" + 
-      "<br/>Game need keyboard. Come in from computer or notebook.</i>";
+    loadMess.innerHTML =   "<i>Sorry...<br/>" + 
+      "<br/>Game need keyboard. Come in from computer or laptop.</i>";
     StartLoader.isMobile = true;    
   }
 

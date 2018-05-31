@@ -124,6 +124,8 @@ const initGame = () => {
   sv.initSpaceCopeClocks()
   initCarCameras()
   initCope()
+  
+  window.addEventListener( 'resize', handleWindowResize, false )
 }
 
 
@@ -494,7 +496,6 @@ s.rendererLessFlash = () => {
  ***********************************************/
 
 const handleWindowResize = () =>  s.renderer.setSize( window.innerWidth, window.innerHeight )
-window.addEventListener( 'resize', handleWindowResize, false )
 
 
 
