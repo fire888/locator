@@ -35,5 +35,7 @@ Gameplay
 |turn right            | "key right"        |    
 
 
+Play
+------------ 
 
 [Let's play](http://poligon.e2e4d7d5.ru)
