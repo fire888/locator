@@ -38,4 +38,4 @@ Gameplay
 Play
 ------------ 
 
-[Let's play](http://poligon.e2e4d7d5.ru)
+[Let's play](http://31.177.78.79:3050/)
